@@ -50,9 +50,9 @@ contact: 'hello@catalyst.coop'
 #
 # Example -------------
 #
-# episodes:
-# - introduction.md
-# - first-steps.md
+episodes:
+- introduction.md
+- downloading-files-programmatically.md
 #
 # learners:
 # - setup.md
