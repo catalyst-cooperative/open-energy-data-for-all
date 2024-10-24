@@ -67,6 +67,7 @@ contact: 'hello@catalyst.coop'
 # Order of episodes in your lesson
 episodes: 
 - introduction.md
+- working-with-diverse-filetypes.md
 
 # Information for Learners
 learners: 
