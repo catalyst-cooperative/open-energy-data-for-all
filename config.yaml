@@ -47,27 +47,12 @@ contact: 'hello@catalyst.coop'
 # Use the following menu items to specify the order of
 # individual pages in each dropdown section. Leave blank to
 # include all pages in the folder.
-#
-# Example -------------
-#
-episodes:
-- introduction.md
-- downloading-files-programmatically.md
-#
-# learners:
-# - setup.md
-#
-# instructors:
-# - instructor-notes.md
-#
-# profiles:
-# - one-learner.md
-# - another-learner.md
 
 # Order of episodes in your lesson
 episodes: 
 - introduction.md
 - working-with-diverse-filetypes.md
+- downloading-files-programmatically.md
 
 # Information for Learners
 learners: 
