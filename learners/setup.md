@@ -16,14 +16,22 @@ Download the [data zip file](https://example.com/FIXME) and unzip it to your Des
 
 ## Software Setup
 
+We'll use [`mamba`](https://github.com/conda-forge/miniforge) to manage the different pieces of software you need for this lesson. We'll run our code examples in a Jupyter notebook so that you don't have to copy-and-paste examples from elsewhere.
+
+
 ::::::::::::::::::::::::::::::::::::::: discussion
 
 ### Details
 
-Setup for different systems can be presented in dropdown menus via a `spoiler`
-tag. They will join to this discussion block, so you can give a general overview
-of the software used in this lesson here and fill out the individual operating
-systems (and potentially add more, e.g. online setup) in the solutions blocks.
+The main steps are as follows:
+
+1. Install mamba using miniforge
+2. Make mamba environment
+3. Install deps into mamba environment
+4. Activate mamba env and run a jupyter notebook server
+5. Open the appropriate notebook for the activity
+
+OS-specific instructions below.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -33,6 +41,8 @@ systems (and potentially add more, e.g. online setup) in the solutions blocks.
 
 Use PuTTY
 
+Follow the [Miniforge instructions](https://github.com/conda-forge/miniforge?tab=readme-ov-file#windows) to install `mamba`.
+
 ::::::::::::::::::::::::
 
 :::::::::::::::: spoiler
@@ -41,6 +51,7 @@ Use PuTTY
 
 Use Terminal.app
 
+Follow the [Miniforge instructions](https://github.com/conda-forge/miniforge?tab=readme-ov-file#unix-like-platforms-macos--linux) to install `mamba`.
 ::::::::::::::::::::::::
 
 
@@ -49,6 +60,7 @@ Use Terminal.app
 ### Linux
 
 Use Terminal
+Follow the [Miniforge instructions](https://github.com/conda-forge/miniforge?tab=readme-ov-file#unix-like-platforms-macos--linux) to install `mamba`.
 
 ::::::::::::::::::::::::
 
