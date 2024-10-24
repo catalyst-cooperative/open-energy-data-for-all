@@ -1,7 +1,7 @@
 ---
 title: "Handling diverse filetypes in Pandas"
-teaching: 10
-exercises: 2
+teaching: 0
+exercises: 0
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
