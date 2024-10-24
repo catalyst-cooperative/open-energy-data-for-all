@@ -3,6 +3,7 @@ site: sandpaper::sandpaper_site
 ---
 
 After following this two-day lesson, learners will be able to:
+
 * identify key open energy data sources suitable to answering energy research questions
 * read in tabular data from XML, JSON, and Parquet formats using `pandas`
 * request data stored in cloud buckets
@@ -14,6 +15,7 @@ After following this two-day lesson, learners will be able to:
 * troubleshoot performance issues, and handle data that is too large to fit in memory
 * automatically detect unexpected values in inputs and outputs by writing data validation tests
 * transform a local codebase into a collaborative project using Github repositories, code documentation, and virtual environments.
+
 
 [workbench]: https://carpentries.github.io/sandpaper-docs
 
