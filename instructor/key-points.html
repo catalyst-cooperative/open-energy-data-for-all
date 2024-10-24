@@ -265,6 +265,18 @@
 </div>
 <!--/div.accordion-flush-->
 
+<div class="accordion accordion-flush" id="accordionFlush4">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading4">
+        <a href="downloading-files-programmatically.html">3. Downloading files programmatically</a>
+    </div>
+<!--/div.accordion-header-->
+
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
                 </div>
               </div>
             </div>
@@ -342,6 +354,20 @@ with similar functions in Python.</li>
 <li>
 <code>pandas</code> accepts both relative and absolute file paths on
 read-in.</li>
+</ul></section><section id="downloading-files-programmatically"><h2 class="section-heading"><a href="downloading-files-programmatically.html">Downloading files programmatically</a></h2>
+<hr class="half-width">
+<ul>
+<li>
+<code>pandas.read_*</code> can read tabular data from remote servers
+&amp; cloud storage as if it was on your local computer</li>
+<li>
+<code>requests</code> can get data from APIs, though you’ll have to
+do the translation from their response format into
+<code>pandas.DataFrame</code> yourself</li>
+<li>To get access to access-restricted APIs, you will usually pass in an
+API key, as a request <em>header</em> or as a request
+<em>parameter</em>. Both <code>requests</code> and
+<code>pandas.read_*</code> have the ability to do this.</li>
 </ul></section>
 </div>
     </main>

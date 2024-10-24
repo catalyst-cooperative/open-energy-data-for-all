@@ -264,6 +264,18 @@
 </div>
 <!--/div.accordion-flush-->
 
+<div class="accordion accordion-flush" id="accordionFlush4">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading4">
+        <a href="downloading-files-programmatically.html">3. Downloading files programmatically</a>
+    </div>
+<!--/div.accordion-header-->
+
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
                 </div>
               </div>
             </div>
@@ -543,6 +555,98 @@ with similar functions in Python.</li>
 <li>
 <code>pandas</code> accepts both relative and absolute file paths on
 read-in.</li>
+</ul>
+</div>
+</div>
+</div></section><section id="aio-downloading-files-programmatically"><p>Content from <a href="downloading-files-programmatically.html">Downloading files programmatically</a></p>
+<hr>
+<p>Last updated on 2024-10-24 |
+
+        <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/downloading-files-programmatically.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
+<div class="text-end">
+          <button role="button" aria-pressed="false" tabindex="0" id="expand-code" class="pull-right" data-expand="Expand All Solutions " data-collapse="Collapse All Solutions "> Expand All Solutions <i aria-hidden="true" data-feather="plus"></i></button>
+        </div>
+<div class="overview card">
+<h2 class="card-header">Overview</h2>
+<div class="row g-0">
+<div class="col-md-4">
+<div class="card-body">
+<div class="inner">
+<h3 class="card-title">Questions</h3>
+<ul>
+<li>How can I get data when there isn’t a ‘download’ link?</li>
+<li>How can I work with data that is behind an API with access
+restrictions?</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="col-md-8">
+<div class="card-body">
+<div class="inner bordered">
+<h3 class="card-title">Objectives</h3>
+<ul>
+<li>request data from a REST API using <code>requests</code>
+</li>
+<li>authenticate to a REST API using HTTP basic auth, bearer tokens,
+etc.</li>
+<li>explore directories in AWS cloud buckets</li>
+<li>download data from AWS using pandas</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="challenge1" class="callout challenge">
+<div class="callout-square">
+<i class="callout-icon" data-feather="zap"></i>
+</div>
+<div class="callout-inner">
+<h3 class="callout-title">Challenge</h3>
+<div class="callout-content">
+<p>Make a <code>GET</code> request to
+<code>https://www.catalyst.coop</code> using <code>requests</code>!</p>
+</div>
+</div>
+</div>
+<div id="accordionSolution1" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
+  <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
+</button>
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div class="accordion-body">
+<div class="codewrapper sourceCode" id="cb1">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>requests.get(<span class="st">"https://www.catalyst.coop"</span>)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="keypoints1" class="callout keypoints">
+<div class="callout-square">
+<i class="callout-icon" data-feather="key"></i>
+</div>
+<div class="callout-inner">
+<h3 class="callout-title">Key Points</h3>
+<div class="callout-content">
+<ul>
+<li>
+<code>pandas.read_*</code> can read tabular data from remote servers
+&amp; cloud storage as if it was on your local computer</li>
+<li>
+<code>requests</code> can get data from APIs, though you’ll have to
+do the translation from their response format into
+<code>pandas.DataFrame</code> yourself</li>
+<li>To get access to access-restricted APIs, you will usually pass in an
+API key, as a request <em>header</em> or as a request
+<em>parameter</em>. Both <code>requests</code> and
+<code>pandas.read_*</code> have the ability to do this.</li>
 </ul>
 </div>
 </div>
