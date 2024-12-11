@@ -40,6 +40,8 @@ able to use and adapt for their own work long after she's left the lab.
 
 ## Gene Rator
 
+#### Profile
+
 Gene Rator is a postdoctoral researcher studying the carbon intensity of electricity
 production.
 
