@@ -2,7 +2,6 @@
 title: Learner Profiles
 ---
 
-
 ## Sparky Watts
 
 #### Profile
@@ -73,3 +72,33 @@ work with collaborators and the public.
     Specify his pipeline’s software requirements so that others can run it
     Publish his pipeline on his Github repository for broader research use
 
+## Saul R. Panel
+
+#### Profile
+
+Saul R. Panel is a 1st-year PhD student who wants to work on modeling the US
+energy system. Until recently they were working at a nonprofit which paid for a
+commercial energy data subscription. Now that they're in school, they have lost
+access to that data. They want to build a web portal that shows people the
+effects of different local policy decisions on their energy bills.
+
+They want to use public data to do this, but the constellation of different
+open datasets in different formats is overwhelming and confusing compared to
+the commercial dataset which provided a simple interface for getting the data
+into an analysis-ready form.
+
+Some folks in their lab have done a lot of policy modeling in Python. Saul is
+just starting out, but has learned the basics of Python from their coworkers in
+the past few months. They're wondering how to connect the publicly available
+data into the policy models from the lab so the web portal can access model
+outputs.
+
+
+#### Background knowledge and skills:
+
+    Has energy domain knowledge and experience working with commercial models
+    Has used Python and Pandas to write some simple data-processing scripts
+
+#### Goals:
+
+    Work with openly licensed data instead of commercially provided and licensed data
