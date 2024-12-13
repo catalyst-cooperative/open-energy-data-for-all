@@ -13,10 +13,9 @@ exercises: 0
 
 :::::::: objectives
 
-* request data from a REST API using `requests`
-* authenticate to a REST API using HTTP basic auth, bearer tokens, etc.
-* explore directories in AWS cloud buckets
-* download data from AWS using pandas
+* Explore directories in AWS cloud buckets
+* Download data from AWS using pandas
+* Request data from a REST API that requires authentication
 
 ::::::::
 
