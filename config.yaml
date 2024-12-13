@@ -50,9 +50,26 @@ contact: 'hello@catalyst.coop'
 
 # Order of episodes in your lesson
 episodes: 
-- introduction.md
+# chapter 1. ingestion
+- introduction.md # hmm.
 - working-with-diverse-filetypes.md
 - downloading-files-programmatically.md
+- scraping data
+# chapter 2. visualization/reusability
+- plotting # pick a few transforms and do them - dropping nulls, adding dtypes, stacking, unit conversion
+- validation testing / properties of your data
+- abstraction/modularization
+- automated testing
+# chapter 3. when things go wrong
+- debuggers
+- profiling
+- strategies for working with big data - chunking, subsetting
+- if all else fails - think about other options
+# chapter 4. collaboration
+- python environments # https://carpentries-incubator.github.io/python-intermediate-development/12-virtual-environments.html
+- data environments
+- documentation
+- hot takes
 
 # Information for Learners
 learners: 
