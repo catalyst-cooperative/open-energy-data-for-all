@@ -54,22 +54,21 @@ episodes:
 - introduction.md # hmm.
 - working-with-diverse-filetypes.md
 - downloading-files-programmatically.md
-- scraping data
+- scraping-data.md
 # chapter 2. visualization/reusability
-- plotting # pick a few transforms and do them - dropping nulls, adding dtypes, stacking, unit conversion
-- validation testing / properties of your data
-- abstraction/modularization
-- automated testing
+- plotting.md # pick a few transforms and do them - dropping nulls, adding dtypes, stacking, unit conversion
+- data-validation.md
+- modularization.md
+- automated-testing.md
 # chapter 3. when things go wrong
-- debuggers
-- profiling
-- strategies for working with big data - chunking, subsetting
-- if all else fails - think about other options
+- debugging.md
+- big-data.md
+- other-options.md
 # chapter 4. collaboration
-- python environments # https://carpentries-incubator.github.io/python-intermediate-development/12-virtual-environments.html
-- data environments
-- documentation
-- hot takes
+- python-environments.md # https://carpentries-incubator.github.io/python-intermediate-development/12-virtual-environments.html
+- data-environments.md
+- documentation.md
+- hot-takes.md
 
 # Information for Learners
 learners: 
