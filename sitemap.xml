@@ -16,7 +16,28 @@
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/aio.html</loc>
   </url>
   <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/automated-testing.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/big-data.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/data-environments.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/data-validation.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/debugging.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/documentation.html</loc>
+  </url>
+  <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/downloading-files-programmatically.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/hot-takes.html</loc>
   </url>
   <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/images.html</loc>
@@ -40,7 +61,28 @@
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/aio.html</loc>
   </url>
   <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/automated-testing.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/big-data.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/data-environments.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/data-validation.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/debugging.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/documentation.html</loc>
+  </url>
+  <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/downloading-files-programmatically.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/hot-takes.html</loc>
   </url>
   <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/images.html</loc>
@@ -58,10 +100,25 @@
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/key-points.html</loc>
   </url>
   <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/modularization.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/other-options.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/plotting.html</loc>
+  </url>
+  <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/profiles.html</loc>
   </url>
   <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/python-environments.html</loc>
+  </url>
+  <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/reference.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/scraping-data.html</loc>
   </url>
   <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/working-with-diverse-filetypes.html</loc>
@@ -76,10 +133,25 @@
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/key-points.html</loc>
   </url>
   <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/modularization.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/other-options.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/plotting.html</loc>
+  </url>
+  <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/profiles.html</loc>
   </url>
   <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/python-environments.html</loc>
+  </url>
+  <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/reference.html</loc>
+  </url>
+  <url>
+    <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/scraping-data.html</loc>
   </url>
   <url>
     <loc>https://catalyst-cooperative.github.io/open-energy-data-for-all/working-with-diverse-filetypes.html</loc>
