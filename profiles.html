@@ -386,7 +386,7 @@
 <section><h2 class="section-heading" id="sparky-watts">Sparky Watts<a class="anchor" aria-label="anchor" href="#sparky-watts"></a></h2>
 <hr class="half-width"><div class="section level4">
 <h4 id="profile">Profile<a class="anchor" aria-label="anchor" href="#profile"></a></h4>
-<p>Sparky Watts is a first-year PhD student in an interdisciplinary
+<p>Sparky Watts is a second-year PhD student in an interdisciplinary
 energy studies department. As she’s preparing for her qualifying exams,
 Sparky is looking at the available energy data sources that she could
 use for her doctoral research.</p>
@@ -397,6 +397,11 @@ postdoc’s data cleaning scripts and updating them to include newer years
 of data, but the code is scattered over several Jupyter Notebooks
 without much documentation. None of the other lab members remember much
 about the project.</p>
+<p>The postdoc also left a folder with a handful of CSVs that Sparky
+thinks contain the raw data he was using, and she’ll need to come up
+with a strategy to get new input data. She’s considering using the EIA’s
+new API to access the new years of data, but other lab members have told
+her the documentation is a bit confusing.</p>
 <p>Though Sparky has taken a Python Software Carpentry workshop before
 and done some coding using Pandas in Jupyter Notebooks, she’s not quite
 sure where to start. The data is larger than other datasets she’s worked
@@ -408,25 +413,26 @@ lab.</p>
 </div>
 <div class="section level4">
 <h4 id="background-knowledge-and-skills">Background knowledge and skills:<a class="anchor" aria-label="anchor" href="#background-knowledge-and-skills"></a></h4>
-<div class="codewrapper sourceCode" id="cb1">
-<h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">Has</span> energy domain knowledge and a research area in mind</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="ex">Recently</span> attended the Data Analysis and Visualization in Python for Ecologists workshop</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="ex">Can</span> install software using GUI’s</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="ex">Has</span> recently used Jupyter Notebooks and Pandas to analyze tabular data</span></code></pre>
-</div>
-</div>
+<ul><li>Has energy domain knowledge and a research area in mind</li>
+<li>Recently attended the Data Analysis and Visualization in Python for
+Ecologists workshop</li>
+<li>Can install software using GUI’s</li>
+<li>Has recently used Jupyter Notebooks and Pandas to analyze tabular
+data</li>
+<li>Is comfortable reading in CSVs to Python using
+<code>pandas.read_csv()</code>
+</li>
+</ul></div>
 <div class="section level4">
 <h4 id="goals">Goals:<a class="anchor" aria-label="anchor" href="#goals"></a></h4>
-<div class="codewrapper sourceCode" id="cb2">
-<h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">Adapt</span> existing cleaning scripts to run more reproducibly on an open-source dataset</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="ex">Analyze</span> data that<span class="st">'s too big to work with in a spreadsheet</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="st">Write and document code in a way that others can build on in the future</span></span></code></pre>
-</div>
-</div>
+<ul><li>Adapt existing cleaning scripts to run more reproducibly on an
+open-source dataset</li>
+<li>Figure out how to programatically download raw data using the EIA
+API</li>
+<li>Analyze data that’s too big to work with in a spreadsheet</li>
+<li>Write and document code in a way that others can build on in the
+future</li>
+</ul></div>
 </section><section><h2 class="section-heading" id="gene-rator">Gene Rator<a class="anchor" aria-label="anchor" href="#gene-rator"></a></h2>
 <hr class="half-width"><div class="section level4">
 <h4 id="profile-1">Profile<a class="anchor" aria-label="anchor" href="#profile-1"></a></h4>
@@ -437,7 +443,9 @@ developed over the years and is comfortable transforming data using
 Pandas.</p>
 <p>Recently, Gene sent his scripts to a collaborator at another research
 institute, who struggled to run the pipeline because it’s heavily tied
-to Gene’s own research environment.</p>
+to Gene’s own research environment. They also complained about having to
+manually download 50 CSVs to get the raw data needed in order to run
+Gene’s pipeline locally.</p>
 <p>Gene needs to publish his own pipeline to both share his work and
 fulfill publication requirements. More worryingly, he recently tried
 re-running the pipeline after making some small tweaks in response to
@@ -449,24 +457,21 @@ effectively share his work with collaborators and the public.</p>
 </div>
 <div class="section level4">
 <h4 id="background-knowledge-and-skills-1">Background knowledge and skills:<a class="anchor" aria-label="anchor" href="#background-knowledge-and-skills-1"></a></h4>
-<div class="codewrapper sourceCode" id="cb3">
-<h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">Proficient</span> in writing Python scripts using Pandas</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="ex">Uses</span> Git to manage his code locally</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="ex">Can</span> install software using conda and write his own environment files</span></code></pre>
-</div>
-</div>
+<ul><li>Proficient in writing Python scripts using Pandas</li>
+<li>Uses Git to manage his code locally</li>
+<li>Can install software using conda and write his own environment
+files</li>
+</ul></div>
 <div class="section level4">
 <h4 id="goals-1">Goals:<a class="anchor" aria-label="anchor" href="#goals-1"></a></h4>
-<div class="codewrapper sourceCode" id="cb4">
-<h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">Debug</span> unexpected problems in existing pipeline</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="ex">Specify</span> his pipeline’s software requirements so that others can run it</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="ex">Publish</span> his pipeline on his Github repository for broader research use</span></code></pre>
-</div>
-</div>
+<ul><li>Debug unexpected problems in existing pipeline</li>
+<li>Specify his pipeline’s software requirements so that others can run
+it</li>
+<li>Automate download of input data so that others can easily access the
+raw data</li>
+<li>Version his input data so that others running his pipeline can
+exactly reproduce his results</li>
+</ul></div>
 </section><section><h2 class="section-heading" id="saul-r--panel">Saul R. Panel<a class="anchor" aria-label="anchor" href="#saul-r--panel"></a></h2>
 <hr class="half-width"><div class="section level4">
 <h4 id="profile-2">Profile<a class="anchor" aria-label="anchor" href="#profile-2"></a></h4>
@@ -479,7 +484,9 @@ on their energy bills.</p>
 <p>They want to use public data to do this, but the constellation of
 different open datasets in different formats is overwhelming and
 confusing compared to the commercial dataset which provided a simple
-interface for getting the data into an analysis-ready form.</p>
+interface for getting the data into an analysis-ready form. They’ve
+played around with some data for a single county, but figuring out how
+to scale this up to a U.S.-wide analysis is overwhelming.</p>
 <p>Some folks in their lab have done a lot of policy modeling in Python.
 Saul is just starting out, but has learned the basics of Python from
 their coworkers in the past few months. They’re wondering how to connect
@@ -488,25 +495,21 @@ web portal can access model outputs.</p>
 </div>
 <div class="section level4">
 <h4 id="background-knowledge-and-skills-2">Background knowledge and skills:<a class="anchor" aria-label="anchor" href="#background-knowledge-and-skills-2"></a></h4>
-<div class="codewrapper sourceCode" id="cb5">
-<h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="ex">Has</span> energy domain knowledge and experience working with commercial models</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="ex">Has</span> used Python and Pandas to write some simple data-processing scripts</span></code></pre>
-</div>
-</div>
+<ul><li>Has energy domain knowledge and experience working with commercial
+models</li>
+<li>Has used Python and Pandas to write some simple data-processing
+scripts</li>
+</ul></div>
 <div class="section level4">
 <h4 id="goals-2">Goals:<a class="anchor" aria-label="anchor" href="#goals-2"></a></h4>
-<div class="codewrapper sourceCode" id="cb6">
-<h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="ex">Work</span> with openly licensed data instead of commercially provided and licensed data</span></code></pre>
-</div>
-<!--
+<ul><li>Work with openly licensed data instead of commercially provided and
+licensed data</li>
+<li>Move from working with a small data sample to a large US-wide
+dataset</li>
+</ul><!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
- -->
-</div>
+ --></div>
 </section></div>
     </main></div>
 <!-- END  : inst/pkgdown/templates/content-extra.html -->
