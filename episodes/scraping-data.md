@@ -6,13 +6,16 @@ exercises: 0
 
 :::::::::::::::::::::::::::::::::::::: questions 
 
-- placeholder
+- How do I download all the data files from a webpage?
+- Can I download files from a webpage even there are no visible links?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- placeholder
+- Automatically download files from a long listing of links on a page
+- Investigate webpage structure with browser dev tools
+- Observe network requests and form hypotheses about how to copy them
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
