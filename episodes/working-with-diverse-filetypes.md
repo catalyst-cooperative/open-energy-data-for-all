@@ -132,8 +132,17 @@ Just demo pd.read_parquet, no need for a challenge here.
 
 `pd.read_parquet('data/eia923_2022.parquet)`
 
-:::::::: questions
+:::::::: challenge
 
 Pick two datasets we've just read in, and compare them. How are they similar, and how are they different? Share your reflections with a peer.
+
+:::: hint
+
+* Inspect a column in a DataFrame `df` by using `df[column_name]`.
+* To quickly see what values are contained in a column, you can use `df[column_name].unique()` to get a list of unique values in the column.
+* Try using `df.iloc[0]` to get the values from the first row of the data.
+* `df.head(n)` returns the first n rows of the data, and `df.tail(n)` returns the last n rows.
+* to add - isin()??
+::::
 
 ::::::::
