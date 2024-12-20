@@ -4,6 +4,8 @@ teaching: 0
 exercises: 0
 ---
 
+Expected duration: 45 min?
+
 :::::::::::::::::::::::::::::::::::::: questions 
 
 - How can I read in different tabular data types to a familiar format in Python?
@@ -29,3 +31,108 @@ transform many kinds of data with similar functions in Python.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+# `pd.read_xlsx()
+
+TODO:
+recap pd.read methods and imports
+set the scene
+describe the EIA data we're working with.
+pd.read_excel() with no input
+using help() to get the docs.
+
+:::::::: challenge
+
+## Challenge 1: handling gnarly 
+
+Using `pd.read_excel()`, read in the first sheet ("Page 1 Energy Storage") using the `skiprows` parameter to select the column header row. 
+
+:::: solution
+
+```python
+import pandas as pd
+
+excel_923 = pd.read_excel('data/eia923_2022.xlsx', sheet_name=0, skiprows=)
+```
+
+::::
+
+::::::::
+
+# `pd.read_json()
+
+TODO:
+What is a json file and when might you see it
+Try to use straight pd.read_json
+When might you need to load a JSON first - nested JSONs.
+Practice with the warnings table.
+FLAG as decision - teach json_normalize() or no?
+Drill down through the dictionary, this is basically what the param is doing under the hood.
+
+:::::::: challenge
+
+## Challenge 2: handling nested JSONs
+
+Using `json.load()` and Pandas, read in the `data` from the `eia923_2022.json` file into a Pandas DataFrame.
+
+:::: solution
+
+```python
+import pandas as pd
+import json
+
+# First, read in the file
+import json
+with open('data/eia923_2022.json') as file:
+    eia923_json = json.load(file)
+
+eia923_json = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
+
+# OR
+eia923_json = pd.DataFrame(eia923_json['response']['data'])
+
+```
+
+::::
+
+::::::::
+
+TODO:
+talk a bit about deeper nesting
+
+# `pd.read_xml()
+
+TODO:
+What is an XML file and when might you see it
+What's different from JSONs?
+
+:::::::: challenge
+
+## Challenge 3: unpacking XML files
+### QUESTION - any way to make this more exciting?
+
+Using `pd.read_xml()`, read in the `data` from the `eia923_2022.xml` file into a Pandas DataFrame.
+
+:::: solution
+
+```python
+import pandas as pd
+
+eia923_xml = pd.read_xml('data/eia923_2022.xml', xpath = '//response/data/row')
+
+```
+
+::::::::
+
+# `pd.read_parquet()
+
+TODO:
+What is a Parquet file and when might you see it
+Just demo pd.read_parquet, no need for a challenge here.
+
+`pd.read_parquet('data/eia923_2022.parquet)`
+
+:::::::: question
+
+Pick two datasets we've just read in, and compare them. How are they similar, and how are they different? Share your reflections with a peer.
+
+::::::::
