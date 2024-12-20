@@ -120,6 +120,7 @@ import pandas as pd
 eia923_xml = pd.read_xml('data/eia923_2022.xml', xpath = '//response/data/row')
 
 ```
+::::
 
 ::::::::
 
@@ -131,7 +132,7 @@ Just demo pd.read_parquet, no need for a challenge here.
 
 `pd.read_parquet('data/eia923_2022.parquet)`
 
-:::::::: question
+:::::::: questions
 
 Pick two datasets we've just read in, and compare them. How are they similar, and how are they different? Share your reflections with a peer.
 
