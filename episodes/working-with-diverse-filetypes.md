@@ -114,7 +114,7 @@ Each row contains monthly generation data for each plant's prime mover. While a 
 
 # Reading JSON files with Pandas
 
-JavaScript Object Notation (JSON) is a lightweight file format based on name-value pairs, similar to Python dictionaries. It's often used to send data to and from web applications, and is one of the most common formats provided when you're accessing data from an Application Programming Interface (API).
+JavaScript Object Notation (JSON) is a lightweight file format based on name-value pairs, similar to Python dictionaries. JSON often used to send data to and from web applications, and is one of the most common formats provided when you're accessing data from an Application Programming Interface (API). JSON data can be found saved as either `.json` or `.txt` files.
 
 If we look at a single record from `eia923_2022_sample.json`, we can see that each name-value pair corresponds to one row and one column in a tabular dataset.
 
@@ -216,21 +216,63 @@ The first part of the response looks like this:
     'gross-generation-units': 'megawatthours'},
     .....
 ```
+Now we can treat `eia923_json` like any other Python dictionary. To see the value of any particular key (*TODO: stick to name-value or switch to key-value??*), we can call it in square brackets by name:
 
+```python
+eia923_json['response']
+```
 
+This returns yet another dictionary with a list of keys. To look more closely at the `warnings` the file contains, we can add another square bracket:
 
-Practice with the warnings table.
-FLAG as decision - teach json_normalize() or no?
-Drill down through the dictionary, this is basically what the param is doing under the hood.
+```python
+eia923_json['response']['warnings']
+```
+
+```output
+[{"warning":"incomplete return","description":"The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results."}, {"warning":"another warning", "description":"Hey! Watch out!"}]
+```
+    *TODO: Should I dupe a second warning??*
+
+This format looks identical to the `eia923_2022_sample.json` we worked with earlier: a list of dictionaries with consistent name-value pairs. It's time to turn these warnings into a table!
+
+## Using `json.normalize()`
+Luckily for us, Pandas has a second function transforming nested or semi-structured JSON files into Pandas DataFrames: `json_normalize()`.
+
+Unlike `read_json()`, `json_normalize()` expects that the JSON object has already been read into Python using `json.load()`. Using the `record_path`
+parameter, we can specify the path to follow to get to our tabular data - in this case, first `response` and then `warnings`:
+
+```python
+pd.read_json(eia923_json, record_path = ['response','warnings'])
+```
+The function returns a DataFrame that looks like this:
+
+```output
+|           warning |                                       description |
+|------------------:|--------------------------------------------------:|
+| incomplete return | The API can only return 5000 rows in JSON form... |
+|   another warning |                                   Hey! Watch out! |
+```
+
+The first row of this table is letting us know that when we queried and saved this data from the API, we only got the first 5000 rows of data - yikes! We'll tackle this problem in a later episode, but for now let's investigate the data that we do have saved locally.
 
 :::::::: challenge
 
 ## Challenge 2: handling nested JSONs
 
-Using `json.load()` and Pandas, read in the `data` from the `eia923_2022.json` file into a Pandas DataFrame.
+Fill in the blanks in the code below to read in the `data` from the `eia923_2022.json` file into a Pandas DataFrame.
 
-TODO: Migrate to fill in the blanks
+```python
+import pandas as pd
+import json
 
+import json
+with open('data/eia923_2022.json') as file:
+    eia923_json = ...
+
+eia923_json_df = pd.json_normalize(eia923_json, record_path = [...])
+
+```
+::::
 
 :::: solution
 
@@ -238,15 +280,11 @@ TODO: Migrate to fill in the blanks
 import pandas as pd
 import json
 
-# First, read in the file
 import json
 with open('data/eia923_2022.json') as file:
     eia923_json = json.load(file)
 
 eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
-
-# OR
-eia923_json_df = pd.DataFrame(eia923_json['response']['data'])
 
 ```
 
@@ -254,8 +292,9 @@ eia923_json_df = pd.DataFrame(eia923_json['response']['data'])
 
 ::::::::
 
-TODO:
-talk a bit about deeper nesting - what did I mean by this haha.
+:::callout
+JSONs can include many levels of nesting, including different levels of nesting for similar records or other formatting that doesn't obey the principles of tabular structure (where each row represents a single record, and each column represents a single variable). `pd.json_normalize()` provides a set of parameters that can used to wrangle more deeply nested JSON data. Call `help(pd.json_normalize)` and look at the provided examples to get a better sense of its capabilities.
+:::
 
 # `pd.read_xml()
 
