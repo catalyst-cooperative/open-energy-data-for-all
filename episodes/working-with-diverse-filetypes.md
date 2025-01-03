@@ -37,12 +37,11 @@ extension. To make sense of this undocumented pile of files, we'll need to read 
 file and compare them. 
 
 # EIA 923 data
-The Energy Information Administration (EIA)'s [Form 923](https://www.eia.gov/electricity/data/eia923) collects detailed monthly and
-annual electric power data on electricity generation, fuel consumption, fossil fuel
-stocks, and receipts at the power plant and prime mover level.
+The Energy Information Administration (EIA)'s [Form 923](https://www.eia.gov/electricity/data/eia923) is known as the Power Plant Operations Report. The data include electric power generation, energy source consumption, end of reporting period fossil fuel stocks, as well as the quality and cost of fossil fuel receipts at the power plant and prime mover level (with a subset of +10MW steam-electric plants reporting at the boiler and generator level). Information is available for non-utility plants starting in 1970 and utility plants beginning in 1999. The Form EIA-923 has evolved over the years, beginning as an environmental add-on in 2007 and ultimately eclipsing the information previously recorded in EIA-906, EIA-920, FERC 423, and EIA-423 by 2008.
+
     TODO: Why is it a good choice for answering the question?
 
-# `pd.read_excel()`
+# Reading Excel files with Pandas
 
 One of the most popular libraries used to work with tabular data in Python is called the
 [Python Data Analysis Library](https://pandas.pydata.org/) (or simply, Pandas). Pandas
@@ -86,12 +85,15 @@ So, if we only want to parse the first 100 rows of the data, we can call:
 ```python
 pd.read_excel('data/eia923_2022.xlsx', nrows=100)
 ```
-
 :::::::: challenge
 
-## Challenge 1: handling gnarly 
+:::callout
+TODO: Absolute and relative file paths should live here? Or elsewhere?
+:::
 
-Using `pd.read_excel()`, read in the first sheet ("Page 1 Generation and Fuel Data") using the `skiprows` parameter to skip any rows that don't contain the column headers.
+## Challenge 1: handling Excel formatting on read-in
+
+Looking at the documentation for `pd.read_excel()`, identify the parameter needed to skip the first few rows of the spreadsheet. Then, using `pd.read_excel()`, read in the "Page 1 Generation and Fuel Data" sheet using this parameter to skip any rows that don't contain the column headers.
 
 :::: solution
 
@@ -99,18 +101,124 @@ Using `pd.read_excel()`, read in the first sheet ("Page 1 Generation and Fuel Da
 import pandas as pd
 
 excel_923 = pd.read_excel('data/eia923_2022.xlsx', sheet_name="Page 1 Generation and Fuel Data", skiprows=5)
+
+# sheet_name can also take the number of the sheet
+excel_923 = pd.read_excel('data/eia923_2022.xlsx', sheet_name=0, skiprows=5)
 ```
 
 ::::
 
 ::::::::
 
-# `pd.read_json()
+Each row contains monthly generation data for each plant's prime mover. While a subset of plants fill out Form 923 at the boiler and generator, a large proportion of plants only report at this more aggregated level. For more on the nuances of the Form 923 data, see PUDL's [data source page](https://catalystcoop-pudl.readthedocs.io/en/latest/data_sources/eia923.html).
 
-TODO:
-What is a json file and when might you see it
-Try to use straight pd.read_json
-When might you need to load a JSON first - nested JSONs.
+# Reading JSON files with Pandas
+
+JavaScript Object Notation (JSON) is a lightweight file format based on name-value pairs, similar to Python dictionaries. It's often used to send data to and from web applications, and is one of the most common formats provided when you're accessing data from an Application Programming Interface (API).
+
+If we look at a single record from `eia923_2022_sample.json`, we can see that each name-value pair corresponds to one row and one column in a tabular dataset.
+
+```output
+{"period":"2022-12","plantCode":"6761",
+ "plantName":"Rawhide","fuel2002":"ALL","fuelTypeDescription":"Total","state":"CO","stateDescription":"Colorado","primeMover":"ALL","generation":"188961","gross-generation":"203283","generation-units":"megawatthours","gross-generation-units":"megawatthours"}
+```
+
+Like `read_excel`, we can use the the Pandas `read_json()` method to read in a JSON file.
+
+```python
+pd.read_json('data/eia923_2022_sample.json')
+```
+
+This yields the following DataFrame, with each JSON record transformed into a row:
+
+```output
+	period	plantCode	plantName	fuel2002	fuelTypeDescription	state	stateDescription	primeMover	generation	gross-generation	generation-units	gross-generation-units
+0	2022-12	6761	Rawhide	ALL	Total	CO	Colorado	ALL	188961.00	203283.00	megawatthours	megawatthours
+1	2022-12	54142	Hillcrest Pump Station	WAT	Hydroelectric Conventional	CO	Colorado	HY	342.43	358.27	megawatthours	megawatthours
+2	2022-12	54142	Hillcrest Pump Station	WAT	Hydroelectric Conventional	CO	Colorado	ALL	342.43	358.27	megawatthours	megawatthours
+3	2022-12	54142	Hillcrest Pump Station	ALL	Total	CO	Colorado	ALL	342.43	358.27	megawatthours	megawatthours
+4	2022-12	64359	Pivot Solar 12 LLC(CSG)	SUN	Solar	CO	Colorado	PV	92.45	92.45	megawatthours	megawatthours
+```
+
+However, there are only four records here! From the Excel spreadsheet you read in earlier, you know this is only a small sample of the data. Let's try to read in the second JSON file the postdoc left behind:
+
+```python
+pd.read_json('data/eia923_2022.json')
+```
+
+```output
+|   response  |                      request                      |                     apiVersion                    | ExcelAddInVersion |       |
+|:-----------:|:-------------------------------------------------:|:-------------------------------------------------:|-------------------|-------|
+| warnings    | [{'warning': 'incomplete return', 'description... | NaN                                               | 2.1.8             | 2.1.0 |
+| total       | 10426                                             | NaN                                               | 2.1.8             | 2.1.0 |
+| dateFormat  | YYYY-MM                                           | NaN                                               | 2.1.8             | 2.1.0 |
+| frequency   | monthly                                           | NaN                                               | 2.1.8             | 2.1.0 |
+| data        | [{'period': '2022-12', 'plantCode': '6761', 'p... | NaN                                               | 2.1.8             | 2.1.0 |
+| description | Annual and monthly electric power operations f... | NaN                                               | 2.1.8             | 2.1.0 |
+| command     | NaN                                               | /v2/electricity/facility-fuel/data/               | 2.1.8             | 2.1.0 |
+| params      | NaN                                               | {'frequency': 'monthly', 'data': ['generation'... | 2.1.8             | 2.1.0 |
+```
+
+We can see the data we want as a single record in the fifth row, but the format returned isn't usable for analysis. That's because this JSON is *nested*!
+
+A nested JSON contains multiple levels of data:
+
+```output
+{'response':
+    {'data': [
+        {'period':'2022-12',
+        'plantCode': '6761'},
+        {'period':'2022-12',
+        'plantCode': '54152'}
+        ]
+    }}}
+```
+
+Here, the `response` name contains another name-value pair called `data`, and `data`
+contains a list with two records, each of which has two name-value pairs (`period` and `plantCode`). Pandas `read_*()` methods transform data into a tabular format. To successfully extract tabular generation data from our nested JSON, we need to identify which part of the nested JSON contains the tabular data we're looking for.
+
+To better visualize our nested JSON file, let's read it into Python without changing its format. To do this, we use the `json` package, and the `load` method.
+
+While Pandas handles opening a file in the `read_*()` methods, `json.load()` does not - so, we first need to open the file in Python. To do so, we use the `open()` function to read the `eia923_2022.json` file.
+
+:::callout
+When we `open()` a file in Python, we should always close it after we've extracted the data we need. Closing a file frees up system resources and ensures that we aren't accidentally modifying our original file.
+
+To automatically handle file opening and closing, we use a *context manager*. Using the word `with`, we put all the code we want to run on the opened file into an indented block.
+:::
+
+```python
+import json
+with open('data/eia923_2022.json') as file:
+    eia923_json = json.load(file)
+
+eia923_json
+```
+The first part of the response looks like this:
+
+```output
+{'response': {'warnings': [{'warning': 'incomplete return',
+    'description': 'The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.'}],
+  'total': '10426',
+  'dateFormat': 'YYYY-MM',
+  'frequency': 'monthly',
+  'data': [{'period': '2022-12',
+    'plantCode': '6761',
+    'plantName': 'Rawhide',
+    'fuel2002': 'ALL',
+    'fuelTypeDescription': 'Total',
+    'state': 'CO',
+    'stateDescription': 'Colorado',
+    'primeMover': 'ALL',
+    'generation': '188961',
+    'gross-generation': '203283',
+    'generation-units': 'megawatthours',
+    'gross-generation-units': 'megawatthours'},
+    .....
+```
+
+
+
 Practice with the warnings table.
 FLAG as decision - teach json_normalize() or no?
 Drill down through the dictionary, this is basically what the param is doing under the hood.
@@ -135,10 +243,10 @@ import json
 with open('data/eia923_2022.json') as file:
     eia923_json = json.load(file)
 
-eia923_json = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
+eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
 
 # OR
-eia923_json = pd.DataFrame(eia923_json['response']['data'])
+eia923_json_df = pd.DataFrame(eia923_json['response']['data'])
 
 ```
 
@@ -178,6 +286,9 @@ eia923_xml = pd.read_xml('data/eia923_2022.xml', xpath = '//response/data/row')
 ::::::::
 
 # `pd.read_parquet()
+
+USE MONTHLY GENERATION FUEL
+out_eia923__monthly_generation_fuel_combined
 
 TODO:
 What is a Parquet file and when might you see it
