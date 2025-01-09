@@ -296,33 +296,166 @@ eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data
 JSONs can include many levels of nesting, including different levels of nesting for similar records or other formatting that doesn't obey the principles of tabular structure (where each row represents a single record, and each column represents a single variable). `pd.json_normalize()` provides a set of parameters that can used to wrangle more deeply nested JSON data. Call `help(pd.json_normalize)` and look at the provided examples to get a better sense of its capabilities.
 :::
 
+# Deciphering XML
+
+eXtensible Markup Language (XML) is a plain text file that uses tags to describe the
+structure and content of the data they contain. Like other markup languages (HTML, LaTeX),
+XML wraps around data, providing information about the structure, format, and relationships
+between components. Each tag provides metadata about what the piece of data it contains
+represents - for instance `<row>` will contain a row of data, while `<plantCode> 243 </plantCode>` will
+means that the plant code is 243.
+
+For example, the following might be a way to represent a note from
+Saul R. Panel to Dr. Watts apologizing for leaving the project in an incomplete state:
+
+```xml
+<note>
+  <to>Saul R. Panel</to>
+  <from>Dr. Watts</from>
+  <heading>Note about project</heading>
+  <body>Sorry for leaving the project in an incomplete state!</body>
+</note>
+```
+
+In JSON, the equivalent information could be formatted as:
+```output
+{"note":
+    {"to": "Saul R. Panel",
+    "from": "Dr. Watts",
+    "heading": "Note about project",
+    "body": "Sorry for leaving the project in an incomplete state!"
+    }
+}
+```
+
+Each tag in XML is similar to a key in a JSON file:
+* both provide metadata about what the corresponding value _is_ (e.g., a note, net generation in watts)
+* both provide information about nested relationships (e.g., the note contains a heading and a body)
+
+While XML is harder and slower to read than JSON, it also has more capabilities. You might
+be likely to see an XML file if the data you're looking at:
+* is old! XML was invented in 1998 and is still widely in use in older data distribution
+methods.
+* has deeply nested hierarchies of relationships, like FERC's accounting data.
+* is large and complex! For instance, XML can be used to share images, charts and graphs
+in addition to text data, while JSON can only handle text.
+* is distributed through an RSS feed. For instance, FERC publishes filings on a rolling
+basis using an RSS feed and the XML data format.
+
+::: challenge
+## Challenge #: From XML to Pandas
+
+Look at the following XML code.
+
+```output
+<data>
+    <row>
+        <period>2022-12</period>
+        <plantCode>59656</plantCode>
+        <plantName>Comanche Solar</plantName>
+    </row>
+    <row>
+        <period>2023-01</period>
+        <plantCode>59657</plantCode>
+        <plantName>Comanche</plantName>
+    </row>
+```
+
+Which of the following Pandas DataFrames would best represent the data in this XML file?
+
+A.
+```output
+|    data   |       row      |
+|:---------:|:--------------:|
+| period    | 2022-12        |
+| plantCode | 59656          |
+| plantName | Comanche Solar |
+| period    | 2023-01        |
+| plantCode | 59657          |
+| plantName | Comanche       |
+```
+
+B.
+```output
+|    row    |      data      |
+|:---------:|:--------------:|
+| period    | 2022-12        |
+| plantCode | 59656          |
+| plantName | Comanche Solar |
+| period    | 2023-01        |
+| plantCode | 59657          |
+| plantName | Comanche       |
+```
+
+C.
+```
+|  period | plantCode | plantName      |
+|:-------:|-----------|----------------|
+| 2022-12 | 59656     | Comanche Solar |
+| 2023-01 | 59657     | Comanche       |
+```
+
+D.
+```
+| plantName | Comanche Solar | Comanche |
+|:---------:|----------------|----------|
+| period    | 2022-12        | 2023-01  |
+| plantCode | 59656          | 59657    |
+```
+
+:::solution
+The solution is C:
+```
+|  period | plantCode | plantName      |
+|:-------:|-----------|----------------|
+| 2022-12 | 59656     | Comanche Solar |
+| 2023-01 | 59657     | Comanche       |
+```
+
+The `<data>` is split into two seperate chunks of data seperated by `<row>` tags, which
+tells us that everything between these tags corresponds to a single row of data. Then,
+we know that the `<period>`, `<plantCode>` and `<plantName>` tags are telling us what
+variable the values correspond to - or in other words, what the column name is that
+corresponds to each tag.
+:::
+
+:::
+
 # `pd.read_xml()
+Like with our other data types, we can use `pd.read_xml()` to parse XML files into Pandas DataFrames. `pd.read_xml()` is designed to ingest tabular data nested in XML files,
+not to coerce highly nested data into a table format. To use this method, we'll need to
+identify where in our XML file the data is structured into a table-like format and can
+be easily extracted to a DataFrame. For more on `pd.read_xml()`, see the [Pandas documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_xml.html#pandas.read_xml#notes).
 
-TODO:
-What is an XML file and when might you see it
-    - it's old.
-    - what are some examples of xml in the wild - e.g., xbrl, html
-What's different from JSONs?
-Explain xpath + demo one level
+Let's try to explore the XML file that the postdoc left behind:
+```python
+pd.read_xml('data/eia923_2022.xml')
+```
 
-:::::::: challenge
+Each tag has been assigned as a column name, and the value inside has been added as a row. To drill down to the `<data>` we are actually interested in,
+we can use the `xpath` parameter, which lets you specify where in the XML file to look for a table.
 
-## Challenge 3: unpacking XML files
-### QUESTION - any way to make this more exciting?
+The `xpath` query we're looking for is formatted as follows:
+* // are used at the beginning to note that we want to select all items with the tags specified
+* Then, like specifying which directory we want to access in a terminal, slashes are used to specify the path to the desired tag.
 
-Using `pd.read_xml()`, read in the `data` from the `eia923_2022.xml` file into a Pandas DataFrame using the `xpath` parameter.
+So to get all the `<row>`s of `<data>`, we call:
+```python
+pd.read_xml('data/eia923_2022.xml', xpath = "//response/data/row")
+```
 
-:::: solution
+Note that we have one extra column called row in our dataframe, which contains yet another warning. Let's inspect it:
 
 ```python
-import pandas as pd
-
-eia923_xml = pd.read_xml('data/eia923_2022.xml', xpath = '//response/data/row')
-
+xml_df = pd.read_xml('data/eia923_2022.xml', xpath = "//response/data/row")
+xml_df.loc[0, 'row'] # Grab the first row of the "row" column
 ```
-::::
 
-::::::::
+```output
+'warning: XML output returns a maximum of 300 rows; use offset= and length= parameters or output to JSON for entire dataset.'
+```
+
+When we start to work with this dataset, we'll want to make sure that we heed this warning!
 
 # `pd.read_parquet()
 
