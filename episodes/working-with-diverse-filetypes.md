@@ -6,7 +6,7 @@ exercises: 0
 
 Expected duration: 45 min?
 
-:::: questions 
+:::: questions
 
 - How can I read in different tabular data types to a familiar format in Python?
 - What are some common errors that occur when importing data, and how can I troubleshoot them?
@@ -60,7 +60,7 @@ spreadsheet software, you see that the first few rows look like this:
 
 ![The first few rows of the eia923_2022.xlsx file](fig/excelheader.png){alt="Snapshot of
 the Excel file showing the first 6 rows contain metadata, blank spaces and column
-names".}
+names."}
 
 To read the spreadsheet in correctly, we want to ignore these first five rows. Luckily,
 `read_excel()` offers built-in functionality to handle various Excel formatting
@@ -85,11 +85,12 @@ So, if we only want to parse the first 100 rows of the data, we can call:
 ```python
 pd.read_excel('data/eia923_2022.xlsx', nrows=100)
 ```
-:::::::: challenge
 
 :::callout
 TODO: Absolute and relative file paths should live here? Or elsewhere?
 :::
+
+:::::::: challenge
 
 ## Challenge 1: handling Excel formatting on read-in
 
