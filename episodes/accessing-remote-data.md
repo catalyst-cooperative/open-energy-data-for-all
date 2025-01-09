@@ -117,54 +117,370 @@ The other answers are wrong because:
 
 The previous postdoc left a note that he had gotten the JSON files straight from the EIA API. While you might not have dealt with a web API before, you have the tools to do so now and resolve to jump in.
 
-A useful mental model for a web API is that of a "function call over the Internet."
+A useful mental model for a web API is that of a *function call on someone else's computer over the Internet*
 
-With a function call to `some_function(param_1=foo, param_2=bar)`, you are asking your computer to run the code that is referred to by `some_function`, and telling it that `param_1` should take the value of `foo` and `param_2` should take the value of `bar`. You learned about the function, the parameters, and what types of input they take, by reading the documentation. Then it returns a value, which you also expect based on the documentation.
+Imagine you have a function called `get_electric_power_operational_data` which takes a few different parameters. Maybe you call it like `get_electric_power_operational_data(data_field="generation", frequency="monthly")` and it will return a dataframe with some monthly generation data.
 
-With a call to a web API, you are asking someone else's computer to run some code, using some inputs, and then it returns a value back to you.
+The web API version of that might look like making a request to `https://api.eia.gov/v2/electricity/electric-power-operational-data/data?api_key=XYZXYZXYZ&data[]=generation&frequency=monthly`. Let's break that down.
 
-<!-- TODO make a comparison table here -->
+* `https://api.eia.gov/` specifies which other computer you're making this request to. In this case, this is the EIA API server.
+* `/v2/electricity/electric-power-operational-data/data` is the equivalent of the function name `get_electric_power_operational_data` above - it specifies what functionality you are asking for.
+* `?api_key=XYZXYZXYZ&data[]=generation&frequency=monthly` is the equivalent of passing in parameters to the function: something like `(api_key="XYZXYZXYZ", data_field="generation", frequency="monthly")`. In this case we need to specify an extra `api_key` field because the other computer wants to verify that you're allowed to ask it to do things. This `?parameter_1=value_1&parameter_2=value_2` syntax is one of the main ways one passes input data to a web API, and is called "URL parameters." The `?` precedes the first parameter, the `=` separates the parameter name from its value, and the `&` separates all parameters from each other.
 
-Emphasize that every API is different, the core skill is reading the docs & figuring out how it works. (what are the params, and how do you pass them?) (connect back to the read_* functions from last lesson)
+Learning a web API is similar to learning a new software library. For a software library, you want to quickly zero in on:
+
+* what are the functions that I want to call?
+* what are the inputs to those functions?
+* what are the outputs?
+
+In the case of a web API, in addition to the above you also need to figure about:
+
+* how do I send the input values?
+* how can I get the output values back into my code?
+* how do I authenticate myself to the API so it allows my request?
 
 ## Case study: EIA API
 
-Aside: API keys are sensitive information, like passwords. Don't store them in your code. store them in env vars instead.
+Let's jump into the EIA API and see how it works!
+
+First of all, the full documentation is [here](https://www.eia.gov/opendata/documentation.php). We'll include relevant links and snippets as we go along.
+
+
+
+We'll start with the authentication piece. In the setup instructions, you got an API key, which is effectively the password you use to access the API. Like passwords, API keys are sensitive information. As such, we don't want to hard-code them into our code for the world to see - instead we should store them as environment variables.
 
 :::::::: challenge
 
-get your api key stored in env var and print it from python
+Store your API key in an environment variable named `EIA_API_KEY`, so that the following code prints out your API key:
 
-::::::::
-
-Link to EIA documentation + include relevant snippets of it in the actual lesson.
-
-Example: hit the EIA API for monthly generation data.
-
-explain result limits and pagination, and that we'll talk about how to get around pagination in the next lesson
-
-Example: modify previous code to do yearly. Oops, it's actually supposed to be "annual".
-Example: discuss error codes when talking about the error message
-
-:::::::: challenge
-
-<!-- TODO: get specific about which fuel consumption data -->
-TODO: break this up into multiple steps:
-* figure out what the valid options are:
-    * here's a snippet of the documentation. https://www.eia.gov/opendata/documentation.php#Examiningametadatarequ
-    * Which one of these endpoints would let us figure out what valid data columns exist?
-* figure out which option you actually need
-    * 
-Here's some code that is supposed to ask the EIA API for some fuel consumption data - but it doesn't work. How can we fix it?
 
 ```python
 import os
 
-import pandas as pd
+print(os.getenv("EIA_API_KEY"))
+```
+
+You might need to look up instructions for your specific shell (run `echo $SHELL` if you're not sure what shell you're using.)
+
+::::::::
+
+Now that we have an API key available to us in Python, we can try to use it. Web APIs just use normal web requests, so `requests` will do the trick.
+
+In the documentation you can see that they expect you to pass the API key as a URL parameter, as well as a few other parameters. While the `?...` syntax works, it gets unwieldy with many parameters. `requests` provides a nice `params` dictionary we can use, which we will do below.
+
+Here's an example of using `requests` to get some data from the EIA API. We've glossed over exactly how to find out which URL to request, and which parameters are available, but we will touch on that later.
+
+```python
+import os
+
 import requests
 
 EIA_API_KEY = os.getenv("EIA_API_KEY")
 
+response = requests.get(
+    f"https://api.eia.gov/v2/electricity/electric-power-operational-data/data",
+    params={
+        "api_key": EIA_API_KEY,
+        "frequency": "monthly",
+        "data[]": "generation",
+        "length": 10
+    }
+)
+print(response.json())
+```
+
+Here's the output, reformatted to be more readable:
+
+```
+{
+  "response": {
+    "warnings": [
+      {
+        "warning": "incomplete return",
+        "description": "The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results."
+      }
+    ],
+    "total": "4184767",
+    "dateFormat": "YYYY-MM",
+    "frequency": "monthly",
+    "data": [
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "NGO",
+        "fuelTypeDescription": "natural gas & other gases",
+        "generation": "8.53051",
+        "generation-units": "thousand megawatthours"
+      },
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "OB2",
+        "fuelTypeDescription": "biomass",
+        "generation": ".306",
+        "generation-units": "thousand megawatthours"
+      },
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "OBW",
+        "fuelTypeDescription": "biomass",
+        "generation": ".306",
+        "generation-units": "thousand megawatthours"
+      },
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "ORW",
+        "fuelTypeDescription": "other renewables",
+        "generation": ".306",
+        "generation-units": "thousand megawatthours"
+      },
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "PEL",
+        "fuelTypeDescription": "petroleum liquids",
+        "generation": "0",
+        "generation-units": "thousand megawatthours"
+      },
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "PET",
+        "fuelTypeDescription": "petroleum",
+        "generation": "0",
+        "generation-units": "thousand megawatthours"
+      },
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "REN",
+        "fuelTypeDescription": "renewable",
+        "generation": "69.38363",
+        "generation-units": "thousand megawatthours"
+      },
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "SPV",
+        "fuelTypeDescription": "solar photovoltaic",
+        "generation": ".61609",
+        "generation-units": "thousand megawatthours"
+      },
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "SUN",
+        "fuelTypeDescription": "solar",
+        "generation": ".61609",
+        "generation-units": "thousand megawatthours"
+      },
+      {
+        "period": "2021-03",
+        "location": "SAT",
+        "stateDescription": "South Atlantic",
+        "sectorid": "6",
+        "sectorDescription": "Industrial Non-CHP",
+        "fueltypeid": "WAS",
+        "fuelTypeDescription": "renewable waste products",
+        "generation": ".306",
+        "generation-units": "thousand megawatthours"
+      }
+    ],
+    "description": "Monthly and annual electric power operations by state, sector, and energy source.\n    Source: Form EIA-923"
+  },
+  "request": {
+    "command": "/v2/electricity/electric-power-operational-data/data/",
+    "params": {
+      "api_key": "...",
+      "frequency": "monthly",
+      "data": [
+        "generation"
+      ],
+      "length": "10"
+    }
+  },
+  "apiVersion": "2.1.8",
+  "ExcelAddInVersion": "2.1.0"
+}
+```
+
+We see a warning, some metadata about the whole response, the actual data we're looking for, and the request that we sent.
+
+The warning says "The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results." This sort of behavior is very common in web APIs - because they have to send their response to you over the Internet, they have to limit the amount of data they send at once. Much like Google search results, you will often need to go through multiple "pages" of response data. We'll deal with how to deal with that later in this lesson.
+
+
+:::::::: challenge
+
+Imagine a function called `get_electric_power_operational_data()` that runs on your computer, instead of the EIA API server. One might call it like so:
+
+```python
+get_electric_power_operational_data(
+    some_parameter=some_value,
+    ...
+)
+```
+
+What call to that imaginary function would be equivalent to the API call we just tried out?
+
+:::: solution
+```python
+get_electric_power_operational_data(
+    api_key=EIA_API_KEY,
+    frequency="monthly",
+    data[]="generation",
+    length=10
+)
+```
+::::
+
+::::::::
+
+
+We can easily modify the code to request data at a yearly granularity:
+
+```python
+import os
+
+import requests
+
+EIA_API_KEY = os.getenv("EIA_API_KEY")
+
+response = requests.get(
+    f"https://api.eia.gov/v2/electricity/electric-power-operational-data/data",
+    params={
+        "api_key": EIA_API_KEY,
+        "frequency": "yearly",
+        "data[]": "generation",
+        "length": 10
+    }
+)
+print(response.json())
+```
+
+Oops! We got an error response:
+
+```output
+{'error': "Invalid frequency 'yearly' provided. The only valid frequencies are 'monthly', 'quarterly', and 'annual'.", 'code': 400}
+```
+
+It tells us what the problem is - we need to use the value `annual` instead of `yearly`.
+
+It also tells us a "code" for the error - this expresses the general category of error and is based on the [HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes). Mostly you need to know that 4xx means *you* did something wrong and 5xx means *they* did something wrong.
+
+:::::::: challenge
+
+How can we figure out the valid values *without* guessing one and then reading the error message? In many APIs, you will be able to find this information in the documentation. For the EIA API, you have to make a metadata request. Read [that section of the documentation](https://www.eia.gov/opendata/documentation.php#Examiningametadatarequ).
+
+Then, use that to figure out what the valid data columns exist for the `electricity/electric-power-operational-data/` endpoint.
+
+:::: solution
+
+Query the `electricity/electric-power-operational-data` endpoint without `/data`.
+
+```python
+import os
+
+import requests
+
+EIA_API_KEY = os.getenv("EIA_API_KEY")
+
+response = requests.get(
+    "https://api.eia.gov/v2/electricity/electric-power-operational-data",
+    params={
+        "api_key": EIA_API_KEY,
+    }
+)
+```
+
+```output
+{
+  "generation": {
+    "alias": "Utility Scale Electricity Net Generation"
+  },
+  "total-consumption": {
+    "alias": "Consumption of Fuels for Electricity Generation and Useful Thermal Output (Physical Units)"
+  },
+  "consumption-for-eg": {
+    "alias": "Consumption of Fuels for Electricity Generation (Physical Units)"
+  },
+  "consumption-uto": {
+    "alias": "Consumption of Fuels for Useful Thermal Output (Physical Units)"
+  },
+  "total-consumption-btu": {
+    "alias": "Consumption of Fuels for Electricity Generation and Useful Thermal Output (BTUs)"
+  },
+  "consumption-for-eg-btu": {
+    "alias": "Consumption of Fuels for Electricity Generation (BTUs)"
+  },
+  "consumption-uto-btu": {
+    "alias": "Consumption of Fuels for Useful Thermal Output (BTUs)"
+  },
+  "stocks": {
+    "alias": "Stocks of Fuel (Physical Units)"
+  },
+  "receipts": {
+    "alias": "Receipts of Fuel (Physical Units)"
+  },
+  "receipts-btu": {
+    "alias": "Receipts of Fuel (BTUs)"
+  },
+  "cost": {
+    "alias": "Average Cost of Fuels (per Physical Unit)"
+  },
+  "cost-per-btu": {
+    "alias": "Average Cost of Fuels (per BTU)"
+  },
+  "sulfur-content": {
+    "alias": "Average Sulfur Content of Consumed Fuel"
+  },
+  "ash-content": {
+    "alias": "Average Ash Content of Consumed Fuel"
+  },
+  "heat-content": {
+    "alias": "Average Heat Content of Consumed Fuels"
+  }
+}
+```
+
+This sort of metadata request is also how we found the `/electricity/electric-power-operational-data/` endpoint in the first place, by first querying `https://api.eia.gov/v2/` and walking down the tree. If you're interested, you can try querying that. What other categories of data are available?
+::::
+
+::::::::
+
+:::::::: challenge
+
+What is wrong with this API call?
+
+```python
 response = requests.get(
     url="https://api.eia.gov/v2/electricity/electric-power-operational-data/data/",
     params={
@@ -174,11 +490,6 @@ response = requests.get(
         "length": 5
     }
 )
-
-raw_json = response.json()
-print(raw_json)
-dataframe = pd.json_normalize(raw_json, ["response", "data"])
-print(dataframe)
 ```
 
 :::: solution
@@ -192,60 +503,26 @@ The JSON response had information about the error:
 }
 ```
 
-This suggests that if we change the data request to `total-consumption` we should get something back. 
+This suggests that if we change the `data[]` parameter to `total-consumption`, `consumption-for-eg`, `consumption-uto`, etc. we should get something back. 
 
-TODO: break this out into its own exercise where input is EIA documentation, output is "consumption-uto" or whatever.
-For the EIA API in particular, you can query https://api.eia.gov/v2/electricity/electric-power-operational-data/ to figure out what `total-consumption` corresponds to - which will tell you that it is "Consumption of Fuels for Electricity Generation and Useful Thermal Output (Physical Units)".
+Which one we should change it to depends on what you want.
 
-
-```python
-import os
-
-import pandas as pd
-import requests
-
-EIA_API_KEY = os.getenv("EIA_API_KEY")
-
-response = requests.get(
-    url="https://api.eia.gov/v2/electricity/electric-power-operational-data/data/",
-    params={
-        "api_key": EIA_API_KEY,
-        "frequency": "annual",
-        "data[]": "total-consumption",
-        "length": 5
-    }
-)
-
-raw_json = response.json()
-print(raw_json)
-dataframe = pd.json_normalize(raw_json, ["response", "data"])
-print(dataframe)
-```
-:::: 
-
+::::
 ::::::::
 
-Example: show the documentation about the data[] parameter, then add another data[] field.
 
-
-```python
-response = requests.get(
-    url="https://api.eia.gov/v2/electricity/electric-power-operational-data/data/",
-    params={
-        "api_key": EIA_API_KEY,
-        "frequency": "annual",
-        "data[]": "total-consumption",
-        "data[]": "generation",
-        "length": 5
-    }
-)
-```
 
 :::::::: challenge
 
-You want to get Colorado generation data.
+<!-- TODO this is not actually taught *anywhere* in the docs. --> 
+<!-- TODO is this challenge... necessary? -->
+You want to get generation data for Colorado only. What is the right parameter?
 
-<!-- TODO: faceting as a MCQ instead of all these "add data, add sort, etc." questions -->
+a. `"stateid[]": "Colorado"`
+a. `"facets[stateid][]": "Colorado"`
+a. `"facets[stateid]": "CO"`
+a. `"facets[stateid][]": "CO"`
+
 * make sure it hits "can you read the EIA documentation and figure out the right way to do something"
 
 * maybe example about facets?
@@ -261,8 +538,23 @@ You want to get Colorado generation data.
 
 ## Generalizing to other APIs
 
+Other APIs will be different from the EIA API - both in what functionality is available, and in how you access that functionality. Let's practice reading the documentation for another useful API, this time from the EPA.
+
+[You can find the documentation here.](https://www.epa.gov/power-sector/cam-api-portal#/swagger/facilities-mgmt)
+
 :::::::: challenge
-How would you generalize this to other APIs?
+
+Let's analyze this with the framework we introduced earlier.
+
+* what functions seem useful to you?
+* what are their inputs/outputs?
+* how do you pass parameters?
+* how do you parse the response?
+* how do you authenticate?
+
+::::::::
+
+:::::::: challenge
 MCQ: look at this. and then tell us which requests.get() call will work for doing whatever
 
 https://www.epa.gov/power-sector/cam-api-portal#/swagger/facilities-mgmt
@@ -278,5 +570,11 @@ https://www.epa.gov/power-sector/cam-api-portal#/swagger/facilities-mgmt
 * `pandas.read_*` can read tabular data from remote servers & cloud storage as if it was on your local computer
 * `requests` can get data that's not in the right shape for `pandas.read_*`, so you can then get it into the Pandas shape APIs, though you'll have to do the translation from their response format into `pandas.DataFrame` yourself
 * To get access to access-restricted APIs, you will usually pass in an API key, as a request *header* or as a request *parameter*. Both `requests` and `pandas.read_*` have the ability to do this.
+* when encountering a new API, ask yourself these questions:
+  * what functions seem useful to you?
+  * what are their inputs/outputs?
+  * how do you pass parameters?
+  * how do you parse the response?
+  * how do you authenticate?
 
 ::::::::
