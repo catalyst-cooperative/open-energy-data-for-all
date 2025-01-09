@@ -6,28 +6,28 @@ exercises: 0
 
 Expected duration: 45 min?
 
-:::::::::::::::::::::::::::::::::::::: questions 
+:::: questions 
 
 - How can I read in different tabular data types to a familiar format in Python?
 - What are some common errors that occur when importing data, and how can I troubleshoot them?
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+::::
 
-::::::::::::::::::::::::::::::::::::: objectives
+:::: objectives
 - Import tabular data from Excel, XML, JSON, and Parquet formats to pandas dataframes using the `pandas` library
 - Use `pandas` documentation to select and implement parameters - refine this.
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+::::
 
 
-::::::::::::::::::::::::::::::::::::: keypoints 
+:::: keypoints 
 
 - `pandas` has functionality to read in many data formats (e.g., XML, JSON,
 Parquet) into the same kind of DataFrame in Python. We can take advantage of this to
 transform many kinds of data with similar functions in Python.
 - `pandas` accepts both relative and absolute file paths on read-in.
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+::::
 
 # Untangling a data pile
 While poking around in your lab's computer, you find the folder that the postdoc was
@@ -272,7 +272,6 @@ with open('data/eia923_2022.json') as file:
 eia923_json_df = pd.json_normalize(eia923_json, record_path = [...])
 
 ```
-::::
 
 :::: solution
 
