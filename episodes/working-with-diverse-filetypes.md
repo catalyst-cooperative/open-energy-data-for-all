@@ -459,14 +459,23 @@ When we start to work with this dataset, we'll want to make sure that we heed th
 
 # `pd.read_parquet()
 
-USE MONTHLY GENERATION FUEL
-out_eia923__monthly_generation_fuel_combined
+There's one more file left in the `data` folder the postdoc left behind - a Parquet file!
+You can think of Parquet files as spreadsheet storage optimized for computers.
 
-TODO:
-What is a Parquet file and when might you see it
-Just demo pd.read_parquet, no need for a challenge here.
+Parquet files:
+* store data column by column, rather than row by row
+* are designed to efficiently process and store large volumes of data, making it about
+50x faster than using `pd.read_csv()` on comparable file sizes.
+* compresses data efficiently, reducing file size
+* are saved with data organized into chunks (e.g., one chunk per month), making it possible
+to quickly load data from some part of the dataset without loading everything into memory.
+* are supported by many existing tools, including `Pandas`.
 
-`pd.read_parquet('data/eia923_2022.parquet)`
+We can read a Parquet file to a Pandas DataFrame using `pd.read_parquet()`, almost identical to how we read in a CSV:
+
+```py
+eia923_parquet = pd.read_parquet('data/eia923_2022.parquet')
+```
 
 :::::::: challenge
 
