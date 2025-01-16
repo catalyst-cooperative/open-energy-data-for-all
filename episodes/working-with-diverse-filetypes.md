@@ -20,7 +20,7 @@ Expected duration: 45 min?
 ::::
 
 
-:::: keypoints 
+:::: keypoints
 
 - `pandas` has functionality to read in many data formats (e.g., XML, JSON,
 Parquet) into the same kind of DataFrame in Python. We can take advantage of this to
@@ -34,7 +34,7 @@ While poking around in your lab's computer, you find the folder that the postdoc
 using to store data inputs to his model. Inside the `data` folder, however, is a bit of
 a mess! Every file in the folder has the same name ("eia923_2022") but a different file
 extension. To make sense of this undocumented pile of files, we'll need to read in each
-file and compare them. 
+file and compare them.
 
 # EIA 923 data
 The Energy Information Administration (EIA)'s [Form 923](https://www.eia.gov/electricity/data/eia923) is known as the Power Plant Operations Report. The data include electric power generation, energy source consumption, end of reporting period fossil fuel stocks, as well as the quality and cost of fossil fuel receipts at the power plant and prime mover level (with a subset of +10MW steam-electric plants reporting at the boiler and generator level). Information is available for non-utility plants starting in 1970 and utility plants beginning in 1999. The Form EIA-923 has evolved over the years, beginning as an environmental add-on in 2007 and ultimately eclipsing the information previously recorded in EIA-906, EIA-920, FERC 423, and EIA-423 by 2008.
