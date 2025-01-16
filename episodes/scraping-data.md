@@ -4,7 +4,7 @@ teaching: 0
 exercises: 0
 ---
 
-:::::::::::::::::::::::::::::::::::::: questions 
+:::::::::::::::::::::::::::::::::::::: questions
 
 - How do I get *all* of the data out of an API call when we've hit the limit for a single request?
 - How do I download all the data files from a webpage?
@@ -22,9 +22,8 @@ exercises: 0
 
 
 
-::::::::::::::::::::::::::::::::::::: keypoints 
+::::::::::::::::::::::::::::::::::::: keypoints
 
 - placeholder
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
-

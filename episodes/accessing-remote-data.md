@@ -71,7 +71,7 @@ response = requests.get("URL")
 <!-- TODO think about whether we want to have an example of read_xml here - since we'd then need to do io.StringIO, etc. probably not worth it?  -->
 
 The `Response` object has many useful methods and properties, but for now we can focus on these two:
-* `response.text` will provide the returned data as a *text string* 
+* `response.text` will provide the returned data as a *text string*
 * `response.json()` will parse the returned data as if it were JSON, and provide a Python list or dictionary.
 
 :::::::: challenge
@@ -108,7 +108,7 @@ The other answers are wrong because:
 * `json.loads(requests.get("URL").text)` does work, but this functionality is more directly achieved with `Response.json()`
 * You don't need to use `with` here because there is no cleanup required after a web request returns.
 ::::
-    
+
 ::::::::
 
 :::::::: challenge
@@ -517,7 +517,7 @@ If you try to make this request, the JSON response will give you information abo
 }
 ```
 
-This suggests that if we change the `data[]` parameter to `total-consumption`, `consumption-for-eg`, `consumption-uto`, etc. we should get something back. 
+This suggests that if we change the `data[]` parameter to `total-consumption`, `consumption-for-eg`, `consumption-uto`, etc. we should get something back.
 
 Which one we should change it to depends on what you want.
 
