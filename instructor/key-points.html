@@ -268,7 +268,7 @@
 <div class="accordion accordion-flush" id="accordionFlush4">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading4">
-        <a href="downloading-files-programmatically.html">3. Downloading files programmatically</a>
+        <a href="accessing-remote-data.html">3. Accessing remote data</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -491,20 +491,30 @@ functions in Python.</li>
 <li>
 <code>pandas</code> accepts both relative and absolute file paths on
 read-in.</li>
-</ul></section><section id="downloading-files-programmatically"><h2 class="section-heading"><a href="downloading-files-programmatically.html">Downloading files programmatically</a></h2>
+</ul></section><section id="accessing-remote-data"><h2 class="section-heading"><a href="accessing-remote-data.html">Accessing remote data</a></h2>
 <hr class="half-width">
 <ul>
 <li>
 <code>pandas.read_*</code> can read tabular data from remote servers
 &amp; cloud storage as if it was on your local computer</li>
 <li>
-<code>requests</code> can get data from APIs, though you’ll have to
-do the translation from their response format into
-<code>pandas.DataFrame</code> yourself</li>
+<code>requests</code> can get data that’s not in the right shape for
+<code>pandas.read_*</code>, so you can then get it into the Pandas shape
+APIs, though you’ll have to do the translation from their response
+format into <code>pandas.DataFrame</code> yourself</li>
 <li>To get access to access-restricted APIs, you will usually pass in an
 API key, as a request <em>header</em> or as a request
 <em>parameter</em>. Both <code>requests</code> and
 <code>pandas.read_*</code> have the ability to do this.</li>
+<li>when encountering a new API, ask yourself these questions:
+<ul>
+<li>what functions seem useful to you?</li>
+<li>what are their inputs/outputs?</li>
+<li>how do you pass parameters?</li>
+<li>how do you parse the response?</li>
+<li>how do you authenticate?</li>
+</ul>
+</li>
 </ul></section><section id="scraping-data"><h2 class="section-heading"><a href="scraping-data.html">Scraping Data</a></h2>
 <hr class="half-width">
 <ul>
