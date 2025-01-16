@@ -6,7 +6,7 @@ exercises: 0
 
 :::::::: questions
 
-* How can I access the latest version of a frequently updated dataset without saving it to my hard drive every time?
+* How can I access data without manually saving it to my hard drive?
 * How can I work with data that is behind a web API?
 
 ::::::::
@@ -22,7 +22,6 @@ exercises: 0
 
 You asked around about the `eia923_2022.parquet` file and found out that it came from the Public Utility Data Liberation project. After a bit of online digging you find that they update their data nightly! You want to get your hands on more up-to-date data, so you want to check this out. Downloading a new file each day seems like a pain, though. You seem to remember that the documentation for `pandas.read_parquet()` mentions that the file path "could be a URL." Let's try it!
 
-<!-- TODO get the right URL for the corresponding parquet file -->
 ```python
 import pandas as pd
 
@@ -71,7 +70,7 @@ response = requests.get("URL")
 
 <!-- TODO think about whether we want to have an example of read_xml here - since we'd then need to do io.StringIO, etc. probably not worth it?  -->
 
-The `Response` object has many useful methods and properties, but for now we can focus on how to get the data back out:
+The `Response` object has many useful methods and properties, but for now we can focus on these two:
 * `response.text` will provide the returned data as a *text string* 
 * `response.json()` will parse the returned data as if it were JSON, and provide a Python list or dictionary.
 
@@ -112,22 +111,35 @@ The other answers are wrong because:
     
 ::::::::
 
+:::::::: challenge
+
+When might you want to use `.text` instead of `.json()`?
+
+:::: solution
+There are many situations! Here are a few:
+* if the response is in XML or HTML instead of JSON
+* if the JSON is consistently malformed in some way, and you need to modify it before parsing it as JSON
+* if you don't actually need to parse the JSON and instead need to store it somewhere as text
+::::
+
+::::::::
+
 
 ## Introduction to APIs
 
 The previous postdoc left a note that he had gotten the JSON files straight from the EIA API. While you might not have dealt with a web API before, you have the tools to do so now and resolve to jump in.
 
-A useful mental model for a web API is that of a *function call on someone else's computer over the Internet*
+A web API consists of a number of different possible *API endpoints*, which you access via *API requests*. A useful mental model for a *web API request* is that of a *function call on someone else's computer over the Internet.*
 
-Imagine you have a function called `get_electric_power_operational_data` which takes a few different parameters. Maybe you call it like `get_electric_power_operational_data(data_field="generation", frequency="monthly")` and it will return a dataframe with some monthly generation data.
+Imagine you have a function called `get_electric_power_operational_data` which takes a few different parameters. Maybe you call it like `get_electric_power_operational_data(data_field="generation")` and it will return a dataframe with some monthly generation data.
 
-The web API version of that might look like making a request to `https://api.eia.gov/v2/electricity/electric-power-operational-data/data?api_key=XYZXYZXYZ&data[]=generation&frequency=monthly`. Let's break that down.
+The web API version of that might look like making a request to `https://api.eia.gov/v2/electricity/electric-power-operational-data/data?api_key=XYZXYZXYZ&data[]=generation`. Let's break that down.
 
-* `https://api.eia.gov/` specifies which other computer you're making this request to. In this case, this is the EIA API server.
+* `https://api.eia.gov/` specifies which other computer you're making this request to. In this case, this is the EIA API server. This also specifies that you're making this request over the Internet.
 * `/v2/electricity/electric-power-operational-data/data` is the equivalent of the function name `get_electric_power_operational_data` above - it specifies what functionality you are asking for.
-* `?api_key=XYZXYZXYZ&data[]=generation&frequency=monthly` is the equivalent of passing in parameters to the function: something like `(api_key="XYZXYZXYZ", data_field="generation", frequency="monthly")`. In this case we need to specify an extra `api_key` field because the other computer wants to verify that you're allowed to ask it to do things. This `?parameter_1=value_1&parameter_2=value_2` syntax is one of the main ways one passes input data to a web API, and is called "URL parameters." The `?` precedes the first parameter, the `=` separates the parameter name from its value, and the `&` separates all parameters from each other.
+* `?api_key=XYZXYZXYZ&data[]=generation` is the equivalent of passing in parameters to the function: something like `(api_key="XYZXYZXYZ", data_field="generation")`. In this case we need to specify an extra `api_key` field because the other computer wants to verify that you're allowed to ask it to do things. This `?parameter_1=value_1&parameter_2=value_2` syntax is one of the main ways one passes arguments to a web API, and is called "URL parameters." The `?` precedes the first parameter, the `=` separates the parameter name from its value, and the `&` separates all parameters from each other.
 
-Learning a web API is similar to learning a new software library. For a software library, you want to quickly zero in on:
+Since an API request is like a function call, learning a web API is similar to learning a new software library. For a software library, you want to quickly zero in on:
 
 * what are the functions that I want to call?
 * what are the inputs to those functions?
@@ -140,6 +152,8 @@ In the case of a web API, in addition to the above you also need to figure about
 * how do I authenticate myself to the API so it allows my request?
 
 ## Case study: EIA API
+
+**TODO maybe reorganize this a little based on the framework outlined above - start with "what are the functions & the inputs/outputs", learn that "oops, you need to hit the API to figure out how to hit the API," then go to auth/input/output, and finally go back and find some good functions and parse their output.**
 
 Let's jump into the EIA API and see how it works!
 
@@ -349,7 +363,7 @@ get_electric_power_operational_data(
 )
 ```
 
-What call to that imaginary function would be equivalent to the API call we just tried out?
+What call to that imaginary function would be equivalent to the API call we just tried out? Feel free to make up parameters for the function.
 
 :::: solution
 ```python
@@ -478,7 +492,7 @@ This sort of metadata request is also how we found the `/electricity/electric-po
 
 :::::::: challenge
 
-What is wrong with this API call?
+This API call will error out. Try running it - what's going wrong and how can you fix it?
 
 ```python
 response = requests.get(
@@ -494,7 +508,7 @@ response = requests.get(
 
 :::: solution
 
-The JSON response had information about the error:
+If you try to make this request, the JSON response will give you information about the error:
 
 ```json
 {
@@ -510,31 +524,27 @@ Which one we should change it to depends on what you want.
 ::::
 ::::::::
 
+<!-- :::::::: challenge -->
 
-
-:::::::: challenge
-
-<!-- TODO this is not actually taught *anywhere* in the docs. --> 
+<!-- TODO this is not actually taught *anywhere* in the docs.  -->
 <!-- TODO is this challenge... necessary? -->
-You want to get generation data for Colorado only. What is the right parameter?
+<!-- You want to get generation data for Colorado only. What is the right parameter? -->
 
-a. `"stateid[]": "Colorado"`
-a. `"facets[stateid][]": "Colorado"`
-a. `"facets[stateid]": "CO"`
-a. `"facets[stateid][]": "CO"`
+<!-- a. `"stateid[]": "Colorado"` -->
+<!-- a. `"facets[stateid][]": "Colorado"` -->
+<!-- a. `"facets[stateid]": "CO"` -->
+<!-- a. `"facets[stateid][]": "CO"` -->
 
-* make sure it hits "can you read the EIA documentation and figure out the right way to do something"
+<!-- * make sure it hits "can you read the EIA documentation and figure out the right way to do something" -->
 
-* maybe example about facets?
-  * look for list of facets
-  * explain the facet[facet_name][list index]=value syntax - which is a lot easier to understand if you've already seen the data[list index]=value syntax.
-  * explain facet[facet_name][list_index]=adofadfalsdkf returning nothing
-    * stateid = California doesn't return anything, stateid=CA probably does
-  
-::::::::
+<!-- * maybe example about facets? -->
+  <!-- * look for list of facets -->
+  <!-- * explain the facet[facet_name][list index]=value syntax - which is a lot easier to understand if you've already seen the data[list index]=value syntax. -->
+  <!-- * explain facet[facet_name][list_index]=adofadfalsdkf returning nothing -->
+  <!-- * stateid = California doesn't return anything, stateid=CA probably does -->
+<!--    -->
+<!-- :::::::: -->
 
-
-* other apis are different from this one.
 
 ## Generalizing to other APIs
 
@@ -546,22 +556,11 @@ Other APIs will be different from the EIA API - both in what functionality is av
 
 Let's analyze this with the framework we introduced earlier.
 
-* what functions seem useful to you?
+* what is a function that seems useful to you?
 * what are their inputs/outputs?
 * how do you pass parameters?
 * how do you parse the response?
 * how do you authenticate?
-
-::::::::
-
-:::::::: challenge
-MCQ: look at this. and then tell us which requests.get() call will work for doing whatever
-
-https://www.epa.gov/power-sector/cam-api-portal#/swagger/facilities-mgmt
-
-* read the EPA CAMD API docs and get some clean air data back
-
-::::::::
 
 ::::::::
 
