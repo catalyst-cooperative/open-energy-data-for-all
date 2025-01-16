@@ -53,7 +53,7 @@ episodes:
 # chapter 1. ingestion
 - introduction.md # hmm.
 - working-with-diverse-filetypes.md
-- downloading-files-programmatically.md
+- accessing-remote-data.md
 - scraping-data.md
 # chapter 2. visualization/reusability
 - plotting.md # pick a few transforms and do them - dropping nulls, adding dtypes, stacking, unit conversion
@@ -63,7 +63,7 @@ episodes:
 # chapter 3. when things go wrong
 - debugging.md
 - big-data.md
-- other-options.md
+- other-options.md # maybe cut? / roll into "here's more resources" section of big-data.md
 # chapter 4. collaboration
 - python-environments.md # https://carpentries-incubator.github.io/python-intermediate-development/12-virtual-environments.html
 - data-environments.md

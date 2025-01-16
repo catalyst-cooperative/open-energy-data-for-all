@@ -12,6 +12,8 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
+- what's dask
+- what's spark
 - placeholder
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
