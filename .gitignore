@@ -49,3 +49,5 @@ docs/
 # translation temp files
 po/*~
 
+# lockfiles
+data/.~lock*
