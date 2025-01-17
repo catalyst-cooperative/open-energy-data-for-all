@@ -6,9 +6,6 @@
         <frequency>monthly</frequency>
         <data>
             <row>
-                <row>warning: XML output returns a maximum of 300 rows; use offset= and length= parameters or output to JSON for entire dataset.</row>
-            </row>
-            <row>
                 <period>2022-12</period>
                 <plantCode>59656</plantCode>
                 <plantName>Comanche Solar</plantName>

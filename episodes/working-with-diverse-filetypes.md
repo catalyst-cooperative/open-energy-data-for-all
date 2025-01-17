@@ -14,8 +14,8 @@ Expected duration: 45 min?
 ::::
 
 :::: objectives
-- Import tabular data from Excel, XML, JSON, and Parquet formats to pandas dataframes using the `pandas` library
-- Use `pandas` documentation to select and implement parameters - refine this.
+- Import tabular data from Excel, JSON, XML and Parquet formats to pandas dataframes using the `pandas` library
+- Use `help` and function documentation to select and implement parameters in function calls.
 
 ::::
 
@@ -23,29 +23,54 @@ Expected duration: 45 min?
 :::: keypoints 
 
 - `pandas` has functionality to read in many data formats (e.g., XML, JSON,
-Parquet) into the same kind of DataFrame in Python. We can take advantage of this to
-transform many kinds of data with similar functions in Python.
+Parquet) into Pandas DataFrames in Python. We can take advantage of this to
+transform many kinds of structured and semi-structured data into similarly formatted
+data.
+- The `help` function can be used to access function documentation, providing avenues
+to resolve problems on import of various data types.
+- When semi-structured data contains tabular data, we can extract the tabular data into
+a Pandas Dataframe.
 - `pandas` accepts both relative and absolute file paths on read-in.
 
 ::::
 
-# Untangling a data pile
+## Untangling a data pile
 While poking around in your lab's computer, you find the folder that the postdoc was
 using to store data inputs to his model. Inside the `data` folder, however, is a bit of
 a mess! Every file in the folder has the same name ("eia923_2022") but a different file
 extension. To make sense of this undocumented pile of files, we'll need to read in each
 file and compare them. 
 
-# EIA 923 data
+## EIA 923 data
 The Energy Information Administration (EIA)'s [Form 923](https://www.eia.gov/electricity/data/eia923) is known as the Power Plant Operations Report. The data include electric power generation, energy source consumption, end of reporting period fossil fuel stocks, as well as the quality and cost of fossil fuel receipts at the power plant and prime mover level (with a subset of +10MW steam-electric plants reporting at the boiler and generator level). Information is available for non-utility plants starting in 1970 and utility plants beginning in 1999. The Form EIA-923 has evolved over the years, beginning as an environmental add-on in 2007 and ultimately eclipsing the information previously recorded in EIA-906, EIA-920, FERC 423, and EIA-423 by 2008.
 
-    TODO: Why is it a good choice for answering the question?
+Given your interest in generation and fuel consumption data for your research, the EIA
+Form 923 data is a great starting point for data exploration.
 
-# Reading Excel files with Pandas
+## Reading Excel files with Pandas
 
 One of the most popular libraries used to work with tabular data in Python is called the
 [Python Data Analysis Library](https://pandas.pydata.org/) (or simply, Pandas). Pandas
 has functions to handle reading in a diversity of file types, from CSVs and Excel spreadsheets to more complex data formats such as XML and Parquet. Each read function offers a variety of parameters designed to handle common complexities specific to the file type on import. For a refresher (TODO: Is this an ok wording?) on Pandas, Pandas DataFrames and reading in files, see the [Starting with Data](https://datacarpentry.github.io/python-ecology-lesson/instructor/02-starting-with-data.html) lesson.
+
+::: callout
+### Identifying file paths
+
+In order to read data into Pandas or any Python function, we'll need to identify the
+*path* to that file. The path tells the code where that file lives. There are two ways
+to specify the path to any file on your computer:
+
+- __Relative path__: A relative path specifies a location starting from the current location.
+- __Absolute path__: An absolute path specifies a location from the root of the filesystem.
+
+For example, to get to the `eia923_2022.json` file in the `data` folder from a notebook
+in the `open-energy-data-for-all` folder, we can either specify:
+
+- __Relative path__: `data/eia923_2022.json`
+- __Absolute path__: `/home/user/Desktop/path/to/open-energy-data-for-all/data/eia923_2022.json`
+:::
+
+### Handling spreadsheet formatting on read-in
 
 Of all the files in the `data` folder, you decide to start with the Excel spreadsheet.
 To read in an Excel spreadsheet using `pandas`, you will use the `read_excel()` function:
@@ -92,7 +117,7 @@ TODO: Absolute and relative file paths should live here? Or elsewhere?
 
 :::::::: challenge
 
-## Challenge 1: handling Excel formatting on read-in
+### Challenge 1: handling Excel formatting on read-in
 
 Looking at the documentation for `pd.read_excel()`, identify the parameter needed to skip the first few rows of the spreadsheet. Then, using `pd.read_excel()`, read in the "Page 1 Generation and Fuel Data" sheet using this parameter to skip any rows that don't contain the column headers.
 
@@ -113,7 +138,7 @@ excel_923 = pd.read_excel('data/eia923_2022.xlsx', sheet_name=0, skiprows=5)
 
 Each row contains monthly generation data for each plant's prime mover. While a subset of plants fill out Form 923 at the boiler and generator, a large proportion of plants only report at this more aggregated level. For more on the nuances of the Form 923 data, see PUDL's [data source page](https://catalystcoop-pudl.readthedocs.io/en/latest/data_sources/eia923.html).
 
-# Reading JSON files with Pandas
+## Reading JSON files with Pandas
 
 JavaScript Object Notation (JSON) is a lightweight file format based on name-value pairs, similar to Python dictionaries. JSON often used to send data to and from web applications, and is one of the most common formats provided when you're accessing data from an Application Programming Interface (API). JSON data can be found saved as either `.json` or `.txt` files.
 
@@ -236,7 +261,7 @@ eia923_json['response']['warnings']
 
 This format looks identical to the `eia923_2022_sample.json` we worked with earlier: a list of dictionaries with consistent name-value pairs. It's time to turn these warnings into a table!
 
-## Using `json.normalize()`
+### Using `json.normalize()`
 Luckily for us, Pandas has a second function transforming nested or semi-structured JSON files into Pandas DataFrames: `json_normalize()`.
 
 Unlike `read_json()`, `json_normalize()` expects that the JSON object has already been read into Python using `json.load()`. Using the `record_path`
@@ -258,7 +283,7 @@ The first row of this table is letting us know that when we queried and saved th
 
 :::::::: challenge
 
-## Challenge 2: handling nested JSONs
+### Challenge 2: handling nested JSONs
 
 Fill in the blanks in the code below to read in the `data` from the `eia923_2022.json` file into a Pandas DataFrame.
 
@@ -296,22 +321,17 @@ eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data
 JSONs can include many levels of nesting, including different levels of nesting for similar records or other formatting that doesn't obey the principles of tabular structure (where each row represents a single record, and each column represents a single variable). `pd.json_normalize()` provides a set of parameters that can used to wrangle more deeply nested JSON data. Call `help(pd.json_normalize)` and look at the provided examples to get a better sense of its capabilities.
 :::
 
-# Deciphering XML
+## Deciphering XML
 
 eXtensible Markup Language (XML) is a plain text file that uses tags to describe the
-structure and content of the data they contain. Like other markup languages (HTML, LaTeX),
-XML wraps around data, providing information about the structure, format, and relationships
-between components. Each tag provides metadata about what the piece of data it contains
-represents - for instance `<row>` will contain a row of data, while `<plantCode> 243 </plantCode>` will
-means that the plant code is 243.
-
-For example, the following might be a way to represent a note from
-Saul R. Panel to Dr. Watts apologizing for leaving the project in an incomplete state:
+structure and content of the data they contain. For example, the following might be a way
+to represent a note from Saul R. Panel to Dr. Watts apologizing for leaving the project
+in an incomplete state:
 
 ```xml
 <note>
-  <to>Saul R. Panel</to>
-  <from>Dr. Watts</from>
+  <from>Saul R. Panel</from>
+  <to>Dr. Watts</to>
   <heading>Note about project</heading>
   <body>Sorry for leaving the project in an incomplete state!</body>
 </note>
@@ -320,30 +340,41 @@ Saul R. Panel to Dr. Watts apologizing for leaving the project in an incomplete 
 In JSON, the equivalent information could be formatted as:
 ```output
 {"note":
-    {"to": "Saul R. Panel",
-    "from": "Dr. Watts",
+    {"from": "Saul R. Panel",
+    "to": "Dr. Watts",
     "heading": "Note about project",
     "body": "Sorry for leaving the project in an incomplete state!"
     }
 }
 ```
 
-Each tag in XML is similar to a key in a JSON file:
-* both provide metadata about what the corresponding value _is_ (e.g., a note, net generation in watts)
-* both provide information about nested relationships (e.g., the note contains a heading and a body)
+Like other markup languages (HTML, LaTeX), XML wraps around data, providing information
+about the structure, format, and relationships between components. Each tag provides
+metadata about what the piece of data it contains represents - for instance `<row>` will
+contain a row of data, while `<plantCode>243</plantCode>` will means that the plant code
+is 243.
+
+Each tag in XML shares similarities with a key in a JSON file:
+- both provide metadata about what the corresponding value _is_ (e.g., a note, net generation in watts)
+- both provide information about nested relationships (e.g., the note contains a heading and a body)
+
+However, unlike JSON, XML tags:
+- can have additional attributes (e.g., <note date="2008-01-10">), providing a way to
+share more complex metadata about a given data point and to search for tags matching
+additional filters (e.g., all notes written after Jan 01, 2008).
 
 While XML is harder and slower to read than JSON, it also has more capabilities. You might
 be likely to see an XML file if the data you're looking at:
-* is old! XML was invented in 1998 and is still widely in use in older data distribution
+- is old! XML was invented in 1998 and is still widely in use in older data distribution
 methods.
-* has deeply nested hierarchies of relationships, like FERC's accounting data.
-* is large and complex! For instance, XML can be used to share images, charts and graphs
-in addition to text data, while JSON can only handle text.
-* is distributed through an RSS feed. For instance, FERC publishes filings on a rolling
+- has deeply nested hierarchies of relationships, like FERC's accounting data.
+- is large and complex! For instance, JSON can only handle strings, numbers and booleans,
+while XML can also be used to share images, charts and graphs.
+- is distributed through an RSS feed. For instance, FERC publishes filings on a rolling
 basis using an RSS feed and the XML data format.
 
 ::: challenge
-## Challenge #: From XML to Pandas
+### Challenge #: From XML to Pandas
 
 Look at the following XML code.
 
@@ -359,6 +390,7 @@ Look at the following XML code.
         <plantCode>59657</plantCode>
         <plantName>Comanche</plantName>
     </row>
+</data>
 ```
 
 Which of the following Pandas DataFrames would best represent the data in this XML file?
@@ -421,7 +453,8 @@ corresponds to each tag.
 
 :::
 
-# `pd.read_xml()
+## `pd.read_xml()`
+
 Like with our other data types, we can use `pd.read_xml()` to parse XML files into Pandas DataFrames. `pd.read_xml()` is designed to ingest tabular data nested in XML files,
 not to coerce highly nested data into a table format. To use this method, we'll need to
 identify where in our XML file the data is structured into a table-like format and can
@@ -436,8 +469,8 @@ Each tag has been assigned as a column name, and the value inside has been added
 we can use the `xpath` parameter, which lets you specify where in the XML file to look for a table.
 
 The `xpath` query we're looking for is formatted as follows:
-* // are used at the beginning to note that we want to select all items with the tags specified
-* Then, like specifying which directory we want to access in a terminal, slashes are used to specify the path to the desired tag.
+- // are used at the beginning to note that we want to select all items with the tags specified
+- Then, like specifying which directory we want to access in a terminal, slashes are used to specify the path to the desired tag.
 
 So to get all the `<row>`s of `<data>`, we call:
 ```python
@@ -457,20 +490,23 @@ xml_df.loc[0, 'row'] # Grab the first row of the "row" column
 
 When we start to work with this dataset, we'll want to make sure that we heed this warning!
 
-# `pd.read_parquet()
+## `pd.read_parquet()`
 
 There's one more file left in the `data` folder the postdoc left behind - a Parquet file!
-You can think of Parquet files as spreadsheet storage optimized for computers.
+You can think of Parquet files as spreadsheet storage optimized for computers. Like an
+Excel file, it's very difficult for a human to interpret the plain text of the file, as
+it is designed to be read efficiently by software. To get into the technical weeds, see
+the [Parquet documentation](https://parquet.apache.org/docs/overview/).
 
 Parquet files:
-* store data column by column, rather than row by row
-* are designed to efficiently process and store large volumes of data, making it about
+- are designed to efficiently process and store large volumes of data, making it about
 50x faster than using `pd.read_csv()` on comparable file sizes.
-* compresses data efficiently, reducing file size
-* are saved with data organized into chunks (e.g., one chunk per month), making it possible
+- compresses data efficiently, reducing file size
+- are saved with data organized into chunks (e.g., one chunk per month), making it possible
 to quickly load data from some part of the dataset without loading everything into memory.
-* are supported by many existing tools, including `Pandas`.
+- are supported by many existing tools, including `Pandas`.
 
+Parquet files 
 We can read a Parquet file to a Pandas DataFrame using `pd.read_parquet()`, almost identical to how we read in a CSV:
 
 ```py
@@ -483,11 +519,11 @@ Pick two datasets we've just read in, and compare them. How are they similar, an
 
 :::: hint
 
-* Inspect a column in a DataFrame `df` by using `df[column_name]`.
-* To quickly see what values are contained in a column, you can use `df[column_name].unique()` to get a list of unique values in the column.
-* Try using `df.iloc[0]` to get the values from the first row of the data.
-* `df.head(n)` returns the first n rows of the data, and `df.tail(n)` returns the last n rows.
-* to add - isin()?? info()
+- Inspect a column in a DataFrame `df` by using `df[column_name]`.
+- To quickly see what values are contained in a column, you can use `df[column_name].unique()` to get a list of unique values in the column.
+- Try using `df.iloc[0]` to get the values from the first row of the data.
+- `df.head(n)` returns the first n rows of the data, and `df.tail(n)` returns the last n rows.
+- to add - isin()?? info()
 ::::
 
 ::::::::
