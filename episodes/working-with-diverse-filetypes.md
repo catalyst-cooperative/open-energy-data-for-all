@@ -39,7 +39,7 @@ While poking around in your lab's computer, you find the folder that the postdoc
 using to store data inputs to his model. Inside the `data` folder, however, is a bit of
 a mess! Every file in the folder has the same name ("eia923_2022") but a different file
 extension. To make sense of this undocumented pile of files, we'll need to read in each
-file and compare them. 
+file and compare them.
 
 ## EIA 923 data
 The Energy Information Administration (EIA)'s [Form 923](https://www.eia.gov/electricity/data/eia923) is known as the Power Plant Operations Report. The data include electric power generation, energy source consumption, end of reporting period fossil fuel stocks, as well as the quality and cost of fossil fuel receipts at the power plant and prime mover level (with a subset of +10MW steam-electric plants reporting at the boiler and generator level). Information is available for non-utility plants starting in 1970 and utility plants beginning in 1999. The Form EIA-923 has evolved over the years, beginning as an environmental add-on in 2007 and ultimately eclipsing the information previously recorded in EIA-906, EIA-920, FERC 423, and EIA-423 by 2008.
@@ -110,10 +110,6 @@ So, if we only want to parse the first 100 rows of the data, we can call:
 ```python
 pd.read_excel('data/eia923_2022.xlsx', nrows=100)
 ```
-
-:::callout
-TODO: Absolute and relative file paths should live here? Or elsewhere?
-:::
 
 :::::::: challenge
 
@@ -242,7 +238,11 @@ The first part of the response looks like this:
     'gross-generation-units': 'megawatthours'},
     .....
 ```
-Now we can treat `eia923_json` like any other Python dictionary. To see the value of any particular key (*TODO: stick to name-value or switch to key-value??*), we can call it in square brackets by name:
+Now we can treat `eia923_json` like any other Python dictionary. We can use `.keys()`
+to see a list of all the keys in the first level of the dictionary - this is a quick and
+helpful way to get a sense for what is contained in different parts of the JSON file, without having to scroll through the entire output.
+
+To see the value of any particular key, we can call it in square brackets by name:
 
 ```python
 eia923_json['response']
