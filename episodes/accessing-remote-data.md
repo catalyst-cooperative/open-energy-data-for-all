@@ -60,56 +60,94 @@ It's nice to use functions in the `pd.read_*()` family with a URL, but sometimes
 
 While Python has some code in the standard library to help you read data from a URL, the [`requests` library](https://requests.readthedocs.io/en/latest/user/quickstart/) is easier to use and also extremely popular, so we'll focus on using that.
 
-To read a URL we use the [`requests.get()` method](https://requests.readthedocs.io/en/latest/api/#requests.get), which returns a [`requests.Response` object](https://requests.readthedocs.io/en/latest/api/#requests.Response):
+To read a URL we use the [`requests.get()` method](https://requests.readthedocs.io/en/latest/api/#requests.get), which returns a [`requests.Response` object](https://requests.readthedocs.io/en/latest/api/#requests.Response). Let's try using it to read some JSON.
 
 ```python
 import requests
 
-response = requests.get("URL")
+response = requests.get("https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.json")
 ```
 
-<!-- TODO think about whether we want to have an example of read_xml here - since we'd then need to do io.StringIO, etc. probably not worth it?  -->
+The `Response` object has many useful methods and properties, which we can see with `help(response)`. We'll focus on the following:
 
-The `Response` object has many useful methods and properties, but for now we can focus on these two:
-* `response.text` will provide the returned data as a *text string* 
-* `response.json()` will parse the returned data as if it were JSON, and provide a Python list or dictionary.
+* `response.status_code`, which tells you if the request succeeded or if it failed, and how it might have failed.
+* `response.text`, which provides the returned data as a *text string*
+* `response.json()` which parses the returned data as if it were JSON, and provide a Python list or dictionary.
 
-:::::::: challenge
+First, let's look at the status code. These are HTTP status codes - numbers between 100 and 600 that indicate what happened.
 
-The same JSON file you dealt with earlier is available online at raw.gihubusercontent.com/...
+You might have seen these before:
+* when you've tried to access a webpage that doesn't exist (`404 Not Found`)
+* when you've tried to access something you didn't have access to (`403 Forbidden`)
+* when a website was down (`502 Bad Gateway`)
 
-How would you read the file contents into a dictionary called `result` without manually downloading it to your hard drive?
+A number above 400 means something went wrong - 4xx means "the person making
+the request messed up" and 5xx means "the person in charge of responding to the
+request messed up."
 
-a.  ```python
-    with open("URL") as f:
-        result = f.read()
-    ```
-a.  ```python
-    result = json.loads(requests.get("URL").text)
-    ```
-a.  ```python
-    result = requests.get("URL").json()
-    ```
-a.  ```python
-    with requests.get("URL") as f:
-        result = f.json()
-    ```
-
-:::: solution
-
-The answer is
+Most of the time, the status code is `200 OK` for requests that succeeded, and that is indeed what we see.
 
 ```python
-result = requests.get("URL").json()
+response.status_code
 ```
 
-The other answers are wrong because:
-* `open()` can only read from a file on your local computer.
-* `json.loads(requests.get("URL").text)` does work, but this functionality is more directly achieved with `Response.json()`
-* You don't need to use `with` here because there is no cleanup required after a web request returns.
-::::
-    
-::::::::
+```output
+200
+```
+
+Next, we'll look at `response.text`. You'll find that, in this case, that returns a very long string:
+
+```python
+len(response.text)
+```
+
+```output
+1562319
+```
+
+And that the string looks like the JSON file you loaded in last episode:
+
+```python
+response.text[:100]
+```
+
+```output
+'{"response":{"warnings":[{"warning":"incomplete return","description":"The API can only return 5000 '
+```
+
+Since this response appears to be JSON, as we expected, let's try using `response.json()` to parse it. Using what we just learned about this particular JSON's structure we can see the first few records from the data:
+
+```python
+eia923_2022_raw = response.json()
+eia923_2022_raw["response"]["data"][:2]
+```
+
+```output
+[{'period': '2022-12',
+  'plantCode': '6761',
+  'plantName': 'Rawhide',
+  'fuel2002': 'ALL',
+  'fuelTypeDescription': 'Total',
+  'state': 'CO',
+  'stateDescription': 'Colorado',
+  'primeMover': 'ALL',
+  'generation': '188961',
+  'gross-generation': '203283',
+  'generation-units': 'megawatthours',
+  'gross-generation-units': 'megawatthours'},
+ {'period': '2022-12',
+  'plantCode': '54142',
+  'plantName': 'Hillcrest Pump Station',
+  'fuel2002': 'WAT',
+  'fuelTypeDescription': 'Hydroelectric Conventional',
+  'state': 'CO',
+  'stateDescription': 'Colorado',
+  'primeMover': 'HY',
+  'generation': '342.43',
+  'gross-generation': '358.27',
+  'generation-units': 'megawatthours',
+  'gross-generation-units': 'megawatthours'}]
+```
 
 :::::::: challenge
 
@@ -117,6 +155,7 @@ When might you want to use `.text` instead of `.json()`?
 
 :::: solution
 There are many situations! Here are a few:
+
 * if the response is in XML or HTML instead of JSON
 * if the JSON is consistently malformed in some way, and you need to modify it before parsing it as JSON
 * if you don't actually need to parse the JSON and instead need to store it somewhere as text
@@ -129,31 +168,63 @@ There are many situations! Here are a few:
 
 The previous postdoc left a note that he had gotten the JSON files straight from the EIA API. While you might not have dealt with a web API before, you have the tools to do so now and resolve to jump in.
 
-A web API consists of a number of different possible *API endpoints*, which you access via *API requests*. A useful mental model for a *web API request* is that of a *function call on someone else's computer over the Internet.*
 
-Imagine you have a function called `get_electric_power_operational_data` which takes a few different parameters. Maybe you call it like `get_electric_power_operational_data(data_field="generation")` and it will return a dataframe with some monthly generation data.
+### Web APIs are just libraries of functions
 
-The web API version of that might look like making a request to `https://api.eia.gov/v2/electricity/electric-power-operational-data/data?api_key=XYZXYZXYZ&data[]=generation`. Let's break that down.
+A web API consists of a bunch of functionality which you access via *API requests*. A useful mental model for a *making a web API request* is that of *calling a function over the Internet*.
 
-* `https://api.eia.gov/` specifies which other computer you're making this request to. In this case, this is the EIA API server. This also specifies that you're making this request over the Internet.
-* `/v2/electricity/electric-power-operational-data/data` is the equivalent of the function name `get_electric_power_operational_data` above - it specifies what functionality you are asking for.
-* `?api_key=XYZXYZXYZ&data[]=generation` is the equivalent of passing in parameters to the function: something like `(api_key="XYZXYZXYZ", data_field="generation")`. In this case we need to specify an extra `api_key` field because the other computer wants to verify that you're allowed to ask it to do things. This `?parameter_1=value_1&parameter_2=value_2` syntax is one of the main ways one passes arguments to a web API, and is called "URL parameters." The `?` precedes the first parameter, the `=` separates the parameter name from its value, and the `&` separates all parameters from each other.
+For example, imagine you have a function called `get_electric_power_operational_data` which takes a few different parameters. Maybe you call it like `get_electric_power_operational_data(data_field="generation", frequency="monthly")` and it will return a dataframe with some monthly generation data.
 
-Since an API request is like a function call, learning a web API is similar to learning a new software library. For a software library, you want to quickly zero in on:
+The web API version of that might look like making a request to `https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=generation&frequency=monthly`. 
 
-* what are the functions that I want to call?
-* what are the inputs to those functions?
-* what are the outputs?
+These both correspond to the following English sentence:
 
-In the case of a web API, in addition to the above you also need to figure about:
+> Get {a specific computer} to do something for me: get me electric power operational data. I only want generation data, and I want it at a monthly granularity.
 
-* how do I send the input values?
-* how can I get the output values back into my code?
-* how do I authenticate myself to the API so it allows my request?
+Let's break down that correspondence.
+
+| English | function call | API request |
+|-----------|---------------|-------------|
+| Get {a specific computer} to do something for me: | implicitly, your own computer | `https://api.eia.gov` |
+| get me electric power operational data. | `get_electric_power_operational_data()` | `v2/electricity/electric-power-operational-data/data` |
+| I only want generation data, | `data_field="generation"` | `data[]=generation` |
+| and I want it at a monthly granularity. | `frequency="monthly"` | `frequency=monthly` |
+
+In this case, we passed function arguments with a ["query string" or "URL parameters"](https://en.wikipedia.org/wiki/Query_string). This format specifies that everything after the `?` is an argument of some sort; the key and value are separated with `=` and the arguments are separated with `&`.
+
+
+Since web APIs are basically a bundle of functions that you call on someone else's computer, learning them is much like learning a new library:
+
+1. Figure out what functionality is available 
+2. Figure out how to interact with it:
+  * what inputs look like
+  * what outputs look like
+  * what happens when things go wrong?
+
+The "how to interact with it" piece is a little bit more complicated for web APIs than regular libraries.
+
+While the functions in all Python libraries are roughly called in the same way (`returned_value = function_name(param_1=value_1, param_2=value_2`), web APIs have a variety of ways to pass in parameters and return their data to you in different ways. They also return their error status to you differently. Additionally, most web APIs have some sort of authentication mechanism to control access. You wouldn't want other people running code on *your* computer willy-nilly, right?
+
+We'll talk about these three, then dive into the EIA API to see if we can figure out the available functionality and how to interact with it.
+
+### Inputs
+
+### Outputs
+
+### Authentication
+* 
+
+
+**TODO key points recap: look for what you can do, figure out how to interact with the thing, look at error messages**
 
 ## Case study: EIA API
 
 **TODO maybe reorganize this a little based on the framework outlined above - start with "what are the functions & the inputs/outputs", learn that "oops, you need to hit the API to figure out how to hit the API," then go to auth/input/output, and finally go back and find some good functions and parse their output.**
+
+**TODO we want to do this because we're interested in up-to-date generation & fuel consumption on a monthly basis.**
+
+**TODO call out that this actually only has aggregated data across regions, not at the plant level!**
+
 
 Let's jump into the EIA API and see how it works!
 
@@ -523,27 +594,6 @@ Which one we should change it to depends on what you want.
 
 ::::
 ::::::::
-
-<!-- :::::::: challenge -->
-
-<!-- TODO this is not actually taught *anywhere* in the docs.  -->
-<!-- TODO is this challenge... necessary? -->
-<!-- You want to get generation data for Colorado only. What is the right parameter? -->
-
-<!-- a. `"stateid[]": "Colorado"` -->
-<!-- a. `"facets[stateid][]": "Colorado"` -->
-<!-- a. `"facets[stateid]": "CO"` -->
-<!-- a. `"facets[stateid][]": "CO"` -->
-
-<!-- * make sure it hits "can you read the EIA documentation and figure out the right way to do something" -->
-
-<!-- * maybe example about facets? -->
-  <!-- * look for list of facets -->
-  <!-- * explain the facet[facet_name][list index]=value syntax - which is a lot easier to understand if you've already seen the data[list index]=value syntax. -->
-  <!-- * explain facet[facet_name][list_index]=adofadfalsdkf returning nothing -->
-  <!-- * stateid = California doesn't return anything, stateid=CA probably does -->
-<!--    -->
-<!-- :::::::: -->
 
 
 ## Generalizing to other APIs
