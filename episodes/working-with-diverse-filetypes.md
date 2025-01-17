@@ -134,54 +134,13 @@ excel_923 = pd.read_excel('data/eia923_2022.xlsx', sheet_name=0, skiprows=5)
 
 Each row contains monthly generation data for each plant's prime mover. While a subset of plants fill out Form 923 at the boiler and generator, a large proportion of plants only report at this more aggregated level. For more on the nuances of the Form 923 data, see PUDL's [data source page](https://catalystcoop-pudl.readthedocs.io/en/latest/data_sources/eia923.html).
 
-## Reading JSON files with Pandas
+## Reading in JSON files
 
 JavaScript Object Notation (JSON) is a lightweight file format based on name-value pairs, similar to Python dictionaries. JSON often used to send data to and from web applications, and is one of the most common formats provided when you're accessing data from an Application Programming Interface (API). JSON data can be found saved as either `.json` or `.txt` files.
 
-If we look at a single record from `eia923_2022_sample.json`, we can see that each name-value pair corresponds to one row and one column in a tabular dataset.
+### Nested formats in JSON files
 
-```output
-{"period":"2022-12","plantCode":"6761",
- "plantName":"Rawhide","fuel2002":"ALL","fuelTypeDescription":"Total","state":"CO","stateDescription":"Colorado","primeMover":"ALL","generation":"188961","gross-generation":"203283","generation-units":"megawatthours","gross-generation-units":"megawatthours"}
-```
-
-Like `read_excel`, we can use the the Pandas `read_json()` method to read in a JSON file.
-
-```python
-pd.read_json('data/eia923_2022_sample.json')
-```
-
-This yields the following DataFrame, with each JSON record transformed into a row:
-
-```output
-	period	plantCode	plantName	fuel2002	fuelTypeDescription	state	stateDescription	primeMover	generation	gross-generation	generation-units	gross-generation-units
-0	2022-12	6761	Rawhide	ALL	Total	CO	Colorado	ALL	188961.00	203283.00	megawatthours	megawatthours
-1	2022-12	54142	Hillcrest Pump Station	WAT	Hydroelectric Conventional	CO	Colorado	HY	342.43	358.27	megawatthours	megawatthours
-2	2022-12	54142	Hillcrest Pump Station	WAT	Hydroelectric Conventional	CO	Colorado	ALL	342.43	358.27	megawatthours	megawatthours
-3	2022-12	54142	Hillcrest Pump Station	ALL	Total	CO	Colorado	ALL	342.43	358.27	megawatthours	megawatthours
-4	2022-12	64359	Pivot Solar 12 LLC(CSG)	SUN	Solar	CO	Colorado	PV	92.45	92.45	megawatthours	megawatthours
-```
-
-However, there are only four records here! From the Excel spreadsheet you read in earlier, you know this is only a small sample of the data. Let's try to read in the second JSON file the postdoc left behind:
-
-```python
-pd.read_json('data/eia923_2022.json')
-```
-
-```output
-|   response  |                      request                      |                     apiVersion                    | ExcelAddInVersion |       |
-|:-----------:|:-------------------------------------------------:|:-------------------------------------------------:|-------------------|-------|
-| warnings    | [{'warning': 'incomplete return', 'description... | NaN                                               | 2.1.8             | 2.1.0 |
-| total       | 10426                                             | NaN                                               | 2.1.8             | 2.1.0 |
-| dateFormat  | YYYY-MM                                           | NaN                                               | 2.1.8             | 2.1.0 |
-| frequency   | monthly                                           | NaN                                               | 2.1.8             | 2.1.0 |
-| data        | [{'period': '2022-12', 'plantCode': '6761', 'p... | NaN                                               | 2.1.8             | 2.1.0 |
-| description | Annual and monthly electric power operations f... | NaN                                               | 2.1.8             | 2.1.0 |
-| command     | NaN                                               | /v2/electricity/facility-fuel/data/               | 2.1.8             | 2.1.0 |
-| params      | NaN                                               | {'frequency': 'monthly', 'data': ['generation'... | 2.1.8             | 2.1.0 |
-```
-
-We can see the data we want as a single record in the fifth row, but the format returned isn't usable for analysis. That's because this JSON is *nested*!
+Pandas `read_*()` methods transform data into a tabular format.  When a JSON file is already formatted as a table, we can use `pd.read_json()` to read it in directly. However, JSON files are very rarely formatted in this way. Instead, most JSONs contain data in a *nested* format. To successfully extract tabular generation data from a nested JSON, we need to identify which part of the nested JSON contains the tabular data we're looking for.
 
 A nested JSON contains multiple levels of data:
 
@@ -193,13 +152,15 @@ A nested JSON contains multiple levels of data:
         {'period':'2022-12',
         'plantCode': '54152'}
         ]
-    }}}
+    }}
 ```
 
-Here, the `response` name contains another name-value pair called `data`, and `data`
-contains a list with two records, each of which has two name-value pairs (`period` and `plantCode`). Pandas `read_*()` methods transform data into a tabular format. To successfully extract tabular generation data from our nested JSON, we need to identify which part of the nested JSON contains the tabular data we're looking for.
+Here, the `response` contains another name-value pair called `data`, and `data`
+contains a list with two records, each of which has two name-value pairs (`period` and `plantCode`).
 
-To better visualize our nested JSON file, let's read it into Python without changing its format. To do this, we use the `json` package, and the `load` method.
+### Reading in JSON files using `json.load()`
+
+To better visualize our JSON file, let's read it into Python without changing its format. To do this, we use the `json` package, and the `load` method.
 
 While Pandas handles opening a file in the `read_*()` methods, `json.load()` does not - so, we first need to open the file in Python. To do so, we use the `open()` function to read the `eia923_2022.json` file.
 
@@ -257,15 +218,40 @@ eia923_json['response']['warnings']
 ```output
 [{"warning":"incomplete return","description":"The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results."}, {"warning":"another warning", "description":"Hey! Watch out!"}]
 ```
-    *TODO: Should I dupe a second warning??*
 
-This format looks identical to the `eia923_2022_sample.json` we worked with earlier: a list of dictionaries with consistent name-value pairs. It's time to turn these warnings into a table!
+In this data format each dictionary corresponds to one row of the data, and each name (e.g., "warning") corresponds to a column name. JSON files typically represent this data format using lists of dictionaries, as above.
+
+<!-- # TODO: Not sure if jumping between warnings and data is confusing.
+:::::::: challenge
+
+### Challenge X: find that table!
+
+Load the `eia923_2022.json` file using `json.load()`, and find the data table containing net generation data by iterating through the dictionary keys.
+
+:::: solution
+
+```python
+import pandas as pd
+import json
+
+import json
+with open('data/eia923_2022.json') as file:
+    eia923_json = json.load(file)
+
+eia923_json['response', 'data']
+
+```
+
+::::
+
+:::::::: -->
 
 ### Using `json.normalize()`
-Luckily for us, Pandas has a second function transforming nested or semi-structured JSON files into Pandas DataFrames: `json_normalize()`.
 
-Unlike `read_json()`, `json_normalize()` expects that the JSON object has already been read into Python using `json.load()`. Using the `record_path`
-parameter, we can specify the path to follow to get to our tabular data - in this case, first `response` and then `warnings`:
+Now that we've found the path to our data table in the JSON file, we still need to transform the data into a Pandas DataFrame. Luckily for us, Pandas has a second function to transform nested or semi-structured JSON files into Pandas DataFrames: `json_normalize()`.
+
+Unlike `read_json()`, `json_normalize()` expects that the JSON object has already been read into Python using `json.load()`. Once we've loaded the JSON file, we can use the `record_path`
+parameter to specify the path to follow to get to our tabular data - in this case, first `response` and then `warnings`:
 
 ```python
 pd.read_json(eia923_json, record_path = ['response','warnings'])
@@ -519,11 +505,13 @@ Pick two datasets we've just read in, and compare them. How are they similar, an
 
 :::: hint
 
+- `df.info()` provides a high level summary of the data, including the
+columns available, their data types, the number of non-null values in each column, and the overall number of rows in the DataFrame.
 - Inspect a column in a DataFrame `df` by using `df[column_name]`.
 - To quickly see what values are contained in a column, you can use `df[column_name].unique()` to get a list of unique values in the column.
 - Try using `df.iloc[0]` to get the values from the first row of the data.
 - `df.head(n)` returns the first n rows of the data, and `df.tail(n)` returns the last n rows.
-- to add - isin()?? info()
+
 ::::
 
 ::::::::
