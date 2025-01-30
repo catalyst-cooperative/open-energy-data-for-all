@@ -2,7 +2,48 @@
 title: Setup
 ---
 
-## Overview
+## Summary - TODO
+
+::: prereq
+
+### Prerequisite Python knowledge
+This lesson assumes an introductory knowledge of Python and the `pandas` library. Participants should:
+
+* be comfortable reading CSV files into Pandas DataFrames
+* be able to do basic data transformations in Pandas: for instance, renaming columns, merging two datasets on a shared column, or multiplying a column by a scalar value.
+* be able to save transformed Pandas DataFrames locally (e.g., as a CSV)
+* be able to create simple graphs in Python
+* be able to write a simple function
+
+These skills are equivalent to the completion of the [Data Analysis and Visualization in
+Python for Ecologists](https://datacarpentry.github.io/python-ecology-lesson/) lesson. If you
+haven’t already completed this lesson and aren’t familiar with the skills listed above, please
+review those materials before starting this lesson.
+
+### Prerequisite Git knowledge
+This lesson assumes `git` is installed locally, and that participants have a basic
+familiarity with the `git` version control command-line tool. Participants should be able to:
+* create a local Git repository
+* use commits to track changes in files
+* push to and pull from a remote repository
+
+These skills are covered in the Software Carpentries' [Version Control with Git](https://swcarpentry.github.io/git-novice/) lesson. If you aren't familiar with the skills listed above, please review
+those materials before starting this lesson.    
+
+### Other prerequisite knowledge
+Throughout this lesson, we'll be working with a variety of energy datasets. In order to
+get the most out of this lesson, we expect that participants:
+* have some domain knowledge about the energy sector (e.g., are studying energy systems
+in university).
+* have energy-relevant research questions that you want to answer using data
+
+Though these are not *mandatory* for participation in the lesson, we believe these skills
+are critical to interpreting the data and applying the skills learned in these lessons
+to your own work.
+
+:::
+
+## Setup: Overview
 
 This lesson is designed to be run on a personal computer.
 All of the software and data used in this lesson are freely available online,
@@ -10,17 +51,23 @@ and instructions on how to obtain them are provided below.
 
 ## Obtain lesson materials
 
-TODO: Do we want people to fork the entire repo or just download the data? If the first, that should come after GH setup.
-<!-- 1. Download [python-novice-inflammation-data.zip][zipfile1]
-  and [python-novice-inflammation-code.zip][zipfile2].
-2. Create a folder called `swc-python` on your Desktop.
-3. Move downloaded files to `swc-python`.
-4. Unzip the files.
+In the terminal, navigate to the directory where you want to save the lesson materials.
+Clone the lesson repository using the `git clone` command:
 
-You should see two folders called `data` and `code` in the `swc-python` directory on your
-Desktop. -->
+```bash
+git clone https://github.com/catalyst-cooperative/open-energy-data-for-all.git
+```
 
-## Accessing lesson data
+This will create an `open-energy-data-for-all` folder in your selected location containing
+all lesson materials.
+
+To clone the repository, you must have `git` installed and configured on your computer (one of
+the prerequisites for this lesson). If you need additional guidance on `git` setup, see the Software Carpentries' [Version Control with Git](https://swcarpentry.github.io/git-novice/) lesson.
+
+## Accessing remote lesson data
+
+In episodes 3 and 4 of this lesson, we'll learn how to efficiently access remote data.
+To do so, we'll need to set up credentials to access these resources.
 
 ### Create an API key for accessing the EIA API
 In episode 3 and 4, we'll be learning how to access the Application Programming Interface (API)
@@ -38,16 +85,6 @@ Clean Air Markets API portal. To register for an EPA API key:
 1. Go to the [registration page](https://www.epa.gov/power-sector/cam-api-portal#/api-key-signup) and fill out the form.
 2. Log in to the email address you provided. You should have received an email from the EPA
 containing an API key for the Clean Air Markets API portal.
-
-## Installing Git
-
-Since many Carpentries lessons rely on Git, please see
-[this section of the workshop template](https://carpentries.github.io/workshop-template/install_instructions/#git) for
-instructions on installing Git for various operating systems.
-
-- [Git installation on Windows](https://carpentries.github.io/workshop-template/install_instructions/#git)
-- [Git installation on MacOS](https://carpentries.github.io/workshop-template/install_instructions/#git)
-- [Git installation on Linux](https://carpentries.github.io/workshop-template/install_instructions/#git)
 
 ## Create an account on GitHub
 
