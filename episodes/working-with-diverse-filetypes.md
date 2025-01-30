@@ -19,19 +19,6 @@ Expected duration: 45 min?
 
 ::::
 
-
-:::: keypoints 
-
-- `pandas` has functionality to read in many data formats (e.g., XML, JSON,
-Parquet) into Pandas DataFrames in Python. We can take advantage of this to
-transform many kinds of structured and semi-structured data into similarly formatted
-data.
-- The `help` function can be used to access function documentation, providing avenues
-to resolve problems on import of various data types.
-- When semi-structured data contains tabular data, we can extract the tabular data into
-a Pandas Dataframe.
-- `pandas` accepts both relative and absolute file paths on read-in.
-
 ::::
 
 ## Untangling a data pile
@@ -51,7 +38,7 @@ Form 923 data is a great starting point for data exploration.
 
 One of the most popular libraries used to work with tabular data in Python is called the
 [Python Data Analysis Library](https://pandas.pydata.org/) (or simply, Pandas). Pandas
-has functions to handle reading in a diversity of file types, from CSVs and Excel spreadsheets to more complex data formats such as XML and Parquet. Each read function offers a variety of parameters designed to handle common complexities specific to the file type on import. For a refresher (TODO: Is this an ok wording?) on Pandas, Pandas DataFrames and reading in files, see the [Starting with Data](https://datacarpentry.github.io/python-ecology-lesson/instructor/02-starting-with-data.html) lesson.
+has functions to handle reading in a diversity of file types, from CSVs and Excel spreadsheets to more complex data formats such as XML and Parquet. Each read function offers a variety of parameters designed to handle common complexities specific to the file type on import. For a refresher on Pandas, Pandas DataFrames and reading in files, see the [Starting with Data](https://datacarpentry.github.io/python-ecology-lesson/instructor/02-starting-with-data.html) lesson.
 
 ::: callout
 ### Identifying file paths
@@ -67,7 +54,7 @@ For example, to get to the `eia923_2022.json` file in the `data` folder from a n
 in the `open-energy-data-for-all` folder, we can either specify:
 
 - __Relative path__: `data/eia923_2022.json`
-- __Absolute path__: `/home/user/Desktop/path/to/open-energy-data-for-all/data/eia923_2022.json`
+- __Absolute path__: `/home/user/Desktop/path/to/open-energy-data-for-all/folder/data/eia923_2022.json`
 :::
 
 ### Handling spreadsheet formatting on read-in
@@ -140,7 +127,9 @@ JavaScript Object Notation (JSON) is a lightweight file format based on name-val
 
 ### Nested formats in JSON files
 
-Pandas `read_*()` methods transform data into a tabular format.  When a JSON file is already formatted as a table, we can use `pd.read_json()` to read it in directly. However, JSON files are very rarely formatted in this way. Instead, most JSONs contain data in a *nested* format. To successfully extract tabular generation data from a nested JSON, we need to identify which part of the nested JSON contains the tabular data we're looking for.
+Pandas `read_*()` methods transform data into a tabular format.  When a JSON file is already formatted as a table, we can use `pd.read_json()` to read it in directly. Most often, we know a JSON file contains a table when we see a list of dictionaries, or a dictionary of lists.
+
+However, JSON files are very rarely formatted to _only_ contain a table. Instead, most JSONs contain data in a *nested* format. To successfully extract tabular generation data from a nested JSON, we need to identify which part of the nested JSON contains the tabular data we're looking for.
 
 A nested JSON contains multiple levels of data:
 
@@ -158,11 +147,15 @@ A nested JSON contains multiple levels of data:
 Here, the `response` contains another name-value pair called `data`, and `data`
 contains a list with two records, each of which has two name-value pairs (`period` and `plantCode`).
 
+The `data` contained in this JSON file can be represented as a table! In this data format,
+each dictionary corresponds to one row of the data, and each name (e.g., "period") corresponds
+to a column name. JSON files typically represent this data format using lists of dictionaries, as above.
+
 ### Reading in JSON files using `json.load()`
 
 To better visualize our JSON file, let's read it into Python without changing its format. To do this, we use the `json` package, and the `load` method.
 
-While Pandas handles opening a file in the `read_*()` methods, `json.load()` does not - so, we first need to open the file in Python. To do so, we use the `open()` function to read the `eia923_2022.json` file.
+While Pandas handles opening a file in the `read_*()` methods, `json.load()` does not - so, we first need to open the file in Python. To do so, we use the `open()` function to read in the `eia923_2022.json` file.
 
 :::callout
 When we `open()` a file in Python, we should always close it after we've extracted the data we need. Closing a file frees up system resources and ensures that we aren't accidentally modifying our original file.
@@ -219,12 +212,9 @@ eia923_json['response']['warnings']
 [{"warning":"incomplete return","description":"The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results."}, {"warning":"another warning", "description":"Hey! Watch out!"}]
 ```
 
-In this data format each dictionary corresponds to one row of the data, and each name (e.g., "warning") corresponds to a column name. JSON files typically represent this data format using lists of dictionaries, as above.
-
-<!-- # TODO: Not sure if jumping between warnings and data is confusing.
 :::::::: challenge
 
-### Challenge X: find that table!
+### Challenge 2: find that table!
 
 Load the `eia923_2022.json` file using `json.load()`, and find the data table containing net generation data by iterating through the dictionary keys.
 
@@ -238,20 +228,20 @@ import json
 with open('data/eia923_2022.json') as file:
     eia923_json = json.load(file)
 
-eia923_json['response', 'data']
+eia923_json['response']['data']
 
 ```
 
 ::::
 
-:::::::: -->
+::::::::
 
 ### Using `json.normalize()`
 
-Now that we've found the path to our data table in the JSON file, we still need to transform the data into a Pandas DataFrame. Luckily for us, Pandas has a second function to transform nested or semi-structured JSON files into Pandas DataFrames: `json_normalize()`.
+Now that we've found the path to our data table in the JSON file, we still need to transform the data into a Pandas DataFrame. Luckily for us, Pandas has a function to transform nested or semi-structured JSON files into Pandas DataFrames: `json_normalize()`.
 
 Unlike `read_json()`, `json_normalize()` expects that the JSON object has already been read into Python using `json.load()`. Once we've loaded the JSON file, we can use the `record_path`
-parameter to specify the path to follow to get to our tabular data - in this case, first `response` and then `warnings`:
+parameter to specify the path to follow to get to our tabular data - for the warnings data, first `response` and then `warnings`:
 
 ```python
 pd.read_json(eia923_json, record_path = ['response','warnings'])
@@ -265,11 +255,11 @@ The function returns a DataFrame that looks like this:
 |   another warning |                                   Hey! Watch out! |
 ```
 
-The first row of this table is letting us know that when we queried and saved this data from the API, we only got the first 5000 rows of data - yikes! We'll tackle this problem in a later episode, but for now let's investigate the data that we do have saved locally.
+The first row of this table is letting us know that when the postdoc queried and saved this data from the API, he only got the first 5,000 rows of data. We'll tackle this problem in a later episode, but for now let's investigate the data that we do have saved locally.
 
 :::::::: challenge
 
-### Challenge 2: handling nested JSONs
+### Challenge 3: handling nested JSONs
 
 Fill in the blanks in the code below to read in the `data` from the `eia923_2022.json` file into a Pandas DataFrame.
 
@@ -360,7 +350,7 @@ while XML can also be used to share images, charts and graphs.
 basis using an RSS feed and the XML data format.
 
 ::: challenge
-### Challenge #: From XML to Pandas
+### Challenge 4: From XML to Pandas
 
 Look at the following XML code.
 
@@ -439,7 +429,7 @@ corresponds to each tag.
 
 :::
 
-## `pd.read_xml()`
+## Using `pd.read_xml()`
 
 Like with our other data types, we can use `pd.read_xml()` to parse XML files into Pandas DataFrames. `pd.read_xml()` is designed to ingest tabular data nested in XML files,
 not to coerce highly nested data into a table format. To use this method, we'll need to
@@ -463,36 +453,26 @@ So to get all the `<row>`s of `<data>`, we call:
 pd.read_xml('data/eia923_2022.xml', xpath = "//response/data/row")
 ```
 
-Note that we have one extra column called row in our dataframe, which contains yet another warning. Let's inspect it:
-
-```python
-xml_df = pd.read_xml('data/eia923_2022.xml', xpath = "//response/data/row")
-xml_df.loc[0, 'row'] # Grab the first row of the "row" column
-```
-
-```output
-'warning: XML output returns a maximum of 300 rows; use offset= and length= parameters or output to JSON for entire dataset.'
-```
-
-When we start to work with this dataset, we'll want to make sure that we heed this warning!
+`xpath` can be used to make more complex queries (e.g., only picking `<note>`'s written
+after a certain date), but we won't cover more advanced usage of `xpath` in this tutorial.
+See this [Library Carpentries tutorial](https://carpentries-incubator.github.io/lc-webscraping/02-xpath/index.html) for more about `xpath`.
 
 ## `pd.read_parquet()`
 
 There's one more file left in the `data` folder the postdoc left behind - a Parquet file!
 You can think of Parquet files as spreadsheet storage optimized for computers. Like an
-Excel file, it's very difficult for a human to interpret the plain text of the file, as
+Excel file, it's very difficult for a human to read the plain text of the file, as
 it is designed to be read efficiently by software. To get into the technical weeds, see
 the [Parquet documentation](https://parquet.apache.org/docs/overview/).
 
 Parquet files:
-- are designed to efficiently process and store large volumes of data, making it about
+- are designed to efficiently process and store large volumes of data, making them about
 50x faster than using `pd.read_csv()` on comparable file sizes.
-- compresses data efficiently, reducing file size
+- compress data efficiently, reducing file size
 - are saved with data organized into chunks (e.g., one chunk per month), making it possible
 to quickly load data from some part of the dataset without loading everything into memory.
 - are supported by many existing tools, including `Pandas`.
 
-Parquet files 
 We can read a Parquet file to a Pandas DataFrame using `pd.read_parquet()`, almost identical to how we read in a CSV:
 
 ```py
@@ -515,3 +495,15 @@ columns available, their data types, the number of non-null values in each colum
 ::::
 
 ::::::::
+
+
+:::: keypoints 
+
+- `pandas` has functionality to read in many data formats (e.g., XML, JSON,
+Parquet) into Pandas DataFrames in Python. We can take advantage of this to
+transform many kinds of structured and semi-structured data into similarly formatted data.
+- The `help` function can be used to access function documentation, providing avenues to resolve problems on import of various data types.
+- When semi-structured data contains tabular data, we can extract the tabular data into a Pandas Dataframe.
+- `pandas` accepts both relative and absolute file paths on read-in.
+
+::::
