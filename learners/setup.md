@@ -64,6 +64,25 @@ all lesson materials.
 To clone the repository, you must have `git` installed and configured on your computer (one of
 the prerequisites for this lesson). If you need additional guidance on `git` setup, see the Software Carpentries' [Version Control with Git](https://swcarpentry.github.io/git-novice/) lesson.
 
+## Setting up the `uv` package manager
+
+We use `uv` to manage the installation of Python packages needed for this lesson. `uv` is
+a package manager
+
+### Installing `uv`
+
+1. Follow the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/) provided for `uv`.
+2. Run the command `uv` in your terminal to verify that the installation has succeeded.
+
+### Setting up the lesson environment
+Once we've installed `uv`, we can use it to create a virtual environment. We'll cover
+virtual environments in lesson *(TODO)*, but in short these are virtual, disposable Python
+software environments that contain only the packages you want to use for a particular project
+or task. If you don't have a working copy of Python locally, `uv` will install it as part
+of the environment set-up step.
+
+__TODO__: Write `uv` set-up instructions from `pyproject.toml` file.
+
 ## Accessing remote lesson data
 
 In episodes 3 and 4 of this lesson, we'll learn how to efficiently access remote data.
@@ -95,7 +114,7 @@ You will need an account for [GitHub](https://github.com) to follow episodes *(T
 3. Verify your email address with GitHub.
 4. Configure multifactor authentication (see below).
 
-Basic GitHub accounts are free. As you set up your account,p lease consider what personal
+Basic GitHub accounts are free. As you set up your account, please consider what personal
 information you'd like to reveal. For example, you may want to review these
 [instructions for keeping your email address private]("https://help.github.com/articles/keeping-your-email-address-private/") provided at GitHub.
 
