@@ -19,8 +19,6 @@ Expected duration: 45 min?
 
 ::::
 
-::::
-
 ## Untangling a data pile
 While poking around in your lab's computer, you find the folder that the postdoc was
 using to store data inputs to his model. Inside the `data` folder, however, is a bit of
