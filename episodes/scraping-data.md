@@ -20,6 +20,90 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+### pagination
+
+Motivation: API only returns 5k rows at a time. You want MORE.
+
+Example:
+
+One single limit/offset request - get 10 rows, then show how you can get that as 2 sets of 5 rows instead.
+
+Exercise:
+Grab *all* of one specific facet.
+
+Basically - this would be a fill in the blank / complete the code exercise - we have most of the loop body
+
+```python
+# get first page
+# get total row count
+# pre-calculate how many pages there are
+all_records = []
+for ______:
+    # params missing limit & offset
+    page_of_data = requests.get("...", params={}).json()
+    all_records.append(page_of_data["response"]["data"])
+```
+
+### spreadsheets
+
+Motivate: there's data that's available via spreadsheet that's not available via API.
+
+Example:
+
+Grab the 923 spreadsheets that they want with bs4
+
+* grab all links
+* filter out the bad ones
+* grab the href and the title
+* use urljoin to get actual absolute link
+* download
+
+Exercise: 
+Get historical 906 data
+
+https://www.eia.gov/electricity/data/eia923/eia906u.php
+
+```
+import bs4
+
+
+def get_spreadsheet_links(soup) -> list[url]:
+    ...
+
+def main():
+    soup = bs4...
+    links = get_spreadsheet_links(soup)
+    for link in links:
+        request.get(...)
+
+```
+
+### caiso network tab snooping
+
+Motivation: want more granular supply information, ISOs have it. CAISO dashboard exists, no clear link
+
+Example:
+
+* open network tab (include instructions for all major browsers: chrome, safari, edge, firefox)
+* look at the "current" link
+* make a request! oh it works
+
+https://www.caiso.com/todays-outlook
+
+Exercise:
+* go in browser, find the supply chart, go to 1/22.
+* What was the link for the right data?
+
+Exercise:
+* Get the data for the last week - scaffold similarly to the EIA906 scaffold - make a function that *just* gets the right URLs, everything else handled by us
+
+### Further resources
+
+Motivate: sometimes this won't be enough.
+
+* inspect html structure
+* javascript
+* user agents
 
 
 ::::::::::::::::::::::::::::::::::::: keypoints
