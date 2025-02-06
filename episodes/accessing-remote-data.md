@@ -115,7 +115,7 @@ The `Response` object has many useful methods and properties, which we can see w
 * `response.text`, which provides the returned data as a *text string*
 * `response.json()` which parses the returned data as if it were JSON, and provide a Python list or dictionary.
 
-First, let's look at the status code. These are HTTP status codes - numbers between 100 and 600 that indicate what happened.
+First, let's look at the status code. These are [HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) - numbers between 100 and 600 that indicate what happened.
 
 You might have seen these before:
 * when you've tried to access a webpage that doesn't exist (`404 Not Found`)
@@ -247,7 +247,7 @@ While the functions in all Python libraries are roughly called in the same way (
 
 We'll talk about these three, then dive into the EIA API to see if we can figure out the available functionality and how to interact with it.
 
-### Inputs
+### Inputs and outputs
 
 Above, we saw one common way of passing arguments to an API - a query string. This can be done with `requests.get`:
 
@@ -268,6 +268,12 @@ requests.post("https://the-url-you-want", json={"key": "value"})
 ### Outputs
 
 Each API will return data in a different format, though the vast majority will return data as either JSON or XML. As you saw in the last episode, JSON and XML data can take many different shapes, and you can reshape them in your code to suit your needs. However, you'll have to read each API's specific documentation to interpret the return data.
+
+### Error messages
+
+Often, when something goes wrong with your API request, you will receive some sort of indication about what went wrong. This information is usually part of the JSON response - sometimes it is paired with an status code within the JSON response as well.
+
+The response will also have an HTTP status code, no matter what. Unfortunately, many APIs don't return the status code that corresponds to the actual error you've run into - so it's best to check the actual response contents.
 
 ### Authentication
 
@@ -331,13 +337,12 @@ print(os.getenv("EIA_API_KEY"))
   * what functions seem useful?
   * how do I send arguments to that functionality?
   * how do I turn the response data into something I can use?
+  * how do errors get reported?
   * how do I authenticate?
 
 ::::
 
 ## Case study: EIA API
-
-**TODO maybe reorganize this a little based on the framework outlined above - start with "what are the functions & the inputs/outputs", learn that "oops, you need to hit the API to figure out how to hit the API," then go to auth/input/output, and finally go back and find some good functions and parse their output.**
 
 You know that you need generation, consumption, and carbon emissions data for your research - and that the EIA provides access to at least some of this data through an API. You decide to check it out!
 
@@ -464,18 +469,44 @@ You can repeat this process, appending route IDs to the URL, until you map out t
 
 Some of those endpoints above look relevant to your research - let's investigate them further.
 
-1. Tweak the above code to list the endpoints under `https://api.eia.gove/v2/electricity`.
+1. Tweak the above code to list the endpoints under `https://api.eia.gov/v2/electricity`.
 2. List out some sub-endpoints that seem relevant.
 3. Keep going down the trail of "endpoints that seem relevant" until the metadata response doesn't have a `"routes"` key in it anymore, indicating that you've reached the end of that particular trail.
-4. What is the endpoint that you are most interested in using?
+4. What is the endpoint that you are most interested in using? What data fields does it return? How can you filter the data?
+
+
+:::::::: hint
+
+* To find out what data fields an endpoint returns, check out the `data` key in the response.
+* To find out how to filter the data, check out the `facets` key in the response.
+
+::::::::
 
 ::::
 
 ### Inputs and outputs
 
-Now that we know what we want to do, we need to figure out how to do it. For this example, we'll look at the `https://api.eia.gov/v2/electricity/electric-power-operational-data` endpoint.
+Now that we know what we want to do, we need to figure out how to do it. For this example, we'll look at the `https://api.eia.gov/v2/electricity/electric-power-operational-data` endpoint, and try to access monthly net generation data for Colorado.
 
+We can take a look at the [Parameters](https://www.eia.gov/opendata/documentation.php#Parameters) section of the documentation.
 
+We see that we need to access a slightly different endpoint:
+
+> To request data points from the API, we stipulate /data as the final node in our API call. 
+
+So we should be accessing `https://api.eia.gov/v2/electricity/electric-power-operational-data/data`.
+
+Let's take a look in the [Data[]](https://www.eia.gov/opendata/documentation.php#Data) section of the docs to see what we can find out about requesting specific data!
+
+> To retrieve data points and their values from the API, we need to specify the specific columns we are interested in. In this document, we've been asking about electricity residential sales, but many data points about that subject matter are available. As of early 2022, our API has data values on revenue, sales, price, and number of customers.
+>
+> [...]
+>
+> Given these columns, let's ask for the price. Remember, in addition to specifying the column in the data[] parameter, we must also specify /data as the last node in the route:
+> 
+> `https://api.eia.gov/v2/electricity/retail-sales/data/?api_key=XXXXXX&data[]=price`
+
+We'll want to adjust the endpoint and the parameter value, but we should be able to use that example URL to create our own request. For the purpose of illustration, we've added in the "length" parameter as well, which limits the number of returned rows:
 
 ```python
 import os
@@ -485,169 +516,104 @@ import requests
 EIA_API_KEY = os.getenv("EIA_API_KEY")
 
 response = requests.get(
-    "https://api.eia.gov/v2/electricity/electric-power-operational-data/data",
+    f"https://api.eia.gov/v2/electricity/electric-power-operational-data/data",
     params={
         "api_key": EIA_API_KEY,
-        "frequency": "monthly",
         "data[]": "generation",
-        "length": 10
+        "length": 2
     }
 )
-print(response.json())
+print(response.json()["response"])
 ```
-
-Here's the output, reformatted to be more readable:
 
 ```
 {
-  "response": {
-    "warnings": [
-      {
-        "warning": "incomplete return",
-        "description": "The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results."
-      }
-    ],
-    "total": "4184767",
-    "dateFormat": "YYYY-MM",
-    "frequency": "monthly",
-    "data": [
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "NGO",
-        "fuelTypeDescription": "natural gas & other gases",
-        "generation": "8.53051",
-        "generation-units": "thousand megawatthours"
-      },
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "OB2",
-        "fuelTypeDescription": "biomass",
-        "generation": ".306",
-        "generation-units": "thousand megawatthours"
-      },
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "OBW",
-        "fuelTypeDescription": "biomass",
-        "generation": ".306",
-        "generation-units": "thousand megawatthours"
-      },
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "ORW",
-        "fuelTypeDescription": "other renewables",
-        "generation": ".306",
-        "generation-units": "thousand megawatthours"
-      },
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "PEL",
-        "fuelTypeDescription": "petroleum liquids",
-        "generation": "0",
-        "generation-units": "thousand megawatthours"
-      },
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "PET",
-        "fuelTypeDescription": "petroleum",
-        "generation": "0",
-        "generation-units": "thousand megawatthours"
-      },
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "REN",
-        "fuelTypeDescription": "renewable",
-        "generation": "69.38363",
-        "generation-units": "thousand megawatthours"
-      },
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "SPV",
-        "fuelTypeDescription": "solar photovoltaic",
-        "generation": ".61609",
-        "generation-units": "thousand megawatthours"
-      },
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "SUN",
-        "fuelTypeDescription": "solar",
-        "generation": ".61609",
-        "generation-units": "thousand megawatthours"
-      },
-      {
-        "period": "2021-03",
-        "location": "SAT",
-        "stateDescription": "South Atlantic",
-        "sectorid": "6",
-        "sectorDescription": "Industrial Non-CHP",
-        "fueltypeid": "WAS",
-        "fuelTypeDescription": "renewable waste products",
-        "generation": ".306",
-        "generation-units": "thousand megawatthours"
-      }
-    ],
-    "description": "Monthly and annual electric power operations by state, sector, and energy source.\n    Source: Form EIA-923"
-  },
-  "request": {
-    "command": "/v2/electricity/electric-power-operational-data/data/",
-    "params": {
-      "api_key": "...",
-      "frequency": "monthly",
-      "data": [
-        "generation"
-      ],
-      "length": "10"
+  "warnings": [
+    {
+      "warning": "incomplete return",
+      "description": "The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results."
     }
-  },
-  "apiVersion": "2.1.8",
-  "ExcelAddInVersion": "2.1.0"
+  ],
+  "total": "4202279",
+  "dateFormat": "YYYY-MM",
+  "frequency": "monthly",
+  "data": [
+    {
+      "period": "2019-06",
+      "location": "HI",
+      "stateDescription": "Hawaii",
+      "sectorid": "3",
+      "sectorDescription": "IPP CHP",
+      "fueltypeid": "BIS",
+      "fuelTypeDescription": "bituminous coal and synthetic coal",
+      "generation": "0",
+      "generation-units": "thousand megawatthours"
+    },
+    {
+      "period": "2019-06",
+      "location": "HI",
+      "stateDescription": "Hawaii",
+      "sectorid": "3",
+      "sectorDescription": "IPP CHP",
+      "fueltypeid": "BIT",
+      "fuelTypeDescription": "bituminous coal",
+      "generation": "0",
+      "generation-units": "thousand megawatthours"
+    }
+  ],
+  "description": "Monthly and annual electric power operations by state, sector, and energy source.\n    Source: Form EIA-923"
 }
 ```
 
-We see a warning, some metadata about the whole response, the actual data we're looking for, and the request that we sent.
+That's nice, but we need the Colorado data, not the Hawaii data.
 
-The warning says "The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results." This sort of behavior is very common in web APIs - because they have to send their response to you over the Internet, they have to limit the amount of data they send at once. Much like Google search results, you will often need to go through multiple "pages" of response data. We'll deal with how to deal with that later in this lesson.
+Unintuitively, instructions for doing so lie within the [Frequency](https://www.eia.gov/opendata/documentation.php#Frequency) section of the documentation.
+
+The skill we'd like to practice here is *reading the documentation*, so go read that section with the following challenge in mind:
+
+:::: challenge
+
+Which of the following query parameters will get us the data for generation in Colorado?
+
+a. `.../data?api_key=XXXX&data[]=generation&stateid[]=CO`
+c. `.../data?api_key=XXXX&data[]=generation&facets[stateid][]=CO`
+b. `.../data?api_key=XXXX&data[]=generation&facets[location][]=CO`
+d. `.../data?api_key=XXXX&data[]=generation&facets[location][]=Colorado`
+
+:::::::: hint
+
+To see what facet types are available, look at the metadata for this endpoint by querying the endpoint without `/data`.
+
+::::::::
+
+:::::::: hint
+
+You may need to get the available facet values - see [Facets and their available values](https://www.eia.gov/opendata/documentation.php#Facetsandtheiravailabl).
+
+::::::::
+
+:::::::: solution
+
+The example in the docs says:
+
+> To do so, we'll add the facet[stateid] and set it to CO. Remember to ask for a column return, in this case, price:
+>
+> https://api.eia.gov/v2/electricity/retail-sales/data?api_key=xxxxxx&data[]=price&facets[sectorid][]=RES&facets[stateid][]=CO
+
+But the metadata for *this* endpoint indicates that `stateid` is *not* an available type - instead it requires `location`.
+
+b. `.../data?api_key=XXXX&data[]=generation&facets[location][]=CO`
+
+::::::::
+
+::::
 
 
 ### Errors
 
-We can easily modify the code to request data at a yearly granularity:
+Sometimes, despite all of our best intentions, we run into issues dealing with the API. In many cases, they'll send back some useful error message.
+
+For example, let's try to modify our previous code to get yearly data.
 
 ```python
 import os
@@ -662,7 +628,7 @@ response = requests.get(
         "api_key": EIA_API_KEY,
         "frequency": "yearly",
         "data[]": "generation",
-        "length": 10
+        "length": 2
     }
 )
 print(response.json())
@@ -676,11 +642,13 @@ Oops! We got an error response:
 
 It tells us what the problem is - we need to use the value `annual` instead of `yearly`.
 
-It also tells us a "code" for the error - this expresses the general category of error and is based on the [HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes). Mostly you need to know that 4xx means *you* did something wrong and 5xx means *they* did something wrong.
+It also tells us a "code" for the error - this expresses the general category of error and is based on the HTTP status codes. The overachieving reader may note that `response.status_code` actually returns `500`, which disagrees with the code above. A grim reminder that web APIs play fast and loose with HTTP status codes and should not be trusted.
 
 :::::::: challenge
 
-This API call will error out. Try running it - what's going wrong and how can you fix it?
+You're trying to get the BTUs of fuel consumption for electricity generation, so you try this API call. However, it fails.
+
+Try running it - what's going wrong and how can you fix it?
 
 ```python
 response = requests.get(
@@ -689,7 +657,7 @@ response = requests.get(
         "api_key": EIA_API_KEY,
         "frequency": "annual",
         "data[]": "consumption",
-        "length": 5
+        "length": 2
     }
 )
 ```
@@ -707,29 +675,166 @@ If you try to make this request, the JSON response will give you information abo
 
 This suggests that if we change the `data[]` parameter to `total-consumption`, `consumption-for-eg`, `consumption-uto`, etc. we should get something back. 
 
-Which one we should change it to depends on what you want.
+Which one we should change it to depends on what you want - go back to the metadata for this endpoint to identify which of these you mean!
+
+We see:
+
+```output
+{
+  "generation": {
+    "alias": "Utility Scale Electricity Net Generation"
+  },
+  "total-consumption": {
+    "alias": "Consumption of Fuels for Electricity Generation and Useful Thermal Output (Physical Units)"
+  },
+  "consumption-for-eg": {
+    "alias": "Consumption of Fuels for Electricity Generation (Physical Units)"
+  },
+  "consumption-uto": {
+    "alias": "Consumption of Fuels for Useful Thermal Output (Physical Units)"
+  },
+  "total-consumption-btu": {
+    "alias": "Consumption of Fuels for Electricity Generation and Useful Thermal Output (BTUs)"
+  },
+  "consumption-for-eg-btu": {
+    "alias": "Consumption of Fuels for Electricity Generation (BTUs)"
+  },
+  "consumption-uto-btu": {
+    "alias": "Consumption of Fuels for Useful Thermal Output (BTUs)"
+  },
+  "stocks": {
+    "alias": "Stocks of Fuel (Physical Units)"
+  },
+  "receipts": {
+    "alias": "Receipts of Fuel (Physical Units)"
+  },
+  "receipts-btu": {
+    "alias": "Receipts of Fuel (BTUs)"
+  },
+  "cost": {
+    "alias": "Average Cost of Fuels (per Physical Unit)"
+  },
+  "cost-per-btu": {
+    "alias": "Average Cost of Fuels (per BTU)"
+  },
+  "sulfur-content": {
+    "alias": "Average Sulfur Content of Consumed Fuel"
+  },
+  "ash-content": {
+    "alias": "Average Ash Content of Consumed Fuel"
+  },
+  "heat-content": {
+    "alias": "Average Heat Content of Consumed Fuels"
+  }
+}
+```
+
+So it looks like we want `consumption-for-eg-btu` here.
 
 ::::
+
 ::::::::
 
 
 ## Generalizing to other APIs
 
-Other APIs will be different from the EIA API - both in what functionality is available, and in how you access that functionality. Let's practice reading the documentation for another useful API, this time from the EPA.
+Other APIs will be different from the EIA API - both in what functionality is available, and in how you access that functionality. Let's practice reading the documentation for another useful API, this time from the EPA. It's focused on different facilities and their attributes such as the different fuel types, environmental equipment, etc. at each facility.
 
 [You can find the documentation here.](https://www.epa.gov/power-sector/cam-api-portal#/swagger/facilities-mgmt)
 
-:::::::: challenge
-
 Let's analyze this with the framework we introduced earlier.
 
-* what is a function that seems useful to you?
-* what are their inputs/outputs?
-* how do you pass parameters?
-* how do you parse the response?
-* how do you authenticate?
+
+Let's start with "is this interesting or useful at all?":
+
+:::: challenge
+
+Which endpoint seems most interesting to you?
+
+::::
+
+The documentation is pretty sparse, so we'll probably need to play around with the API to actually understand it. That means we need to figure out authentication.
+
+:::: challenge
+
+What would you add to your `requests.get()` call to authenticate?
+
+:::::::: hint
+
+Click on the green Authorize button!
 
 ::::::::
+
+
+:::::::: solution
+
+You'll need to add an `x-api-key` header to your `requests.get()`:
+
+```python
+
+response = requests.get(..., headers={"x-api-key": "THE_API_KEY"})
+```
+
+::::::::
+
+::::
+
+For the purposes of this exploration, you can use the built-in "try it out" buttons on the website - make sure you click that "authorize" button and paste your API key first.
+
+:::: challenge
+
+Choose one interesting endpoint. What are the inputs/outputs?
+
+:::::::: hint
+
+The inputs are listed as parameters once you expand each endpoint.
+
+The outputs are a little harder to find. There are some output types listed at the bottom of the page (the "DTO"s), but you'll have to actually try out the API to figure out which output types go with which endpoints.
+
+::::::::
+
+::::
+
+:::: challenge
+How do you pass parameters to your interesting endpoint?
+
+:::::::: solution
+
+Most endpoints take parameters as query parameters, just like the EIA API.
+
+One of these endpoints take parameters as part of their path (`/facilities-mgmt/facilities/{id}`).
+::::::::
+
+::::
+
+:::: challenge
+What format are the responses in?
+
+:::::::: solution
+
+The responses are in JSON - and they seem to correlate with the grey DTO definitions at the bottom of the page!
+
+::::::::
+
+::::
+
+:::: challenge
+
+What happens when things go wrong?
+
+:::::::: hint
+
+Try inputting parameters that are obviously wrong, like a negative year number.
+
+::::::::
+
+:::::::: solution
+
+We get a bunch of error information back in the JSON response, similar to the EIA API.
+
+::::::::
+
+::::
 
 :::::::: keypoints
 
@@ -739,6 +844,7 @@ Let's analyze this with the framework we introduced earlier.
   * what functions seem useful?
   * how do I send arguments to that functionality?
   * how do I turn the response data into something I can use?
+  * what happens when something goes wrong?
   * how do I authenticate?
 
 ::::::::
