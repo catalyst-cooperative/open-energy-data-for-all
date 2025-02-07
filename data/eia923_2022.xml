@@ -4,6 +4,16 @@
         <total>96</total>
         <dateFormat>YYYY-MM</dateFormat>
         <frequency>monthly</frequency>
+        <warnings>
+            <row>
+                <warning>Incomplete return.</warning>
+                <description>The API can only return 300 rows in XML format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.</description>
+            </row>
+            <row>
+                <warning>Another warning.</warning>
+                <description>Hey! Watch out!</description>
+            </row>
+        </warnings>
         <data>
             <row>
                 <period>2022-12</period>

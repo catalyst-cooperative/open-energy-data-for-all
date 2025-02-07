@@ -6,6 +6,15 @@ exercises: 0
 
 Expected duration: 45 min?
 
+:::: instructor
+In preparation for this lesson:
+* In Jupyter Notebooks, open the diverse-filetypes.ipynb notebook in the `instructors` folder, which contains all the images and challenges for the lesson
+* In another Jupyter Notebooks tab, open the directory view to make it possible to visualize
+* Open the `data/eia923_2022.xlsx` file on your computer's spreadsheet software (e.g., Excel)
+* Open the lesson folder in your local file browser, to make it easy to open files in a text editor throughout the lesson.
+
+::::
+
 :::: questions
 
 - How can I read in different tabular data types to a familiar format in Python?
@@ -38,6 +47,10 @@ One of the most popular libraries used to work with tabular data in Python is ca
 [Python Data Analysis Library](https://pandas.pydata.org/) (or simply, Pandas). Pandas
 has functions to handle reading in a diversity of file types, from CSVs and Excel spreadsheets to more complex data formats such as XML and Parquet. Each read function offers a variety of parameters designed to handle common complexities specific to the file type on import. For a refresher on Pandas, Pandas DataFrames and reading in files, see the [Starting with Data](https://datacarpentry.github.io/python-ecology-lesson/instructor/02-starting-with-data.html) lesson.
 
+:::instructor
+We recommend skipping the below call-out unless people run into filepath issues.
+:::
+
 ::: callout
 ### Identifying file paths
 
@@ -45,14 +58,14 @@ In order to read data into Pandas or any Python function, we'll need to identify
 *path* to that file. The path tells the code where that file lives. There are two ways
 to specify the path to any file on your computer:
 
-- __Relative path__: A relative path specifies a location starting from the current location.
 - __Absolute path__: An absolute path specifies a location from the root of the filesystem.
+- __Relative path__: A relative path specifies a location starting from the current location. The relative path is just a subset of the absolute path.
 
 For example, to get to the `eia923_2022.json` file in the `data` folder from a notebook
 in the `open-energy-data-for-all` folder, we can either specify:
 
-- __Relative path__: `data/eia923_2022.json`
 - __Absolute path__: `/home/user/Desktop/path/to/open-energy-data-for-all/folder/data/eia923_2022.json`
+- __Relative path__: `data/eia923_2022.json`
 :::
 
 ### Handling spreadsheet formatting on read-in
@@ -64,18 +77,8 @@ To read in an Excel spreadsheet using `pandas`, you will use the `read_excel()` 
 import pandas as pd
 pd.read_excel('data/eia923_2022.xlsx')
 ```
-
-Unfortunately, something doesn't look quite right! When opening the file in a
-spreadsheet software, you see that the first few rows look like this:
-
-![The first few rows of the eia923_2022.xlsx file](fig/excelheader.png){alt="Snapshot of
-the Excel file showing the first 6 rows contain metadata, blank spaces and column
-names."}
-
-To read the spreadsheet in correctly, we want to ignore these first five rows. Luckily,
-`read_excel()` offers built-in functionality to handle various Excel formatting
-challenges. To identify which parameter we need to use to skip these rows when reading
-in the file, we can use the `help()` function to pull up the function documentation:
+That took a while! Luckily,`read_excel()` offers built-in functionality to handle various Excel formatting
+challenges. Let's see if there's a way to quickly explore a smaller subset of the data. While we can always look up documentation online, we can also access a function's documentation right in Python. To identify which parameter might be able to help us, we can use the `help()` function to pull up the function documentation:
 
 ```python
 help(pd.read_excel)
@@ -83,7 +86,7 @@ help(pd.read_excel)
 
 For each parameter, the documentation provides the name of the parameter, the format for the parameter input (e.g., list, string, int), the default value if no value is provided, and an explanation of what the parameter does.
 
-For example, the `nrows` parameter provides the following documentation:
+We can see that the `nrows` parameter provides the following documentation:
 
 ```output
 nrows : int, default None
@@ -96,21 +99,31 @@ So, if we only want to parse the first 100 rows of the data, we can call:
 pd.read_excel('data/eia923_2022.xlsx', nrows=100)
 ```
 
+That's better. But unfortunately, something doesn't look quite right! When opening the file in a
+spreadsheet software, you see that the first few rows look like this:
+
+::: instructor
+Go ahead and open the `eia923_2022.xlsx` file in your local spreadsheet software (e.g., Excel, OpenOffice).
+:::
+
+![The first few rows of the eia923_2022.xlsx file](fig/excelheader.png){alt="Snapshot of
+the Excel file showing the first 6 rows contain metadata, blank spaces and column
+names."}
+
+To read the spreadsheet in correctly, we want to ignore these first five rows. 
+
 :::::::: challenge
 
 ### Challenge 1: handling Excel formatting on read-in
 
-Looking at the documentation for `pd.read_excel()`, identify the parameter needed to skip the first few rows of the spreadsheet. Then, using `pd.read_excel()`, read in the "Page 1 Generation and Fuel Data" sheet using this parameter to skip any rows that don't contain the column headers.
+Looking at the documentation for `pd.read_excel()`, identify the parameter needed to ignore the first few rows of the spreadsheet. Then, using `pd.read_excel()`, read in the `eia923_2022.xlsx` file using this parameter to skip any rows that don't contain the column headers.
 
 :::: solution
 
 ```python
 import pandas as pd
 
-excel_923 = pd.read_excel('data/eia923_2022.xlsx', sheet_name="Page 1 Generation and Fuel Data", skiprows=5)
-
-# sheet_name can also take the number of the sheet
-excel_923 = pd.read_excel('data/eia923_2022.xlsx', sheet_name=0, skiprows=5)
+excel_923 = pd.read_excel('data/eia923_2022.xlsx', skiprows=5)
 ```
 
 ::::
@@ -127,7 +140,7 @@ JavaScript Object Notation (JSON) is a lightweight file format based on name-val
 
 Pandas `read_*()` methods transform data into a tabular format.  When a JSON file is already formatted as a table, we can use `pd.read_json()` to read it in directly. Most often, we know a JSON file contains a table when we see a list of dictionaries, or a dictionary of lists.
 
-However, JSON files are very rarely formatted to _only_ contain a table. Instead, most JSONs contain data in a *nested* format. To successfully extract tabular generation data from a nested JSON, we need to identify which part of the nested JSON contains the tabular data we're looking for.
+However, JSON is a flexible format, and JSON files come in all kinds of formats. Unlike Excel or CSV spreadsheets, many JSON files don't just contain a table. Instead, most JSONs contain data in a *nested* format. To successfully extract tabular generation data from a nested JSON, we need to identify which part of the nested JSON contains the tabular data we're looking for.
 
 A nested JSON contains multiple levels of data:
 
@@ -149,11 +162,19 @@ The `data` contained in this JSON file can be represented as a table! In this da
 each dictionary corresponds to one row of the data, and each name (e.g., "period") corresponds
 to a column name. JSON files typically represent this data format using lists of dictionaries, as above.
 
+:::callout
+JSONs can include many levels of nesting, including different levels of nesting for similar records or other formatting that doesn't obey the principles of tabular structure (where each row represents a single record, and each column represents a single variable). We focus on extracting tabular data from these nested JSONs in this lesson, but some JSON files may not contain tabular data at all.
+:::
+
 ### Reading in JSON files using `json.load()`
 
 To better visualize our JSON file, let's read it into Python without changing its format. To do this, we use the `json` package, and the `load` method.
 
-While Pandas handles opening a file in the `read_*()` methods, `json.load()` does not - so, we first need to open the file in Python. To do so, we use the `open()` function to read in the `eia923_2022.json` file.
+While Pandas handles opening a file in the `read_*()` methods, `json.load()` does not - so, we first need to read the file into Python. To do so, we use the `open()` function.
+
+:::instructor
+We recommend skipping the below call-out unless students ask more about what's actually going on or you're ahead on schedule - it's an aside that we don't necessarily need to get into.
+:::
 
 :::callout
 When we `open()` a file in Python, we should always close it after we've extracted the data we need. Closing a file frees up system resources and ensures that we aren't accidentally modifying our original file.
@@ -190,9 +211,10 @@ The first part of the response looks like this:
     'gross-generation-units': 'megawatthours'},
     .....
 ```
-Now we can treat `eia923_json` like any other Python dictionary. We can use `.keys()`
+By using `json.load()`, we've read our file into a Python dictionary. Now, we can use `.keys()`
 to see a list of all the keys in the first level of the dictionary - this is a quick and
-helpful way to get a sense for what is contained in different parts of the JSON file, without having to scroll through the entire output.
+helpful way to get a sense for what is contained in different parts of the JSON file, 
+without having to scroll through the entire output.
 
 To see the value of any particular key, we can call it in square brackets by name:
 
@@ -200,7 +222,8 @@ To see the value of any particular key, we can call it in square brackets by nam
 eia923_json['response']
 ```
 
-This returns yet another dictionary with a list of keys. To look more closely at the `warnings` the file contains, we can add another square bracket:
+This returns yet another dictionary with a list of keys. To look more closely at the
+`warnings` the file contains, we can add another square bracket:
 
 ```python
 eia923_json['response']['warnings']
@@ -210,39 +233,10 @@ eia923_json['response']['warnings']
 [{"warning":"incomplete return","description":"The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results."}, {"warning":"another warning", "description":"Hey! Watch out!"}]
 ```
 
-:::::::: challenge
-
-### Challenge 2: find that table!
-
-Load the `eia923_2022.json` file using `json.load()`, and find the data table containing net generation data by iterating through the dictionary keys.
-
-:::: solution
+Now that we've found the path to our data table in the JSON file, we can use `pd.DataFrame()` to transform it into a Pandas DataFrame:
 
 ```python
-import pandas as pd
-import json
-
-import json
-with open('data/eia923_2022.json') as file:
-    eia923_json = json.load(file)
-
-eia923_json['response']['data']
-
-```
-
-::::
-
-::::::::
-
-### Using `json.normalize()`
-
-Now that we've found the path to our data table in the JSON file, we still need to transform the data into a Pandas DataFrame. Luckily for us, Pandas has a function to transform nested or semi-structured JSON files into Pandas DataFrames: `json_normalize()`.
-
-Unlike `read_json()`, `json_normalize()` expects that the JSON object has already been read into Python using `json.load()`. Once we've loaded the JSON file, we can use the `record_path`
-parameter to specify the path to follow to get to our tabular data - for the warnings data, first `response` and then `warnings`:
-
-```python
-pd.read_json(eia923_json, record_path = ['response','warnings'])
+pd.DataFrame(eia923_json['response','warnings'])
 ```
 The function returns a DataFrame that looks like this:
 
@@ -257,21 +251,23 @@ The first row of this table is letting us know that when the postdoc queried and
 
 :::::::: challenge
 
-### Challenge 3: handling nested JSONs
+### Challenge 2: find that table!
 
 Fill in the blanks in the code below to read in the `data` from the `eia923_2022.json` file into a Pandas DataFrame.
 
 ```python
-import pandas as pd
-import json
-
-import json
 with open('data/eia923_2022.json') as file:
     eia923_json = ...
 
-eia923_json_df = pd.json_normalize(eia923_json, record_path = [...])
+eia923_json_df = pd.DataFrame(eia923_json[...])
 
 ```
+
+:::: hint
+First, read in the file using `open()` and `json.load()`. Once you've read in the file,
+you can iterate through the `.keys()` of the dictionary to find the path to the `data` portion of the
+file.
+::::
 
 :::: solution
 
@@ -283,17 +279,13 @@ import json
 with open('data/eia923_2022.json') as file:
     eia923_json = json.load(file)
 
-eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
+eia923_json_df = pd.DataFrame(eia923_json['response']['data'])
 
 ```
 
 ::::
 
 ::::::::
-
-:::callout
-JSONs can include many levels of nesting, including different levels of nesting for similar records or other formatting that doesn't obey the principles of tabular structure (where each row represents a single record, and each column represents a single variable). `pd.json_normalize()` provides a set of parameters that can used to wrangle more deeply nested JSON data. Call `help(pd.json_normalize)` and look at the provided examples to get a better sense of its capabilities.
-:::
 
 ## Deciphering XML
 
@@ -322,7 +314,7 @@ In JSON, the equivalent information could be formatted as:
 }
 ```
 
-Like other markup languages (HTML, LaTeX), XML wraps around data, providing information
+Like other markup languages (e.g., HTML), XML wraps around data, providing information
 about the structure, format, and relationships between components. Each tag provides
 metadata about what the piece of data it contains represents - for instance `<row>` will
 contain a row of data, while `<plantCode>243</plantCode>` will means that the plant code
@@ -333,9 +325,9 @@ Each tag in XML shares similarities with a key in a JSON file:
 - both provide information about nested relationships (e.g., the note contains a heading and a body)
 
 However, unlike JSON, XML tags:
-- can have additional attributes (e.g., <note date="2008-01-10">), providing a way to
-share more complex metadata about a given data point and to search for tags matching
-additional filters (e.g., all notes written after Jan 01, 2008).
+- can have additional attributes (e.g., <data type="float" precision=3 variable_name="net-generation-mw">3.142</data>),
+providing a way to share more complex metadata about a given data point and to search for tags matching
+additional filters (e.g., all data with a particular variable name).
 
 While XML is harder and slower to read than JSON, it also has more capabilities. You might
 be likely to see an XML file if the data you're looking at:
@@ -346,86 +338,6 @@ methods.
 while XML can also be used to share images, charts and graphs.
 - is distributed through an RSS feed. For instance, FERC publishes filings on a rolling
 basis using an RSS feed and the XML data format.
-
-::: challenge
-### Challenge 4: From XML to Pandas
-
-Look at the following XML code.
-
-```output
-<data>
-    <row>
-        <period>2022-12</period>
-        <plantCode>59656</plantCode>
-        <plantName>Comanche Solar</plantName>
-    </row>
-    <row>
-        <period>2023-01</period>
-        <plantCode>59657</plantCode>
-        <plantName>Comanche</plantName>
-    </row>
-</data>
-```
-
-Which of the following Pandas DataFrames would best represent the data in this XML file?
-
-A.
-```output
-|    data   |       row      |
-|:---------:|:--------------:|
-| period    | 2022-12        |
-| plantCode | 59656          |
-| plantName | Comanche Solar |
-| period    | 2023-01        |
-| plantCode | 59657          |
-| plantName | Comanche       |
-```
-
-B.
-```output
-|    row    |      data      |
-|:---------:|:--------------:|
-| period    | 2022-12        |
-| plantCode | 59656          |
-| plantName | Comanche Solar |
-| period    | 2023-01        |
-| plantCode | 59657          |
-| plantName | Comanche       |
-```
-
-C.
-```
-|  period | plantCode | plantName      |
-|:-------:|-----------|----------------|
-| 2022-12 | 59656     | Comanche Solar |
-| 2023-01 | 59657     | Comanche       |
-```
-
-D.
-```
-| plantName | Comanche Solar | Comanche |
-|:---------:|----------------|----------|
-| period    | 2022-12        | 2023-01  |
-| plantCode | 59656          | 59657    |
-```
-
-:::solution
-The solution is C:
-```
-|  period | plantCode | plantName      |
-|:-------:|-----------|----------------|
-| 2022-12 | 59656     | Comanche Solar |
-| 2023-01 | 59657     | Comanche       |
-```
-
-The `<data>` is split into two seperate chunks of data seperated by `<row>` tags, which
-tells us that everything between these tags corresponds to a single row of data. Then,
-we know that the `<period>`, `<plantCode>` and `<plantName>` tags are telling us what
-variable the values correspond to - or in other words, what the column name is that
-corresponds to each tag.
-:::
-
-:::
 
 ## Using `pd.read_xml()`
 
@@ -439,45 +351,106 @@ Let's try to explore the XML file that the postdoc left behind:
 pd.read_xml('data/eia923_2022.xml')
 ```
 
-Each tag has been assigned as a column name, and the value inside has been added as a row. To drill down to the `<data>` we are actually interested in,
-we can use the `xpath` parameter, which lets you specify where in the XML file to look for a table.
+Hm, that doesn't look quite right. Each tag has been assigned as a column name, and the
+value inside has been added as a row.
+
+If we open up the XML file in a text editor or browser, we can see that a nested series
+of tags can help us identify the part of the table we want to read in.
+
+```xml
+<response>
+    <total>96</total>
+    <dateFormat>YYYY-MM</dateFormat>
+    <frequency>monthly</frequency>
+    <warnings>
+        <row>
+            <warning>Incomplete return.</warning>
+            <description>The API can only return 300 rows in XML format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.</description>
+        </row>
+        <row>
+            <warning>Another warning.</warning>
+            <description>Hey! Watch out!</description>
+        </row>
+    </warnings>
+    ...
+```
+
+For example, the same warnings table we were working with before is in the <response> tag, then
+the <warnings> tag. Each row of the data is also wrapped in a <row> tag.
+
+To drill down to the section of the file we are actually interested in,
+we can use the `xpath` parameter, which lets you use tags to specify where in the XML file to look for a table.
 
 The `xpath` query we're looking for is formatted as follows:
 - // are used at the beginning to note that we want to select all items with the tags specified
 - Then, like specifying which directory we want to access in a terminal, slashes are used to specify the path to the desired tag.
 
-So to get all the `<row>`s of `<data>`, we call:
+So to get all the `<row>`s of the `<warnings>` table, we call:
 ```python
+pd.read_xml('data/eia923_2022.xml', xpath = "//response/warnings/row")
+```
+
+::: challenge
+### Challenge 3: Reading in XML data
+
+Read in all the rows of the `data` table in `eia923_2022.xml` into a Pandas DataFrame, using
+`pd.read_xml` and the `xpath` parameter.
+
+::: solution
+```py
 pd.read_xml('data/eia923_2022.xml', xpath = "//response/data/row")
 ```
 
+The data is found following the following tags: `<response><data><row>`
+
+The `<data>` is split into two seperate chunks of data seperated by `<row>` tags, which
+tells us that everything between these tags corresponds to a single row of data. Then,
+we know that the `<period>`, `<plantCode>` and `<plantName>` tags are telling us what
+variable the values correspond to - or in other words, what the column name is that
+corresponds to each tag. We use the xpath parameter to grab all `<row>`'s of data in the XML file.
+:::
+
+:::
+
+::: callout
 `xpath` can be used to make more complex queries (e.g., only picking `<note>`'s written
 after a certain date), but we won't cover more advanced usage of `xpath` in this tutorial.
 See this [Library Carpentries tutorial](https://carpentries-incubator.github.io/lc-webscraping/02-xpath/index.html) for more about `xpath`.
+:::
 
 ## `pd.read_parquet()`
 
 There's one more file left in the `data` folder the postdoc left behind - a Parquet file!
 You can think of Parquet files as spreadsheet storage optimized for computers. Like an
 Excel file, it's very difficult for a human to read the plain text of the file, as
-it is designed to be read efficiently by software. To get into the technical weeds, see
-the [Parquet documentation](https://parquet.apache.org/docs/overview/).
+it is designed to be read efficiently by software. 
 
 Parquet files:
 - are designed to efficiently process and store large volumes of data, making them about
 50x faster than using `pd.read_csv()` on comparable file sizes.
-- compress data efficiently, reducing file size
 - are saved with data organized into chunks (e.g., one chunk per month), making it possible
 to quickly load data from some part of the dataset without loading everything into memory.
 - are supported by many existing tools, including `Pandas`.
+
+:::: callout
+To get into the technical weeds of Parquet files, see
+the [Parquet documentation](https://parquet.apache.org/docs/overview/). For a desktop viewer
+similar to Excel, we recommend checking out [Tad](https://www.tadviewer.com/).
+::::
 
 We can read a Parquet file to a Pandas DataFrame using `pd.read_parquet()`, almost identical to how we read in a CSV:
 
 ```py
 eia923_parquet = pd.read_parquet('data/eia923_2022.parquet')
 ```
+:::: instructor
+Below is an optional challenge that is likely to get cut for time. It is intended to 
+refresh students' data exploration skills, and build intuition around comparing datasets.
+Plus, it's a nice ice-breaker. This may be appropriate if you're only teaching the first two episodes, or if you're particularly interested in developing the data exploration and comparison skills of your cohort.
+::::
 
 :::::::: challenge
+#### Challenge 4: Comparing datasets
 
 Pick two datasets we've just read in, and compare them. How are they similar, and how are they different? Share your reflections with a peer.
 
