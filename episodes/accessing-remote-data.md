@@ -6,8 +6,8 @@ exercises: 0
 
 :::::::: questions
 
-* How can I access data without manually saving it to my hard drive?
-* How can I work with data that is behind a web API?
+* How can I consistently work with the most up-to-date data available?
+* How can I work with data from a web API?
 
 ::::::::
 
@@ -20,7 +20,9 @@ exercises: 0
 
 ## Introduction to remote data
 
-Remote data is data that's not stored on your computer's hard drive - instead it's stored somewhere else and you access it through a network. This still downloads the data over the network, but doesn't store it on your hard drive.
+We learned last time about opening the EIA 923 data in a variety of formats. That data was stored directly on your hard drive because you cloned the lesson respository in setup - we call that **local data**.
+
+We can also read in data that's stored somewhere else, or **remote data**. That's accessed through a URL, instead of a path on your hard drive.
 
 :::: discussion
 
@@ -31,28 +33,33 @@ What are some advantages and disadvantages you can imagine for using remote data
 Some non-exhaustive ideas:
 
 Remote data pros:
+
 * if someone else updates the data, you always have the most recent version
 * you don't need to manage multiple versions of the same data on your hard drive
 * if you send your code to someone else, you don't also have to package the data with it
 
 Local data pros:
+
 * you can keep track of different versions of the same data, even if the publisher doesn't
 * you only need to download the data once, and then you can read from your disk in the future, which is faster
 * if someone else updates the data, your data doesn't change until you actively download a new version
+* what about no internet
 
 ::::::::
 ::::
 
 ## Reading remote files into `pandas` directly
 
-You asked around about the `eia923_2022.parquet` file and found out that it came from the [Public Utility Data Liberation project](https://catalyst.coop/pudl/). After a bit of online digging you find that they update their data nightly! You want to get your hands on more up-to-date data, so you want to check this out. Downloading a new file each day seems like a pain, though. You seem to remember that the documentation for `pandas.read_parquet()` mentions that the file path "could be a URL." Let's try it!
+You asked around about the `eia923_2022.parquet` file and found out that it came from the [Public Utility Data Liberation project](https://catalyst.coop/pudl/) which updates regularly! You want to get your hands on more up-to-date data, so you want to check this out.
+
+It looks like they publish their newest data at `https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/TABLE_NAME.parquet`. Downloading a new version, checking if it's different from the old one, and managing all the versions on your hard drive seems like a pain, so you want to automatically download the newest version every time you run the code. You seem to remember that the documentation for `pandas.read_parquet()` mentions that the file path "could be a URL." Let's try it!
 
 ```python
 import pandas as pd
 
 df = pd.read_parquet("https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/core_eia923__monthly_generation_fuel.parquet")
 
-print(df.report_date.value_counts().sort_index().tail(5))
+print(df.report_date.max())
 ```
 
 ```output
@@ -69,21 +76,26 @@ Indeed, `read_parquet()` does handle URLs without a hiccup! You can see that the
 
 :::: callout
 
-Most, but not all, of the `read_*` functions support URLs - the exceptions are `read_spss`, `read_hdf`, and `read_clipboard`. Check the docs to make sure this will work!
+Most, but not all, of the `read_*` functions support URLs -  check the docs to make sure this will work!
 
 ::::
 
 :::::::: challenge
 
-<!-- TODO 2025-01-03 add the link, and previous Excel example, here. -->
-Adapt your previous Excel-reading code to read the same Excel file directly from the Internet. You should be able to find the file here: ...
+Adapt your previous Excel-reading code to read the same Excel file directly from the Internet. You should be able to find the file here: `https://github.com/catalyst-cooperative/open-energy-data-for-all/raw/refs/heads/main/data/eia923_2022.xlsx`
+
+```python
+import pandas as pd
+
+pd.read_excel("data/eia923_2022.xlsx", skiprows=5)
+```
 
 :::: solution
 
-Much like `pd.read_excel` can read from a URL just as easily as it can read from a local file.
-
 ```python
-pd.read_excel("https://raw.githubusercontent.com/...", ...)
+import pandas as pd
+
+pd.read_excel("https://github.com/catalyst-cooperative/open-energy-data-for-all/raw/refs/heads/main/data/eia923_2022.xlsx", skiprows=5)
 ```
 ::::
 
@@ -97,11 +109,11 @@ This can also be very annoying when you want your analysis to remain stable! In 
 
 ## Using `requests` to download files
 
-It's nice to use functions in the `pd.read_*()` family with a URL, but sometimes you need to do a little bit of reshaping of the data before you can actually use `pd.read_*()`. We saw this with the XML file earlier. In those cases, you can stil tell your code to download the file instead of having to download it yourself.
+It's nice to use functions in the `pd.read_*()` family with a URL, but sometimes you need to do a little bit of reshaping of the data before you can actually use `pd.read_*()`. We saw this with the JSON file earlier. In those cases, you can stil tell your code to download the file instead of having to download it yourself.
 
 While Python has some code in the standard library to help you read data from a URL, the [`requests` library](https://requests.readthedocs.io/en/latest/user/quickstart/) is easier to use and also extremely popular, so we'll focus on using that.
 
-To read a URL we use the [`requests.get()` method](https://requests.readthedocs.io/en/latest/api/#requests.get), which returns a [`requests.Response` object](https://requests.readthedocs.io/en/latest/api/#requests.Response). Let's try using it to read some JSON.
+To read a URL we use the [`requests.get()` method](https://requests.readthedocs.io/en/latest/api/#requests.get), which returns a [`requests.Response` object](https://requests.readthedocs.io/en/latest/api/#requests.Response). Let's try using it to read some JSON - the same file we read in the last episode, but without having to save it to disk first!
 
 ```python
 import requests
@@ -109,59 +121,14 @@ import requests
 response = requests.get("https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.json")
 ```
 
-The `Response` object has many useful methods and properties, which we can see with `help(response)`. We'll focus on the following:
+The `Response` object has many useful methods and properties. We'll focus on `response.json()`, which turns JSON data into a Python object we can interact with.
 
-* `response.status_code`, which tells you if the request succeeded or if it failed, and how it might have failed.
-* `response.text`, which provides the returned data as a *text string*
-* `response.json()` which parses the returned data as if it were JSON, and provide a Python list or dictionary.
-
-First, let's look at the status code. These are [HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) - numbers between 100 and 600 that indicate what happened.
-
-You might have seen these before:
-* when you've tried to access a webpage that doesn't exist (`404 Not Found`)
-* when you've tried to access something you didn't have access to (`403 Forbidden`)
-* when a website was down (`502 Bad Gateway`)
-
-A number above 400 means something went wrong - 4xx means "the person making
-the request messed up" and 5xx means "the person in charge of responding to the
-request messed up."
-
-Most of the time, the status code is `200 OK` for requests that succeeded, and that is indeed what we see.
-
-```python
-response.status_code
-```
-
-```output
-200
-```
-
-Next, we'll look at `response.text`. You'll find that, in this case, that returns a very long string:
-
-```python
-len(response.text)
-```
-
-```output
-1562319
-```
-
-And that the start of the string looks like the JSON file you loaded in last episode:
-
-```python
-response.text[:100]
-```
-
-```output
-'{"response":{"warnings":[{"warning":"incomplete return","description":"The API can only return 5000 '
-```
-
-Since this response appears to be JSON, as we expected, let's try using `response.json()` to parse it. Using what we just learned about this particular JSON's structure we can see the first few records from the data:
 
 ```python
 eia923_2022_raw = response.json()
-eia923_2022_raw["response"]["data"][:2]
 ```
+
+This seems to follow the format we saw last time.
 
 ```output
 [{'period': '2022-12',
@@ -192,647 +159,551 @@ eia923_2022_raw["response"]["data"][:2]
 
 :::::::: challenge
 
-When might you want to use `.text` instead of `.json()`?
+Adapt the JSON reading code from last episode to use requests.get.
+
+```python
+import pandas as pd
+import json
+
+with open('data/eia923_2022.json') as file:
+    eia923_json = json.load(file)
+
+eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
+```
 
 :::: solution
-There are many situations! Here are a few:
+import pandas as pd
+import json
+import requests
 
-* if the response is in XML or HTML instead of JSON
-* if the JSON is consistently malformed in some way, and you need to modify it before parsing it as JSON
-* if you don't actually need to parse the JSON and instead need to store it somewhere as text
+response = requests.get("https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.json")
+eia923_json = response.json()
+
+eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
 ::::
 
 ::::::::
 
+## Web APIs: Fancy URLs
 
-## Introduction to APIs
+Suppose someone asks you, "how much natural gas was consumed for electricity generation, totalled across all sectors, in Colorado, for each year between 2020 and 2022?"
 
-The previous postdoc left a note that he had gotten the JSON files straight from the EIA API. While you might not have dealt with a web API before, you have the tools to do so now and resolve to jump in.
+You *could* go find the EIA 923 spreadsheets for 2020-2022, download the individual files, do a bunch of filtering and reshaping of the data, and get an answer.
 
+But, in this case, the EIA has another way - their web API. Web APIs are collections of fancy URLs that allow them to be much more flexible than merely downloading individual files. They can save you a lot of work, if you become good at using them.
 
-### Web APIs are just libraries of functions
+For example, to answer that question, you can request this URL:
 
-A web API consists of a bunch of functionality which you access via *API requests*. A useful mental model for a *making a web API request* is that of *calling a function over the Internet*.
-
-For example, imagine you have a function called `get_electric_power_operational_data` which takes a few different parameters. Maybe you call it like `get_electric_power_operational_data(data_field="generation", frequency="monthly")` and it will return a dataframe with some monthly generation data.
-
-The web API version of that might look like making a request to `https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=generation&frequency=monthly`. 
-
-These both correspond to the following English sentence:
-
-> Get {a specific computer} to do something for me: get me electric power operational data. I only want generation data, and I want it at a monthly granularity.
-
-Let's break down that correspondence.
-
-| English | function call | API request |
-|-----------|---------------|-------------|
-| Get {a specific computer} to do something for me: | implicitly, your own computer | `https://api.eia.gov` |
-| get me electric power operational data. | `get_electric_power_operational_data()` | `v2/electricity/electric-power-operational-data/data` |
-| I only want generation data, | `data_field="generation"` | `data[]=generation` |
-| and I want it at a monthly granularity. | `frequency="monthly"` | `frequency=monthly` |
-
-In this case, we passed function arguments with a ["query string" or "URL parameters"](https://en.wikipedia.org/wiki/Query_string). This format specifies that everything after the `?` is an argument of some sort; the key and value are separated with `=` and the arguments are separated with `&`.
-
-Since web APIs are basically a bundle of functions that you call on someone else's computer, learning them is much like learning a new library:
-
-1. Figure out what functionality is available 
-2. Figure out how to interact with it:
-  * what inputs look like
-  * what outputs look like
-  * what happens when things go wrong?
-
-The "how to interact with it" piece is a little bit more complicated for web APIs than regular libraries.
-
-While the functions in all Python libraries are roughly called in the same way (`returned_value = function_name(param_1=value_1, param_2=value_2`), web APIs have a variety of ways to pass in parameters and return their data to you in different ways. They also return their error status to you differently. Additionally, most web APIs have an **authentication** mechanism to control access.
-
-We'll talk about these three, then dive into the EIA API to see if we can figure out the available functionality and how to interact with it.
-
-### Inputs and outputs
-
-Above, we saw one common way of passing arguments to an API - a query string. This can be done with `requests.get`:
 
 ```python
 import requests
 
-requests.get("https://the-url-you-want", params={"key": "value"})
+response = requests.get("https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&facets[fueltypeid][]=NG&facets[sectorid][]=99&facets[location][]=CO&frequency=annual&start=2019&end=2023&api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
+
+response.json()
 ```
 
-Another common method is to attach a JSON document to the web request. This is usually done using `requests.post`:
+Which gives you the amount of natural gas consumed for electricity generation in Colorado, across all sectors, in those years:
 
-```python
-import requests
-
-requests.post("https://the-url-you-want", json={"key": "value"})
+```output
+{'response': {'total': '3',
+  'dateFormat': 'YYYY',
+  'frequency': 'annual',
+  'data': [{'period': '2020',
+    'location': 'CO',
+    'stateDescription': 'Colorado',
+    'sectorid': '99',
+    'sectorDescription': 'All Sectors',
+    'fueltypeid': 'NG',
+    'fuelTypeDescription': 'natural gas',
+    'consumption-for-eg': '141498.781',
+    'consumption-for-eg-units': 'thousand Mcf'},
+   {'period': '2022',
+    'location': 'CO',
+    'stateDescription': 'Colorado',
+    'sectorid': '99',
+    'sectorDescription': 'All Sectors',
+    'fueltypeid': 'NG',
+    'fuelTypeDescription': 'natural gas',
+    'consumption-for-eg': '127967.696',
+    'consumption-for-eg-units': 'thousand Mcf'},
+   {'period': '2021',
+    'location': 'CO',
+    'stateDescription': 'Colorado',
+    'sectorid': '99',
+    'sectorDescription': 'All Sectors',
+    'fueltypeid': 'NG',
+    'fuelTypeDescription': 'natural gas',
+    'consumption-for-eg': '117512.901',
+    'consumption-for-eg-units': 'thousand Mcf'}],
+  'description': 'Monthly and annual electric power operations by state, sector, and energy source.\n    Source: Form EIA-923'},
+ 'request': {'command': '/v2/electricity/electric-power-operational-data/data/',
+  'params': {'data': ['consumption-for-eg'],
+   'facets': {'fueltypeid': ['NG'], 'sectorid': ['99'], 'location': ['CO']},
+   'frequency': 'annual',
+   'start': '2019',
+   'end': '2022',
+   'api_key': '3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8'}},
+ 'apiVersion': '2.1.8',
+ 'ExcelAddInVersion': '2.1.0'}
 ```
 
-### Outputs
+While that URL can seem impossibly complicated at first, we can break it down into a few parts:
 
-Each API will return data in a different format, though the vast majority will return data as either JSON or XML. As you saw in the last episode, JSON and XML data can take many different shapes, and you can reshape them in your code to suit your needs. However, you'll have to read each API's specific documentation to interpret the return data.
+* `https://api.eia.gov/` is the **host** - this means we're asking the **EIA API** for something, as opposed to another website.
+* `/v2/electricity/electric-power-operational-data/data?`: the **route** - this tells the API what you're looking for. In this case, "electric power operational data."
+* The rest of the URL is a bunch of `name=value` pairs split by `&`s - we'll ignore the `&`'s for clarity. These are called **parameters**.
+  * `data[]=consumption-for-eg`: "I only want the consumption for electricity generation"
+  * `facets[fueltypeid][]=NG`: "with the fuel type ID NG for natural gas"
+  * `facets[sectorid][]=99`: "for sector ID 99, which means 'all sectors'"
+  * `facets[location][]=CO`: "within the location CO for colorado"
+  * `frequency=quarterly`: "at a quarterly frequency"
+  * `start=2020`: "starting after 2020"
+  * `end=2024`: "ending by 2024"
+  * `api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8`: a password to prove you have access to the API. 
+  
+  
+:::: callout
+The API key we're using in this lesson is a public one that EIA provides, but it would be polite to request your own API key by clicking the register button on the [EIA open data portal](https://www.eia.gov/opendata/) if you plan on using the API a lot.
 
-### Error messages
+Many other APIs will not have a public key, so you'll have to register in one way or another to get one.
+::::
 
-Often, when something goes wrong with your API request, you will receive some sort of indication about what went wrong. This information is usually part of the JSON response - sometimes it is paired with an status code within the JSON response as well.
+Every web API behaves differently, but you only need to be able to do two things to figure any API out:
 
-The response will also have an HTTP status code, no matter what. Unfortunately, many APIs don't return the status code that corresponds to the actual error you've run into - so it's best to check the actual response contents.
+* read their documentation
+* make requests to the API & interpret responses
 
-### Authentication
+You can read, and you can use `requests` to make requests. We'll walk through building a similarly complicated query as we just saw, by applying those two skills.
 
-Much of the time, you will need to authenticate to an API in order to use it. This is usually done by sending an **API key** with your request.
+:::: challenge
 
-This key is usually sent either alongside the inputs (for example, as part of the query string) or as a **request header**.
+Make a request to that URL with `requests.get`.
 
-Request headers are a separate metadata dictionary that get sent along with each request - you can send them with `requests` by passing a `headers={...}` argument to the `requests.get` function:
+Try removing the `end=2022` parameter from the URL. What happens?
 
-```python
-requests.get("https://some-api.com/api/endpoint", headers={"Authentication": "some key"}) # also works with .post()!
-```
+:::::::: solution
 
-:::: caution
+You get data all the way until the present day!
 
-API keys are secrets, just like passwords! Don't commit them to your Git repository, since that poses a risk that someone else will be able to use your credentials.
-
-Instead, you should store them as environment variables, and read them in your code.
-
-Here is how to set the environment variables in various operating systems - we'll use the EIA API key that you got in the setup instructions.
-
-:::::::: tab
-
-### Windows
-
-Open a command prompt, then use the [`setx` command](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/setx):
-
-```cmd
-setx EIA_API_KEY some-secret-key-value
-```
-
-Then close the command prompt.
-
-### Linux/Mac
-
-This will depend a bit on your shell. The default shell for Mac OS is `zsh`; for Linux, and older Mac installations, you'll probably be using `bash` (run `echo $SHELL` to find out).
-
-Open your `~/.zshrc` (or `~/.bashrc`, if you're running `bash` instead) and add the following to the end:
-
-```zsh
-export EIA_API_KEY="some-secret-key-value"
-```
 ::::::::
 
-Future Python scripts should be able to read the environment variable:
-
-
-```python
-import os
-
-print(os.getenv("EIA_API_KEY"))
-```
 ::::
 
 
 :::: keypoints
 
-* web APIs can be thought of like libraries that you call in a special way
-* each web API is different, but there are common patterns to interacting with them
-* when confronted with a new web API, think about the following questions:
-  * what functions seem useful?
-  * how do I send arguments to that functionality?
-  * how do I turn the response data into something I can use?
-  * how do errors get reported?
-  * how do I authenticate?
+* web APIs can be thought of as bundles of fancy URLs
+* each web API is different, but if you can read the documentation and make requests to URLs, you can figure them out
 
 ::::
 
 ## Case study: EIA API
 
-You know that you need generation, consumption, and carbon emissions data for your research - and that the EIA provides access to at least some of this data through an API. You decide to check it out!
+Let's get started! You can find the API documentation [here](https://www.eia.gov/opendata/documentation.php). 
 
-You find the API documentation [here](https://www.eia.gov/opendata/documentation.php). 
+:::: caution
+Unfortunately, the *headers* for the sections of the documentation are misaligned with the actual *content* of each section.
 
-### Finding functionality
-
-Let's go through the framework outlined above. What functionality do they have, that you care about?
-
-In many APIs, you will be able to find this information in the documentation. While reading the EIA API documentation, you find [a section of the documentation](https://www.eia.gov/opendata/documentation.php#Examiningametadatarequ) that indicates you need to make requests *to* the API to figure out what functionality is available:
-
-> Discovering datasets should be much easier in APIv2 because the API now self-documents and organizes itself in a data hierarchy. Parent datasets have child datasets, which may have children of their own, and so on. To investigate what datasets are available, we request a parent node. The API will respond with the child datasets (routes) for the path we've requested. 
-
-To make such a request, we'll have to figure out the authentication piece.
-
-### Authentication
-
-In the documentation you can see that they [expect you to pass the API key](https://www.eia.gov/opendata/documentation.php#UsinganAPIkey) as part of the query string, alongside the other parameters. Fortunately, you've set up the EIA API key as an environment variable already, so you should be able to just use it. `requests` provides a nice `params` dictionary we can use, which we will do below. 
-
-### Finding functionality, part 2
-
-We start with the simplest endpoint of the API:
-
-```python
-import os
-
-import requests
-
-EIA_API_KEY = os.getenv("EIA_API_KEY")
-
-response = requests.get(
-    f"https://api.eia.gov/v2/",
-    params={
-        "api_key": EIA_API_KEY,
-    }
-)
-# print(response.json())
-print(response.text)
-```
-
-Much like the JSON you saw last episode, it looks like the data is contained in the `"response"` key. There's a `"routes"` key within that which has the available endpoints and their descriptions:
-
-:::: spoiler
-```output
-[
-  {
-    "id": "coal",
-    "name": "Coal",
-    "description": "EIA coal energy data"
-  },
-  {
-    "id": "crude-oil-imports",
-    "name": "Crude Oil Imports",
-    "description": "Crude oil imports by country to destination, \r\n        includes type, grade, quantity.  Source: EIA-814  Interactive data \r\n        product:  www.eia.gov/petroleum/imports/companylevel/"
-  },
-  {
-    "id": "electricity",
-    "name": "Electricity",
-    "description": "EIA electricity survey data"
-  },
-  {
-    "id": "international",
-    "name": "International",
-    "description": "Country level production, consumption, imports, exports by energy source (petroleum, natural gas, electricity, renewable, etc.)  \r\n        Interactive product:  https://www.eia.gov/international/data/world"
-  },
-  {
-    "id": "natural-gas",
-    "name": "Natural Gas",
-    "description": "EIA natural gas survey data"
-  },
-  {
-    "id": "nuclear-outages",
-    "name": "Nuclear Outages",
-    "description": "EIA nuclear outages survey data"
-  },
-  {
-    "id": "petroleum",
-    "name": "Petroleum",
-    "description": "EIA petroleum gas survey data"
-  },
-  {
-    "id": "seds",
-    "name": "State Energy Data System (SEDS)",
-    "description": "Estimated production, consumption, price, and expenditure data for all energy sources by state and sector.  \r\n        Source:  https://www.eia.gov/state/seds/seds-technical-notes-complete.php  \r\n        Product:  SEDS (https://www.eia.gov/state/seds/)"
-  },
-  {
-    "id": "steo",
-    "name": "Short Term Energy Outlook",
-    "description": "Monthly short term (18 month) projections using STEO model.  \r\n        Report and interactive projection data browser:  STEO (www.eia.gov/steo/)"
-  },
-  {
-    "id": "densified-biomass",
-    "name": "Densified Biomass",
-    "description": "EIA densified biomass data"
-  },
-  {
-    "id": "total-energy",
-    "name": "Total Energy",
-    "description": "These data represent the most recent comprehensive energy statistics integrated across all energy sources.  The data includes total energy production, consumption, stocks, and trade; energy prices; overviews of petroleum, natural gas, coal, electricity, nuclear energy, renewable energy, and carbon dioxide emissions; and data unit conversions values.  Source: https://www.eia.gov/totalenergy/data/monthly/pdf/mer_a_doc.pdf  Report:  MER (https://www.eia.gov/totalenergy/data/monthly/)"
-  },
-  {
-    "id": "aeo",
-    "name": "Annual Energy Outlook",
-    "description": "Annual U.S. projections using National Energy Modelling System (NEMS) for release year.  Report, documentation, and interactive projection data browser:  AEO (www.eia.gov/aeo/)"
-  },
-  {
-    "id": "ieo",
-    "name": "International Energy Outlook",
-    "description": "Annual international projections using the World Energy Projection System (WEPS) model for release year.  Report and interactive projection data browser:  IEO (www.eia.gov/ieo/)"
-  },
-  {
-    "id": "co2-emissions",
-    "name": "State CO2 Emissions",
-    "description": "EIA CO2 Emissions data"
-  }
-]
-```
+Because of this, we'll be pointing you directly to the sections we want you to focus on, instead of asking you to find the section that matters.
 ::::
 
-You can repeat this process, appending route IDs to the URL, until you map out the entire functionality of the API. We won't do all of that, but a more directed search will help us figure out what we can actually use this API for.
+Let's focus on a slightly different question than we had before - now that we know the aggregated information, we want to drill down.
+
+**"What was the total yearly natural gas consumption (for electricity generation as well as thermal output), plant-by-plant, in Colorado from 2020-2023?"**
+
+Our first goal is to figure out how to start interacting with the API, and how to map any examples in the documentation to real Python code.
+
+When scrolling through the documentation, we notice a bunch of example URLs. Let's pick a fairly simple one to get started: `https://api.eia.gov/v2/electricity&api_key=xxxxxx`
+
+```python
+api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+
+response = requests.get(f"https://api.eia.gov/v2/electricity?api_key={api_key}")
+response.json()
+```
+
+```output
+{'response': {'id': 'electricity',
+  'name': 'Electricity',
+  'description': 'EIA electricity survey data',
+  'routes': [{'id': 'retail-sales',
+    'name': 'Electricity Sales to Ultimate Customers',
+    'description': 'Electricity sales to ultimate customer by state and sector (number of customers, average price, revenue, and megawatthours of sales).  \n    Sources: Forms EIA-826, EIA-861, EIA-861M'},
+   {'id': 'electric-power-operational-data',
+    'name': 'Electric Power Operations (Annual and Monthly)',
+    'description': 'Monthly and annual electric power operations by state, sector, and energy source.\n    Source: Form EIA-923'},
+   {'id': 'rto',
+    'name': 'Electric Power Operations (Daily and Hourly)',
+    'description': 'Hourly and daily electric power operations by balancing authority.  \n    Source: Form EIA-930'},
+   {'id': 'state-electricity-profiles',
+    'name': 'State Specific Data',
+    'description': 'State Specific Data'},
+   {'id': 'operating-generator-capacity',
+    'name': 'Inventory of Operable Generators',
+    'description': 'Inventory of operable generators in the U.S.\n    Source: Forms EIA-860, EIA-860M'},
+   {'id': 'facility-fuel',
+    'name': 'Electric Power Operations for Individual Power Plants (Annual and Monthly)',
+    'description': 'Annual and monthly electric power operations for individual power plants, by energy source and prime mover\n    Source: Form EIA-923'}]},
+ 'request': {'command': '/v2/electricity/',
+  'params': {'api_key': '3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8'}},
+ 'apiVersion': '2.1.8',
+ 'ExcelAddInVersion': '2.1.0'}
+```
+
+It looks like there's no actual data here... Going back to the docs, we see:
+
+> Discovering datasets should be much easier in APIv2 because the API now self-documents and organizes itself in a data hierarchy. Parent datasets have child datasets, which may have children of their own, and so on. To investigate what datasets are available, we request a parent node. The API will respond with the child datasets (routes) for the path we've requested.
+
+So it seems like there are a variety of different child routes we could request.
 
 :::: challenge
 
+If we're looking for yearly data about fuel consumption at the plant level, what route should we request next?
 
-Some of those endpoints above look relevant to your research - let's investigate them further.
+:::::::: Solution
 
-1. Tweak the above code to list the endpoints under `https://api.eia.gov/v2/electricity`.
-2. List out some sub-endpoints that seem relevant.
-3. Keep going down the trail of "endpoints that seem relevant" until the metadata response doesn't have a `"routes"` key in it anymore, indicating that you've reached the end of that particular trail.
-4. What is the endpoint that you are most interested in using? What data fields does it return? How can you filter the data?
-
-
-:::::::: hint
-
-* To find out what data fields an endpoint returns, check out the `data` key in the response.
-* To find out how to filter the data, check out the `facets` key in the response.
+`facility-fuel`!
 
 ::::::::
 
 ::::
 
-### Inputs and outputs
+OK, so let's drill down into one of those child routes.
 
-Now that we know what we want to do, we need to figure out how to do it. For this example, we'll look at the `https://api.eia.gov/v2/electricity/electric-power-operational-data` endpoint, and try to access monthly net generation data for Colorado.
-
-We can take a look at the [Parameters](https://www.eia.gov/opendata/documentation.php#Parameters) section of the documentation.
-
-We see that we need to access a slightly different endpoint:
-
-> To request data points from the API, we stipulate /data as the final node in our API call. 
-
-So we should be accessing `https://api.eia.gov/v2/electricity/electric-power-operational-data/data`.
-
-Let's take a look in the [Data[]](https://www.eia.gov/opendata/documentation.php#Data) section of the docs to see what we can find out about requesting specific data!
-
-> To retrieve data points and their values from the API, we need to specify the specific columns we are interested in. In this document, we've been asking about electricity residential sales, but many data points about that subject matter are available. As of early 2022, our API has data values on revenue, sales, price, and number of customers.
->
-> [...]
->
-> Given these columns, let's ask for the price. Remember, in addition to specifying the column in the data[] parameter, we must also specify /data as the last node in the route:
-> 
-> `https://api.eia.gov/v2/electricity/retail-sales/data/?api_key=XXXXXX&data[]=price`
-
-We'll want to adjust the endpoint and the parameter value, but we should be able to use that example URL to create our own request. For the purpose of illustration, we've added in the "length" parameter as well, which limits the number of returned rows:
 
 ```python
-import os
+metadata = requests.get(f"https://api.eia.gov/v2/electricity/facility-fuel?api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8").json()
 
-import requests
-
-EIA_API_KEY = os.getenv("EIA_API_KEY")
-
-response = requests.get(
-    f"https://api.eia.gov/v2/electricity/electric-power-operational-data/data",
-    params={
-        "api_key": EIA_API_KEY,
-        "data[]": "generation",
-        "length": 2
-    }
-)
-print(response.json()["response"])
+metadata
 ```
-
-```
-{
-  "warnings": [
-    {
-      "warning": "incomplete return",
-      "description": "The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results."
-    }
-  ],
-  "total": "4202279",
-  "dateFormat": "YYYY-MM",
-  "frequency": "monthly",
-  "data": [
-    {
-      "period": "2019-06",
-      "location": "HI",
-      "stateDescription": "Hawaii",
-      "sectorid": "3",
-      "sectorDescription": "IPP CHP",
-      "fueltypeid": "BIS",
-      "fuelTypeDescription": "bituminous coal and synthetic coal",
-      "generation": "0",
-      "generation-units": "thousand megawatthours"
-    },
-    {
-      "period": "2019-06",
-      "location": "HI",
-      "stateDescription": "Hawaii",
-      "sectorid": "3",
-      "sectorDescription": "IPP CHP",
-      "fueltypeid": "BIT",
-      "fuelTypeDescription": "bituminous coal",
-      "generation": "0",
-      "generation-units": "thousand megawatthours"
-    }
-  ],
-  "description": "Monthly and annual electric power operations by state, sector, and energy source.\n    Source: Form EIA-923"
-}
-```
-
-That's nice, but we need the Colorado data, not the Hawaii data.
-
-Unintuitively, instructions for doing so lie within the [Frequency](https://www.eia.gov/opendata/documentation.php#Frequency) section of the documentation.
-
-The skill we'd like to practice here is *reading the documentation*, so go read that section with the following challenge in mind:
-
-:::: challenge
-
-Which of the following query parameters will get us the data for generation in Colorado?
-
-a. `.../data?api_key=XXXX&data[]=generation&stateid[]=CO`
-c. `.../data?api_key=XXXX&data[]=generation&facets[stateid][]=CO`
-b. `.../data?api_key=XXXX&data[]=generation&facets[location][]=CO`
-d. `.../data?api_key=XXXX&data[]=generation&facets[location][]=Colorado`
-
-:::::::: hint
-
-To see what facet types are available, look at the metadata for this endpoint by querying the endpoint without `/data`.
-
-::::::::
-
-:::::::: hint
-
-You may need to get the available facet values - see [Facets and their available values](https://www.eia.gov/opendata/documentation.php#Facetsandtheiravailabl).
-
-::::::::
-
-:::::::: solution
-
-The example in the docs says:
-
-> To do so, we'll add the facet[stateid] and set it to CO. Remember to ask for a column return, in this case, price:
->
-> https://api.eia.gov/v2/electricity/retail-sales/data?api_key=xxxxxx&data[]=price&facets[sectorid][]=RES&facets[stateid][]=CO
-
-But the metadata for *this* endpoint indicates that `stateid` is *not* an available type - instead it requires `location`.
-
-b. `.../data?api_key=XXXX&data[]=generation&facets[location][]=CO`
-
-::::::::
-
-::::
-
-
-### Errors
-
-Sometimes, despite all of our best intentions, we run into issues dealing with the API. In many cases, they'll send back some useful error message.
-
-For example, let's try to modify our previous code to get yearly data.
-
-```python
-import os
-
-import requests
-
-EIA_API_KEY = os.getenv("EIA_API_KEY")
-
-response = requests.get(
-    f"https://api.eia.gov/v2/electricity/electric-power-operational-data/data",
-    params={
-        "api_key": EIA_API_KEY,
-        "frequency": "yearly",
-        "data[]": "generation",
-        "length": 2
-    }
-)
-print(response.json())
-```
-
-Oops! We got an error response:
 
 ```output
-{'error': "Invalid frequency 'yearly' provided. The only valid frequencies are 'monthly', 'quarterly', and 'annual'.", 'code': 400}
+{'response': {'id': 'facility-fuel',
+  'name': 'Electric Power Operations for Individual Power Plants (Annual and Monthly)',
+  'description': 'Annual and monthly electric power operations for individual power plants, by energy source and prime mover\n    Source: Form EIA-923',
+  'frequency': [{'id': 'monthly',
+    'description': 'One data point for each month.',
+    'query': 'M',
+    'format': 'YYYY-MM'},
+   {'id': 'quarterly',
+    'description': 'One data point every 3 months.',
+    'query': 'Q',
+    'format': 'YYYY-"Q"Q'},
+   {'id': 'annual',
+    'description': 'One data point for each calendar year.',
+    'query': 'A',
+    'format': 'YYYY'}],
+  'facets': [{'id': 'plantCode', 'description': 'Plant ID and Name'},
+   {'id': 'fuel2002', 'description': 'Energy Source'},
+   {'id': 'state', 'description': 'State'},
+   {'id': 'primeMover', 'description': 'Prime Mover'}],
+  'data': {'generation': {'alias': 'Net Generation', 'units': 'megawatthours'},
+   'gross-generation': {'alias': 'Gross Generation', 'units': 'megawatthours'},
+   'total-consumption': {'alias': 'Consumption of Fuels for Electricity Generation and Useful Thermal Output (Physical Units)'},
+   'total-consumption-btu': {'alias': 'Consumption of Fuels for Electricity Generation and Useful Thermal Output (BTUs)',
+    'units': 'MMBtu'},
+   'consumption-for-eg': {'alias': 'Consumption of Fuels for Electricity Generation (Physical Units)'},
+   'consumption-for-eg-btu': {'alias': 'Consumption of Fuels for Electricity Generation (BTUs)',
+    'units': 'MMBtu'},
+   'average-heat-content': {'alias': 'Average Heat Content of Consumed Fuels'}},
+  'startPeriod': '2001-01',
+  'endPeriod': '2024-11',
+  'defaultDateFormat': 'YYYY-MM',
+  'defaultFrequency': 'monthly'},
+ 'request': {'command': '/v2/electricity/facility-fuel/',
+  'params': {'api_key': '3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8'}},
+ 'apiVersion': '2.1.8',
+ 'ExcelAddInVersion': '2.1.0'}
 ```
 
-It tells us what the problem is - we need to use the value `annual` instead of `yearly`.
+Still no data! But it seems like we're getting closer - there's a `data` field in the response, and also some `frequency` and `facets` information that looks relevant.
 
-It also tells us a "code" for the error - this expresses the general category of error and is based on the HTTP status codes. The overachieving reader may note that `response.status_code` actually returns `500`, which disagrees with the code above. A grim reminder that web APIs play fast and loose with HTTP status codes and should not be trusted.
-
-:::::::: challenge
-
-You're trying to get the BTUs of fuel consumption for electricity generation, so you try this API call. However, it fails.
-
-Try running it - what's going wrong and how can you fix it?
-
-```python
-response = requests.get(
-    url="https://api.eia.gov/v2/electricity/electric-power-operational-data/data/",
-    params={
-        "api_key": EIA_API_KEY,
-        "frequency": "annual",
-        "data[]": "consumption",
-        "length": 2
-    }
-)
-```
-
-:::: solution
-
-If you try to make this request, the JSON response will give you information about the error:
-
-```json
-{
-    'error': "Invalid data 'consumption' provided. The only valid data are 'generation', 'total-consumption', 'consumption-for-eg', 'consumption-uto', 'total-consumption-btu', 'consumption-for-eg-btu', 'consumption-uto-btu', 'stocks', 'receipts', 'receipts-btu', 'cost', 'cost-per-btu', 'sulfur-content', 'ash-content', and 'heat-content'.",
-    'code': 400
-}
-```
-
-This suggests that if we change the `data[]` parameter to `total-consumption`, `consumption-for-eg`, `consumption-uto`, etc. we should get something back. 
-
-Which one we should change it to depends on what you want - go back to the metadata for this endpoint to identify which of these you mean!
+What next? When in doubt we can always go for the documentation. Let's read through the [Data[]](https://www.eia.gov/opendata/documentation.php#Data) section of the documentation. 
 
 We see:
 
-```output
-{
-  "generation": {
-    "alias": "Utility Scale Electricity Net Generation"
-  },
-  "total-consumption": {
-    "alias": "Consumption of Fuels for Electricity Generation and Useful Thermal Output (Physical Units)"
-  },
-  "consumption-for-eg": {
-    "alias": "Consumption of Fuels for Electricity Generation (Physical Units)"
-  },
-  "consumption-uto": {
-    "alias": "Consumption of Fuels for Useful Thermal Output (Physical Units)"
-  },
-  "total-consumption-btu": {
-    "alias": "Consumption of Fuels for Electricity Generation and Useful Thermal Output (BTUs)"
-  },
-  "consumption-for-eg-btu": {
-    "alias": "Consumption of Fuels for Electricity Generation (BTUs)"
-  },
-  "consumption-uto-btu": {
-    "alias": "Consumption of Fuels for Useful Thermal Output (BTUs)"
-  },
-  "stocks": {
-    "alias": "Stocks of Fuel (Physical Units)"
-  },
-  "receipts": {
-    "alias": "Receipts of Fuel (Physical Units)"
-  },
-  "receipts-btu": {
-    "alias": "Receipts of Fuel (BTUs)"
-  },
-  "cost": {
-    "alias": "Average Cost of Fuels (per Physical Unit)"
-  },
-  "cost-per-btu": {
-    "alias": "Average Cost of Fuels (per BTU)"
-  },
-  "sulfur-content": {
-    "alias": "Average Sulfur Content of Consumed Fuel"
-  },
-  "ash-content": {
-    "alias": "Average Ash Content of Consumed Fuel"
-  },
-  "heat-content": {
-    "alias": "Average Heat Content of Consumed Fuels"
-  }
-}
-```
-
-So it looks like we want `consumption-for-eg-btu` here.
-
-::::
-
-::::::::
-
-
-## Generalizing to other APIs
-
-Other APIs will be different from the EIA API - both in what functionality is available, and in how you access that functionality. Let's practice reading the documentation for another useful API, this time from the EPA. It's focused on different facilities and their attributes such as the different fuel types, environmental equipment, etc. at each facility.
-
-[You can find the documentation here.](https://www.epa.gov/power-sector/cam-api-portal#/swagger/facilities-mgmt)
-
-Let's analyze this with the framework we introduced earlier.
-
-
-Let's start with "is this interesting or useful at all?":
+> Remember, in addition to specifying the column in the data[] parameter, we must also specify /data as the last node in the route:
+>
+> `https://api.eia.gov/v2/electricity/retail-sales/data/?api_key=XXXXXX&data[]=price`
 
 :::: challenge
 
-Which endpoint seems most interesting to you?
+Given the above example, and the output for the `facility-fuels` metadata, how do we get the total consumption for both electrical generation and useful thermal output?
 
-::::
-
-The documentation is pretty sparse, so we'll probably need to play around with the API to actually understand it. That means we need to figure out authentication.
-
-:::: challenge
-
-What would you add to your `requests.get()` call to authenticate?
-
-:::::::: hint
-
-Click on the green Authorize button!
-
-::::::::
-
-
-:::::::: solution
-
-You'll need to add an `x-api-key` header to your `requests.get()`:
+Start from this:
 
 ```python
+response = requests.get("https://api.eia.gov/v2/electricity/facility-fuel?api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
 
-response = requests.get(..., headers={"x-api-key": "THE_API_KEY"})
+response.json()
+```
+
+:::::::: solution
+
+```python
+response = requests.get("https://api.eia.gov/v2/electricity/facility-fuel/data?data[]=total-consumption&api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
+
+response.json()
+```
+::::::::
+
+::::
+
+
+That data we got above is consumption data, but there are still some problems:
+
+* it's monthly, not yearly
+* it includes all fuel types
+* it includes all states
+* it includes all years 
+
+Let's tackle these one at a time, starting with the yearly data.
+
+If we look at the original metadata response, we can see that there's a `frequency` key in the metadata... is that usable somehow?
+
+We can look in the documentation for `frequency`, which turns up a bunch of queries that look like:
+
+> `https://api.eia.gov/v2/electricity/retail-sales/data?api_key=xxxxxx&data[]=price&facets[sectorid][]=RES&facets[stateid][]=CO&frequency=monthly`
+
+This seems to indicate we can just pass `frequency` as a parameter like `data[]` - let's try it:
+
+```python
+response = requests.get("https://api.eia.gov/v2/electricity/facility-fuel/data?data[]=total-consumption&frequency=yearly&api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
+
+response.json()
+```
+
+Oops - looks like we made a mistake, that came back with an error message:
+
+```output
+{'error': "Invalid frequency 'yearly' provided. The only valid frequencies are 'monthly', 'quarterly', and 'annual'.",
+ 'code': 400}
+```
+
+Easy enough to fix, though - we just have to replace the parameter value with `annual`.
+
+
+```python
+response = requests.get("https://api.eia.gov/v2/electricity/facility-fuel/data?data[]=total-consumption&frequency=annual&api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
+
+response.json()
+```
+
+Great, now the output does look annual!
+
+As we accumulate more and more parameters, this starts to get pretty unwieldy to read - fortunately, `requests` allows us to pass in the parameters as a dictionary alongside the request:
+
+```python
+response = requests.get(
+    "https://api.eia.gov/v2/electricity/facility-fuel/data",
+    params={
+        "data[]": "total-consumption",
+        "frequency": "annual",
+        "api_key": "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+    },
+)
+
+response.json()
+```
+
+Next let's filter this to just natural gas.
+
+First, let's take a look at the output.
+
+```output
+{'period': '2022',
+'plantCode': '1004',
+'plantName': 'Edwardsport',
+'fuel2002': 'NG',
+'fuelTypeDescription': 'Natural Gas',
+'state': 'IN',
+'stateDescription': 'Indiana',
+'primeMover': 'CA',
+'total-consumption': '0',
+'total-consumption-units': 'MMBtu per Mcf'},
+```
+
+In this one row, we can see that `fuelTypeDescription` is "Natural Gas", which is what we want, and `fuel2002` is "NG", which is possibly the same as "natural gas". Can we confirm that somehow?
+
+If we take a look in the metadata for that `fuel2002` means, we can see this:
+
+```python
+metadata = requests.get("https://api.eia.gov/v2/electricity/facility-fuel?api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8").json()
+
+metadata
+```
+
+```output
+...
+'facets': [{'id': 'plantCode', 'description': 'Plant ID and Name'},
+ {'id': 'fuel2002', 'description': 'Energy Source'},
+ {'id': 'state', 'description': 'State'},
+ {'id': 'primeMover', 'description': 'Prime Mover'}],
+...
+```
+
+Which shows us that `fuel2002` does indeed correspond to the energy source. It also shows us that `fuel2002` is a "facet" - maybe there's something in the documentation about facets.
+
+Indeed, there's a [Facets and their available values](https://www.eia.gov/opendata/documentation.php#DataFacetsandtheiravailabl) section - in it, you see:
+
+> To determine what the appropriate values for those are, we query on that facet itself Let's try asking for all available sectors by specifying the `sectorid` facet:
+> 
+> `https://api.eia.gov/v2/electricity/retail sales/facet/sectorid/?api_key=xxxxxx`
+
+```python
+fueltypes = requests.get("https://api.eia.gov/v2/electricity/facility-fuel/facet/fuel2002?api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8").json()
+
+fueltypes
+```
+
+```output
+{'response': {'totalFacets': 47,
+  'facets': [{'id': 'NG', 'name': 'Natural Gas'},
+   {'id': 'LIG', 'name': 'Coal'},
+   {'id': 'WDL', 'name': 'Wood Waste Solids'},
+   {'id': 'MWH', 'name': 'Other'},
+...
+```
+
+OK, so `NG` does indeed mean natural gas.
+
+:::: challenge
+
+How would you get valid values for the `state` facet?
+
+::::
+
+Our final question, then, is how do we actually enact this filter? A quick search in the docs for `&facet` will show:
+
+> `http://api.eia.gov/v2/electricity/retail-sales/data/?api_key=xxxxxx&facets[stateid][]=CO&facets[sectorid][]=RES&frequency=monthly`
+
+Let's blindly copy this pattern and see if that works:
+
+```python
+response = requests.get(
+    "https://api.eia.gov/v2/electricity/facility-fuel/data",
+    params={
+        "data[]": "total-consumption",
+        "frequency": "annual",
+        "facets[fuel2002][]": "NG",
+        "api_key": "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+    },
+)
+
+response.json()
+```
+
+It does seem to filter the outputs to only natural gas data!
+
+:::: challenge
+
+Now we want to limit this to just the state of Colorado - let's update the code to do that:
+
+```python
+response = requests.get(
+    "https://api.eia.gov/v2/electricity/facility-fuel/data",
+    params={
+        "data[]": "total-consumption",
+        "frequency": "annual",
+        "facets[fuel2002][]": "NG",
+        "api_key": "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+    },
+)
+
+response.json()
+```
+
+:::::::: solution
+
+```python
+response = requests.get(
+    "https://api.eia.gov/v2/electricity/facility-fuel/data",
+    params={
+        "data[]": "total-consumption",
+        "frequency": "annual",
+        "facets[fuel2002][]": "NG",
+        "facets[state][]": "CO",
+        "api_key": "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+    },
+)
+
+response.json()
 ```
 
 ::::::::
 
 ::::
 
-For the purposes of this exploration, you can use the built-in "try it out" buttons on the website - make sure you click that "authorize" button and paste your API key first.
+Sweet, now we have yearly natural gas consumption for Colorado. 
+
+Now we just need to limit it to the right years. 
 
 :::: challenge
 
-Choose one interesting endpoint. What are the inputs/outputs?
+Look in the [Date Range](https://www.eia.gov/opendata/documentation.php#Daterange) and [Sort Data](https://www.eia.gov/opendata/documentation.php#SortData) sections of the documentation - can you find the snippet that tells you how to limit returned data to a specific date range?
 
-:::::::: hint
-
-The inputs are listed as parameters once you expand each endpoint.
-
-The outputs are a little harder to find. There are some output types listed at the bottom of the page (the "DTO"s), but you'll have to actually try out the API to figure out which output types go with which endpoints.
-
+:::::::: solution
+> The start parameter instructs the API only to return data after a specific point, and the end parameter stipulates the latest date. Using both of them in the same call, we can request data constrained to a specific time span
 ::::::::
 
 ::::
 
 :::: challenge
-How do you pass parameters to your interesting endpoint?
+Limit the results to 2020-2023. Start from your last query:
 
+```python
+response = requests.get(
+    "https://api.eia.gov/v2/electricity/facility-fuel/data",
+    params={
+        "data[]": "total-consumption",
+        "frequency": "annual",
+        "facets[fuel2002][]": "NG",
+        "facets[state][]": "CO",
+        "api_key": "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+    },
+)
+
+response.json()
+```
 :::::::: solution
 
-Most endpoints take parameters as query parameters, just like the EIA API.
+```python
+response = requests.get(
+    "https://api.eia.gov/v2/electricity/facility-fuel/data",
+    params={
+        "data[]": "total-consumption",
+        "frequency": "annual",
+        "facets[fuel2002][]": "NG",
+        "facets[state][]": "CO",
+        "start": 2020,
+        "end": 2023,
+        "api_key": "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+    },
+)
 
-One of these endpoints take parameters as part of their path (`/facilities-mgmt/facilities/{id}`).
+response.json()
+```
 ::::::::
 
 ::::
 
-:::: challenge
-What format are the responses in?
+Now you've worked through the documentation, played with an API, and built up a complicated API query from scratch! And you've answered your earlier question of **"what was the total yearly natural gas consumption (for electricity generation as well as thermal output), plant-by-plant, in Colorado from 2020-2023?"**
 
-:::::::: solution
+That was a lot of work, but now you're equipped to answer other similar questions using this API.
 
-The responses are in JSON - and they seem to correlate with the grey DTO definitions at the bottom of the page!
+:::: discussion
 
-::::::::
+Think back to the metadata you saw - what are some questions can you answer with the `facility-fuel` endpoint?
 
 ::::
 
+
 :::: challenge
 
-What happens when things go wrong?
+### Bonus challenge
 
-:::::::: hint
-
-Try inputting parameters that are obviously wrong, like a negative year number.
-
-::::::::
-
-:::::::: solution
-
-We get a bunch of error information back in the JSON response, similar to the EIA API.
-
-::::::::
+Choose one of those questions from the discussion, and use the EIA API to answer it!
 
 ::::
 
@@ -840,11 +711,7 @@ We get a bunch of error information back in the JSON response, similar to the EI
 
 * Many functions in the `pandas.read_*` family can read tabular data from remote servers & cloud storage as if it was on your local computer
 * `requests` can get data that's not in the right shape for `pandas.read_*`; you'll have to do the translation from their response format into `pandas.DataFrame` yourself
-* when confronted with a new web API, think about the following questions:
-  * what functions seem useful?
-  * how do I send arguments to that functionality?
-  * how do I turn the response data into something I can use?
-  * what happens when something goes wrong?
-  * how do I authenticate?
+* web APIs are just collections of fancy URLs, which you can interact with via `requests`
+* to learn an API, you need to be able to read the documentation and experiment with the API to see how it responds.
 
 ::::::::
