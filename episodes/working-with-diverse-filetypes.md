@@ -325,9 +325,9 @@ Each tag in XML shares similarities with a key in a JSON file:
 - both provide information about nested relationships (e.g., the note contains a heading and a body)
 
 However, unlike JSON, XML tags:
-- can have additional attributes (e.g., <note date="2008-01-10">), providing a way to
-share more complex metadata about a given data point and to search for tags matching
-additional filters (e.g., all notes written after Jan 01, 2008).
+- can have additional attributes (e.g., <data type="float" precision=3 variable_name="net-generation-mw">3.142</data>),
+providing a way to share more complex metadata about a given data point and to search for tags matching
+additional filters (e.g., all data with a particular variable name).
 
 While XML is harder and slower to read than JSON, it also has more capabilities. You might
 be likely to see an XML file if the data you're looking at:
@@ -338,86 +338,6 @@ methods.
 while XML can also be used to share images, charts and graphs.
 - is distributed through an RSS feed. For instance, FERC publishes filings on a rolling
 basis using an RSS feed and the XML data format.
-
-::: challenge
-### Challenge 4: From XML to Pandas
-
-Look at the following XML code.
-
-```output
-<data>
-    <row>
-        <period>2022-12</period>
-        <plantCode>59656</plantCode>
-        <plantName>Comanche Solar</plantName>
-    </row>
-    <row>
-        <period>2023-01</period>
-        <plantCode>59657</plantCode>
-        <plantName>Comanche</plantName>
-    </row>
-</data>
-```
-
-Which of the following Pandas DataFrames would best represent the data in this XML file?
-
-A.
-```output
-|    data   |       row      |
-|:---------:|:--------------:|
-| period    | 2022-12        |
-| plantCode | 59656          |
-| plantName | Comanche Solar |
-| period    | 2023-01        |
-| plantCode | 59657          |
-| plantName | Comanche       |
-```
-
-B.
-```output
-|    row    |      data      |
-|:---------:|:--------------:|
-| period    | 2022-12        |
-| plantCode | 59656          |
-| plantName | Comanche Solar |
-| period    | 2023-01        |
-| plantCode | 59657          |
-| plantName | Comanche       |
-```
-
-C.
-```
-|  period | plantCode | plantName      |
-|:-------:|-----------|----------------|
-| 2022-12 | 59656     | Comanche Solar |
-| 2023-01 | 59657     | Comanche       |
-```
-
-D.
-```
-| plantName | Comanche Solar | Comanche |
-|:---------:|----------------|----------|
-| period    | 2022-12        | 2023-01  |
-| plantCode | 59656          | 59657    |
-```
-
-:::solution
-The solution is C:
-```
-|  period | plantCode | plantName      |
-|:-------:|-----------|----------------|
-| 2022-12 | 59656     | Comanche Solar |
-| 2023-01 | 59657     | Comanche       |
-```
-
-The `<data>` is split into two seperate chunks of data seperated by `<row>` tags, which
-tells us that everything between these tags corresponds to a single row of data. Then,
-we know that the `<period>`, `<plantCode>` and `<plantName>` tags are telling us what
-variable the values correspond to - or in other words, what the column name is that
-corresponds to each tag.
-:::
-
-:::
 
 ## Using `pd.read_xml()`
 
@@ -431,37 +351,92 @@ Let's try to explore the XML file that the postdoc left behind:
 pd.read_xml('data/eia923_2022.xml')
 ```
 
-Each tag has been assigned as a column name, and the value inside has been added as a row. To drill down to the `<data>` we are actually interested in,
-we can use the `xpath` parameter, which lets you specify where in the XML file to look for a table.
+Hm, that doesn't look quite right. Each tag has been assigned as a column name, and the
+value inside has been added as a row.
+
+If we open up the XML file in a text editor or browser, we can see that a nested series
+of tags can help us identify the part of the table we want to read in.
+
+```xml
+<response>
+    <total>96</total>
+    <dateFormat>YYYY-MM</dateFormat>
+    <frequency>monthly</frequency>
+    <warnings>
+        <row>
+            <warning>Incomplete return.</warning>
+            <description>The API can only return 300 rows in XML format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.</description>
+        </row>
+        <row>
+            <warning>Another warning.</warning>
+            <description>Hey! Watch out!</description>
+        </row>
+    </warnings>
+    ...
+```
+
+For example, the same warnings table we were working with before is in the <response> tag, then
+the <warnings> tag. Each row of the data is also wrapped in a <row> tag.
+
+To drill down to the section of the file we are actually interested in,
+we can use the `xpath` parameter, which lets you use tags to specify where in the XML file to look for a table.
 
 The `xpath` query we're looking for is formatted as follows:
 - // are used at the beginning to note that we want to select all items with the tags specified
 - Then, like specifying which directory we want to access in a terminal, slashes are used to specify the path to the desired tag.
 
-So to get all the `<row>`s of `<data>`, we call:
+So to get all the `<row>`s of the `<warnings>` table, we call:
 ```python
+pd.read_xml('data/eia923_2022.xml', xpath = "//response/warnings/row")
+```
+
+::: challenge
+### Challenge 3: Reading in XML data
+
+Read in all the rows of the `data` table in `eia923_2022.xml` into a Pandas DataFrame, using
+`pd.read_xml` and the `xpath` parameter.
+
+::: solution
+```py
 pd.read_xml('data/eia923_2022.xml', xpath = "//response/data/row")
 ```
 
+The data is found following the following tags: `<response><data><row>`
+
+The `<data>` is split into two seperate chunks of data seperated by `<row>` tags, which
+tells us that everything between these tags corresponds to a single row of data. Then,
+we know that the `<period>`, `<plantCode>` and `<plantName>` tags are telling us what
+variable the values correspond to - or in other words, what the column name is that
+corresponds to each tag. We use the xpath parameter to grab all `<row>`'s of data in the XML file.
+:::
+
+:::
+
+::: callout
 `xpath` can be used to make more complex queries (e.g., only picking `<note>`'s written
 after a certain date), but we won't cover more advanced usage of `xpath` in this tutorial.
 See this [Library Carpentries tutorial](https://carpentries-incubator.github.io/lc-webscraping/02-xpath/index.html) for more about `xpath`.
+:::
 
 ## `pd.read_parquet()`
 
 There's one more file left in the `data` folder the postdoc left behind - a Parquet file!
 You can think of Parquet files as spreadsheet storage optimized for computers. Like an
 Excel file, it's very difficult for a human to read the plain text of the file, as
-it is designed to be read efficiently by software. To get into the technical weeds, see
-the [Parquet documentation](https://parquet.apache.org/docs/overview/).
+it is designed to be read efficiently by software. 
 
 Parquet files:
 - are designed to efficiently process and store large volumes of data, making them about
 50x faster than using `pd.read_csv()` on comparable file sizes.
-- compress data efficiently, reducing file size
 - are saved with data organized into chunks (e.g., one chunk per month), making it possible
 to quickly load data from some part of the dataset without loading everything into memory.
 - are supported by many existing tools, including `Pandas`.
+
+:::: callout
+To get into the technical weeds of Parquet files, see
+the [Parquet documentation](https://parquet.apache.org/docs/overview/). For a desktop viewer
+similar to Excel, we recommend checking out [Tad](https://www.tadviewer.com/).
+::::
 
 We can read a Parquet file to a Pandas DataFrame using `pd.read_parquet()`, almost identical to how we read in a CSV:
 
@@ -475,6 +450,7 @@ Plus, it's a nice ice-breaker. This may be appropriate if you're only teaching t
 ::::
 
 :::::::: challenge
+#### Challenge 4: Comparing datasets
 
 Pick two datasets we've just read in, and compare them. How are they similar, and how are they different? Share your reflections with a peer.
 
