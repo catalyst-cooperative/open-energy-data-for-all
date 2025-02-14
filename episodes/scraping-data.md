@@ -78,25 +78,6 @@ def main():
 
 ```
 
-### caiso network tab snooping
-
-Motivation: want more granular supply information, ISOs have it. CAISO dashboard exists, no clear link
-
-Example:
-
-* open network tab (include instructions for all major browsers: chrome, safari, edge, firefox)
-* look at the "current" link
-* make a request! oh it works
-
-https://www.caiso.com/todays-outlook
-
-Exercise:
-* go in browser, find the supply chart, go to 1/22.
-* What was the link for the right data?
-
-Exercise:
-* Get the data for the last week - scaffold similarly to the EIA906 scaffold - make a function that *just* gets the right URLs, everything else handled by us
-
 ### Further resources
 
 Motivate: sometimes this won't be enough.
@@ -104,6 +85,7 @@ Motivate: sometimes this won't be enough.
 * inspect html structure
 * javascript
 * user agents
+* network tab
 
 
 ::::::::::::::::::::::::::::::::::::: keypoints
