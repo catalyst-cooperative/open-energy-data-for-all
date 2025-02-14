@@ -16,11 +16,13 @@ exercises: 2
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-
 ### Narrative
 
 * you're trying to pick up this project from someone else
 * goals: transparency & reproducibility for others
+* here are the phases of an open research process: finding data, working with the data, sharing code & data with other people (as you're working on it!)
+
+**TODO figure out if we want to have all these discussions as separate discussions, or one set of breakout groups***
 
 ### Finding data
 
