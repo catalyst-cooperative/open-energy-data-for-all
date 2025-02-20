@@ -20,40 +20,34 @@ exercises: 0
 
 ## Introduction to remote data
 
+:::: instructor
+
+Prep checklist:
+
+- [ ] make a sticky note that includes the research question used for EIA API exploration
+- [ ] pull up the [PUDL viewer with the right table already in search](https://viewer.catalyst.coop/search?q=eia923%20monthly%20generation%20fuel)
+
+::::
+
 We learned last time about opening the EIA 923 data in a variety of formats. That data was stored directly on your hard drive because you cloned the lesson respository in setup - we call that **local data**.
 
 We can also read in data that's stored somewhere else, or **remote data**. That's accessed through a URL, instead of a path on your hard drive.
 
-:::: discussion
-
-What are some advantages and disadvantages you can imagine for using remote data vs. saving the data to your hard drive (aka **local data**)?
-
-:::::::: solution
-
-Some non-exhaustive ideas:
-
-Remote data pros:
-
-* if someone else updates the data, you always have the most recent version
-* you don't need to manage multiple versions of the same data on your hard drive
-* if you send your code to someone else, you don't also have to package the data with it
-
-Local data pros:
-
-* you can keep track of different versions of the same data, even if the publisher doesn't
-* you only need to download the data once, and then you can read from your disk in the future, which is faster
-* if someone else updates the data, your data doesn't change until you actively download a new version
-* what about no internet
-
-::::::::
-
-::::
-
 ## Reading remote files into `pandas` directly
 
-You asked around about the `eia923_2022.parquet` file and found out that it came from the [Public Utility Data Liberation project](https://catalyst.coop/pudl/) which updates regularly! You want to get your hands on more up-to-date data, so you want to check this out.
+You asked around about the `eia923_2022.parquet` file and found out that it came from the [Public Utility Data Liberation project](https://catalyst.coop/pudl/) which updates regularly! You want to get your hands on the newer data, so you go check that out.
 
-It looks like they publish their newest data at `https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/TABLE_NAME.parquet`. Downloading a new version, checking if it's different from the old one, and managing all the versions on your hard drive seems like a pain, so you want to automatically download the newest version every time you run the code. You seem to remember that the documentation for `pandas.read_parquet()` mentions that the file path "could be a URL." Let's try it!
+Skipping a few 'look at the webpage' steps, you find their [data listings](https://viewer.catalyst.coop/search?q=eia923%20monthly%20generation%20fuel) and find a link to where you can download a Parquet file: `https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/core_eia923__monthly_generation_fuel.parquet`.
+
+You *could* download this file, then point `read_parquet` at it. But, since it gets updated sometimes, downloading a new version, checking if it's different from the old one, and managing all the versions on your hard drive seems like a pain.
+
+So let's download the newest version every time you run the code. Maybe `read_parquet` can help... let's check out the documentation.
+
+```python
+help(pd.read_parquet)
+```
+
+It says that the path "could be a URL." Let's try it!
 
 ```python
 import pandas as pd
@@ -81,9 +75,9 @@ Most, but not all, of the `read_*` functions support URLs -  check the docs to m
 
 ::::
 
-:::::::: challenge
+:::: challenge
 
-Adapt your previous Excel-reading code to read the same Excel file directly from the Internet. You should be able to find the file here: `https://github.com/catalyst-cooperative/open-energy-data-for-all/raw/refs/heads/main/data/eia923_2022.xlsx`
+Adapt your previous Excel-reading code to read the same Excel file directly from the Internet. GitHub has convenient links for all the files in the repo - you should be able to find the Excel file here: `https://github.com/catalyst-cooperative/open-energy-data-for-all/raw/refs/heads/main/data/eia923_2022.xlsx`
 
 ```python
 import pandas as pd
@@ -91,26 +85,48 @@ import pandas as pd
 pd.read_excel("data/eia923_2022.xlsx", skiprows=5)
 ```
 
-:::: solution
+:::::::: solution
 
 ```python
 import pandas as pd
 
 pd.read_excel("https://github.com/catalyst-cooperative/open-energy-data-for-all/raw/refs/heads/main/data/eia923_2022.xlsx", skiprows=5)
 ```
+::::::::
+
 ::::
 
+
+:::: discussion
+
+What are some advantages and disadvantages you can imagine for using remote data vs. saving the data to your hard drive (aka **local data**)?
+
+:::::::: solution
+
+Some non-exhaustive ideas:
+
+Remote data pros:
+
+* if someone else updates the data, you always have the most recent version
+* you don't need to manage multiple versions of the same data on your hard drive
+* if you send your code to someone else, you don't also have to package the data with it
+
+Local data pros:
+
+* you can keep track of different versions of the same data, even if the publisher doesn't
+* you only need to download the data once, and then you can read from your disk in the future, which is faster
+* if someone else updates the data, your data doesn't change until you actively download a new version
+* you can access this without internet!
+
 ::::::::
 
-:::::::: callout
-If the person maintaining the remote data updates the data without changing the URL, you will get the new version. This can be very useful when exploring data!
-
-This can also be very annoying when you want your analysis to remain stable! In that case, you can try to find data that's hosted on a services like [Zenodo](https://zenodo.org/) which is designed to provide stable URLs. Many data providers also provide distinct URLs for each specific data version as well as a pointer to the latest data version. Of course, archiving the data yourself and managing the data versions can also work.
-::::::::
+::::
 
 ## Using `requests` to download files
 
-It's nice to use functions in the `pd.read_*()` family with a URL, but sometimes you need to do a little bit of reshaping of the data before you can actually use `pd.read_*()`. We saw this with the JSON file earlier. In those cases, you can stil tell your code to download the file instead of having to download it yourself.
+It's nice to use functions in the `pd.read_*()` family with a URL, but sometimes you need to do a little bit of reshaping of the data before you can actually use `pd.read_*()`. We saw this with the JSON file earlier, where we had to read in the file, grab the tabular data out of it, and then pass that into `pandas`.
+
+In those cases, you can still use remote data!
 
 While Python has some code in the standard library to help you read data from a URL, the [`requests` library](https://requests.readthedocs.io/en/latest/user/quickstart/) is easier to use and also extremely popular, so we'll focus on using that.
 
@@ -122,11 +138,39 @@ import requests
 response = requests.get("https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.json")
 ```
 
-The `Response` object has many useful methods and properties. We'll focus on `response.json()`, which turns JSON data into a Python object we can interact with.
+The `Response` object has many useful methods and properties - see `help(response)`. We'll focus on three:
+* `response.status_code`, which shows you a high level status of what happened
+* `response.text`, which shows you the full response
+* `response.json()`, which parses the response text into a Python list or dictionary, assuming the response is indeed in JSON.
+
+First, let's check out `response.status_code`. This shows the [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) - it's a three digit number that tells you how the request went. For example, if you make a request for something that doesn't exist, you'll get a `404` status code.
+
+In general, status codes that start with `2` mean everything went fine; `4xx` means you messed up somehow; `5xx` means the computer that's responding to your request ran into some sort of error. Or, `4xx` is your fault, `5xx` is their fault.
+
+```python
+response.status_code
+```
+
+```output
+200
+```
+
+Great, the request wasn't a total failure! Now let's check to see what the content looks like:
+
+```python
+response.text
+```
+
+```output
+'{"response":{"warnings":[{"warning":"incomplete return","description":"The API can only return 5000 '...
+```
+
+Looks like JSON to me! We could parse that text ourselves, but we might as well just use the built-in functionality of `response.json()`.
 
 
 ```python
-eia923_2022_raw = response.json()
+eia923_2022_json = response.json()
+eia923_2022_json["response"]["data"]
 ```
 
 This seems to follow the format we saw last time.
