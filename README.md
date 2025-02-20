@@ -12,6 +12,15 @@ We expect everyone to adhere to the [Code of
 Conduct](https://catalystcoop-pudl.readthedocs.io/en/stable/code_of_conduct.html)
 to promote a safe, welcoming, and productive learning environment.
 
+## Building the lesson locally
+
+1. Follow the [installation
+   instructions](https://carpentries.github.io/sandpaper-docs/index.html)
+   provided by the Carpentries to install the `sandpaper`/`pegboard`/`varnish`
+   R packages required for building this.
+
+2. Run `Rscript build.R` to build the lesson locally & open it in your browser.
+
 ## Configure a new lesson
 
 Follow the steps below to
