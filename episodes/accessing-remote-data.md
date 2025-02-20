@@ -265,9 +265,9 @@ While that URL can seem impossibly complicated at first, we can break it down in
   * `frequency=quarterly`: "at a quarterly frequency"
   * `start=2020`: "starting after 2020"
   * `end=2024`: "ending by 2024"
-  * `api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8`: a password to prove you have access to the API. 
-  
-  
+  * `api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8`: a password to prove you have access to the API.
+
+
 :::: callout
 The API key we're using in this lesson is a public one that EIA provides, but it would be polite to request your own API key by clicking the register button on the [EIA open data portal](https://www.eia.gov/opendata/) if you plan on using the API a lot.
 
@@ -305,7 +305,7 @@ You get data all the way until the present day!
 
 ## Case study: EIA API
 
-Let's get started! You can find the [API documentation here](https://www.eia.gov/opendata/documentation.php). 
+Let's get started! You can find the [API documentation here](https://www.eia.gov/opendata/documentation.php).
 
 :::: caution
 Unfortunately, the *headers* for the sections of the documentation are misaligned with the actual *content* of each section.
@@ -424,7 +424,7 @@ metadata
 
 Still no data! But it seems like we're getting closer - there's a `data` field in the response, and also some `frequency` and `facets` information that looks relevant.
 
-What next? When in doubt we can always go for the documentation. Let's read through the [Data[]](https://www.eia.gov/opendata/documentation.php#Data) section of the documentation. 
+What next? When in doubt we can always go for the documentation. Let's read through the [Data[]](https://www.eia.gov/opendata/documentation.php#Data) section of the documentation.
 
 We see:
 
@@ -461,7 +461,7 @@ That data we got above is consumption data, but there are still some problems:
 * it's monthly, not yearly
 * it includes all fuel types
 * it includes all states
-* it includes all years 
+* it includes all years
 
 Let's tackle these one at a time, starting with the yearly data.
 
@@ -553,7 +553,7 @@ Which shows us that `fuel2002` does indeed correspond to the energy source. It a
 Indeed, there's a [Facets and their available values](https://www.eia.gov/opendata/documentation.php#DataFacetsandtheiravailabl) section - in it, you see:
 
 > To determine what the appropriate values for those are, we query on that facet itself Let's try asking for all available sectors by specifying the `sectorid` facet:
-> 
+>
 > `https://api.eia.gov/v2/electricity/retail sales/facet/sectorid/?api_key=xxxxxx`
 
 ```python
@@ -640,9 +640,9 @@ response.json()
 
 ::::
 
-Sweet, now we have yearly natural gas consumption for Colorado. 
+Sweet, now we have yearly natural gas consumption for Colorado.
 
-Now we just need to limit it to the right years. 
+Now we just need to limit it to the right years.
 
 :::: challenge
 

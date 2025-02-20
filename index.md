@@ -18,4 +18,3 @@ After following this two-day lesson, learners will be able to:
 
 
 [workbench]: https://carpentries.github.io/sandpaper-docs
-
