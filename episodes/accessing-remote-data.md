@@ -46,6 +46,7 @@ Local data pros:
 * what about no internet
 
 ::::::::
+
 ::::
 
 ## Reading remote files into `pandas` directly
@@ -172,6 +173,8 @@ eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data
 ```
 
 :::: solution
+
+```python
 import pandas as pd
 import json
 import requests
@@ -180,6 +183,8 @@ response = requests.get("https://raw.githubusercontent.com/catalyst-cooperative/
 eia923_json = response.json()
 
 eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
+```
+
 ::::
 
 ::::::::
@@ -300,7 +305,7 @@ You get data all the way until the present day!
 
 ## Case study: EIA API
 
-Let's get started! You can find the API documentation [here](https://www.eia.gov/opendata/documentation.php). 
+Let's get started! You can find the [API documentation here](https://www.eia.gov/opendata/documentation.php). 
 
 :::: caution
 Unfortunately, the *headers* for the sections of the documentation are misaligned with the actual *content* of each section.
@@ -361,7 +366,7 @@ So it seems like there are a variety of different child routes we could request.
 
 If we're looking for yearly data about fuel consumption at the plant level, what route should we request next?
 
-:::::::: Solution
+:::::::: solution
 
 `facility-fuel`!
 
@@ -644,7 +649,9 @@ Now we just need to limit it to the right years.
 Look in the [Date Range](https://www.eia.gov/opendata/documentation.php#Daterange) and [Sort Data](https://www.eia.gov/opendata/documentation.php#SortData) sections of the documentation - can you find the snippet that tells you how to limit returned data to a specific date range?
 
 :::::::: solution
+
 > The start parameter instructs the API only to return data after a specific point, and the end parameter stipulates the latest date. Using both of them in the same call, we can request data constrained to a specific time span
+
 ::::::::
 
 ::::
@@ -666,6 +673,7 @@ response = requests.get(
 
 response.json()
 ```
+
 :::::::: solution
 
 ```python
