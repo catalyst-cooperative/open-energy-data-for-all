@@ -5,7 +5,6 @@ exercises: 0
 ---
 
 
-
 :::: questions 
 
 - How can I get to know a data set that is new to me?
@@ -115,9 +114,8 @@ That x axis is gross and not helping, drop it
 
 
 
-::::::::::::::::::::::::::::::::::::: keypoints 
+::::::::::::::::::::::::::::::::::::: keypoints
 
 - placeholder
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
-
