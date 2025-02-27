@@ -20,6 +20,11 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+* why might you scrape at all?
+  * *lots* of links: ~100
+  * multiple times
+  * frequently updated
+
 ### pagination
 
 Motivation: API only returns 5k rows at a time. You want MORE.
