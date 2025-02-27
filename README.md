@@ -19,7 +19,7 @@ to promote a safe, welcoming, and productive learning environment.
    provided by the Carpentries to install the `sandpaper`/`pegboard`/`varnish`
    R packages required for building this.
 
-2. Run `Rscript build.R` to build the lesson locally. You can add `--preview`
+2. Run `./build.R` to build the lesson locally. You can add `--preview`
    to have it automatically open in your browser, or you can navigate to
    `site/docs` in your browser yourself.
 
