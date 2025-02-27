@@ -63,7 +63,7 @@ Grab the 923 spreadsheets that they want with bs4
 * use urljoin to get actual absolute link
 * download
 
-Exercise: 
+Exercise:
 Get historical 906 data
 
 https://www.eia.gov/electricity/data/eia923/eia906u.php
