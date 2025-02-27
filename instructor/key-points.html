@@ -496,27 +496,23 @@ read-in.</li>
 </ul></section><section id="accessing-remote-data"><h2 class="section-heading"><a href="accessing-remote-data.html">Accessing remote data</a></h2>
 <hr class="half-width">
 <ul>
-<li>
-<code>pandas.read_*</code> can read tabular data from remote servers
-&amp; cloud storage as if it was on your local computer</li>
+<li>web APIs can be thought of as bundles of fancy URLs</li>
+<li>each web API is different, but if you can read the documentation and
+make requests to URLs, you can figure them out</li>
+</ul>
+<ul>
+<li>Many functions in the <code>pandas.read_*</code> family can read
+tabular data from remote servers &amp; cloud storage as if it was on
+your local computer</li>
 <li>
 <code>requests</code> can get data that’s not in the right shape for
-<code>pandas.read_*</code>, so you can then get it into the Pandas shape
-APIs, though you’ll have to do the translation from their response
-format into <code>pandas.DataFrame</code> yourself</li>
-<li>To get access to access-restricted APIs, you will usually pass in an
-API key, as a request <em>header</em> or as a request
-<em>parameter</em>. Both <code>requests</code> and
-<code>pandas.read_*</code> have the ability to do this.</li>
-<li>when encountering a new API, ask yourself these questions:
-<ul>
-<li>what functions seem useful to you?</li>
-<li>what are their inputs/outputs?</li>
-<li>how do you pass parameters?</li>
-<li>how do you parse the response?</li>
-<li>how do you authenticate?</li>
-</ul>
+<code>pandas.read_*</code>; you’ll have to do the translation from their
+response format into <code>pandas.DataFrame</code> yourself</li>
+<li>web APIs are just collections of fancy URLs, which you can interact
+with via <code>requests</code>
 </li>
+<li>to learn an API, you need to be able to read the documentation and
+experiment with the API to see how it responds.</li>
 </ul></section><section id="scraping-data"><h2 class="section-heading"><a href="scraping-data.html">Scraping Data</a></h2>
 <hr class="half-width">
 <ul>
@@ -590,7 +586,7 @@ API key, as a request <em>header</em> or as a request
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>Template licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a> by <a href="https://carpentries.org/" class="external-link">The Carpentries</a></p>
-        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.16.11" class="external-link">sandpaper (0.16.11)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.7" class="external-link">pegboard (0.7.7)</a>, and <a href="https://github.com/carpentries/varnish/tree/1.0.5" class="external-link">varnish (1.0.5)</a></p>
+        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.16.11" class="external-link">sandpaper (0.16.11)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/carpentries/varnish/tree/1.0.5" class="external-link">varnish (1.0.5)</a></p>
 			</div>
 		</footer>
 </div> <!-- / div.container -->
@@ -613,8 +609,8 @@ API key, as a request <em>header</em> or as a request
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/key-points.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/key-points.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2025-02-18",
-  "datePublished": "2025-02-18"
+  "dateModified": "2025-02-27",
+  "datePublished": "2025-02-27"
 }
 
   </script><script>
