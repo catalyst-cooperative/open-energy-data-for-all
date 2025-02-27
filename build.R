@@ -1,3 +1,5 @@
+#! /usr/bin/env Rscript
+
 args <- commandArgs(trailingOnly = TRUE)
 
 if ("--help" %in% args || "-h" %in% args) {
