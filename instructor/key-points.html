@@ -496,6 +496,21 @@ read-in.</li>
 </ul></section><section id="accessing-remote-data"><h2 class="section-heading"><a href="accessing-remote-data.html">Accessing remote data</a></h2>
 <hr class="half-width">
 <ul>
+<li>
+<code>requests</code> is useful when you need to reformat the data
+before shoving it into <code>pandas</code>
+</li>
+<li>
+<code>response.status_code</code> tells you if the request succeeded
+or why it failed.</li>
+<li>
+<code>response.text</code> gives you the raw response, if you need
+to check that the data is formatted how you expect</li>
+<li>
+<code>response.json()</code> will parse the response as JSON, which
+is handy</li>
+</ul>
+<ul>
 <li>web APIs can be thought of as bundles of fancy URLs</li>
 <li>each web API is different, but if you can read the documentation and
 make requests to URLs, you can figure them out</li>
