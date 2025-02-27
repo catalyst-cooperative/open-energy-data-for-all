@@ -51,3 +51,9 @@ po/*~
 
 # lockfiles
 data/.~lock*
+
+# mac stuff
+**/.DS_Store
+
+# ipynb stuff
+.ipynb_checkpoints/*
