@@ -502,7 +502,7 @@ What next? Through some more documentation reading, we can find some explanation
 ![Screenshot of documentation, with relevant text reproduced below](./fig/ep-3/data-endpoint.png){alt="Screenshot of documentation, with relevant text reproduced below"}
 
 > In earlier examples, when we asked about the metadata, the API responded with these available data points [under the 'data' key]:
-> 
+>
 > [...]
 >
 > Remember, in addition to specifying the column in the data[] parameter, we must also specify /data as the last node in the route:
@@ -718,10 +718,10 @@ Now we just need to limit it to the right years. We saw the start/end parameters
 
 > Start date
 > https://api.eia.gov/v2/electricity/retail-sales/data?api_key=xxxxxx&data[]=price&facets[sectorid][]=RES&facets[stateid][]=CO&frequency=monthly&start=2008-01-31
-> 
+>
 > End date
 > https://api.eia.gov/v2/electricity/retail-sales/data?api_key=xxxxxx&data[]=price&facets[sectorid][]=RES&facets[stateid][]=CO&frequency=monthly&end=2008-03-01
-> 
+>
 > Start and end date together
 > https://api.eia.gov/v2/electricity/retail-sales/data?api_key=xxxxxx&data[]=price&facets[sectorid][]=RES&facets[stateid][]=CO&frequency=monthly&start=2008-01-31&end=2008-03-01
 
