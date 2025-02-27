@@ -495,7 +495,7 @@ columns available, their data types, the number of non-null values in each colum
 ::::::::
 
 
-:::: keypoints 
+:::: keypoints
 
 - `pandas` has functionality to read in many data formats (e.g., XML, JSON,
 Parquet) into Pandas DataFrames in Python. We can take advantage of this to
