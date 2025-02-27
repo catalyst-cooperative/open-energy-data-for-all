@@ -56,4 +56,4 @@ data/.~lock*
 **/.DS_Store
 
 # ipynb stuff
-.ipynb_checkpoints/*
+**/.ipynb_checkpoints/*

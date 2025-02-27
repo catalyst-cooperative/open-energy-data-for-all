@@ -24,7 +24,7 @@ exercises: 0
 
 Prep checklist:
 
-- [ ] make a sticky note that includes the research question used for EIA API exploration
+- [ ] make a sticky note that includes the research question: "What was the net electricity generation from natural gas, plant-by-plant, in Colorado from 2020-2023?"
 - [ ] pull up the [PUDL viewer with the right table already in search](https://viewer.catalyst.coop/search?q=eia923%20monthly%20generation%20fuel)
 
 ::::
@@ -213,7 +213,7 @@ import json
 with open('data/eia923_2022.json') as file:
     eia923_json = json.load(file)
 
-eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
+eia923_json_df = pd.DataFrame(eia923_json["response"]["data"])
 ```
 
 :::: solution
@@ -226,12 +226,22 @@ import requests
 response = requests.get("https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.json")
 eia923_json = response.json()
 
-eia923_json_df = pd.json_normalize(eia923_json, record_path = ['response', 'data'])
+eia923_json_df = pd.DataFrame(eia923_json["response"]["data"])
 ```
 
 ::::
 
 ::::::::
+
+
+:::: keypoints
+
+* `requests` is useful when you need to reformat the data before shoving it into `pandas`
+* `response.status_code` tells you if the request succeeded or why it failed.
+* `response.text` gives you the raw response, if you need to check that the data is formatted how you expect
+* `response.json()` will parse the response as JSON, which is handy
+
+::::
 
 ## Web APIs: Fancy URLs
 
@@ -515,12 +525,12 @@ What next? Through some more documentation reading, we can find some explanation
 
 Given the above example, and the output for the `facility-fuels` metadata, how do we get the net generation data?
 
-Start from this:
+Build off of the earlier request:
 
 ```python
-net_generation = requests.get(f"{base_url}/facility-fuel?api_key={api_key}")
+facility_fuel = requests.get(f"{base_url}/facility-fuel?api_key={api_key}")
 
-net_generation.json()
+facility_fuel.json()
 ```
 
 :::::::: solution
@@ -665,8 +675,10 @@ It does seem to filter the outputs to only natural gas data!
 
 Now we want to limit this to just the state of Colorado - let's update the code to do that.
 
+As before, let's build off the old request.
+
 ```python
-annual_ng_co = requests.get(
+annual_ng = requests.get(
     "{base_url}/facility-fuel/data",
     params={
         "data[]": "generation",
@@ -676,7 +688,7 @@ annual_ng_co = requests.get(
     },
 )
 
-annual_ng_co.json()
+annual_ng.json()
 ```
 
 :::::::: solution
