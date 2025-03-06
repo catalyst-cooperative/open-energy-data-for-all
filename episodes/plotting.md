@@ -53,24 +53,24 @@ epacems.info()
 <class 'pandas.core.frame.DataFrame'>
 RangeIndex: 582504 entries, 0 to 582503
 Data columns (total 16 columns):
- #   Column                     Non-Null Count   Dtype         
----  ------                     --------------   -----         
- 0   plant_id_eia               582504 non-null  int32         
- 1   plant_id_epa               582504 non-null  int32         
- 2   emissions_unit_id_epa      582504 non-null  object        
+ #   Column                     Non-Null Count   Dtype
+---  ------                     --------------   -----
+ 0   plant_id_eia               582504 non-null  int32
+ 1   plant_id_epa               582504 non-null  int32
+ 2   emissions_unit_id_epa      582504 non-null  object
  3   operating_datetime_utc     582504 non-null  datetime64[ms]
- 4   year                       582504 non-null  int32         
- 5   state                      582504 non-null  category      
- 6   operating_time_hours       582504 non-null  float32       
- 7   gross_load_mw              252664 non-null  float32       
- 8   heat_content_mmbtu         252664 non-null  float32       
- 9   steam_load_1000_lbs        0 non-null       float32       
- 10  so2_mass_lbs               252664 non-null  float32       
- 11  so2_mass_measurement_code  252664 non-null  category      
- 12  nox_mass_lbs               252663 non-null  float32       
- 13  nox_mass_measurement_code  252663 non-null  category      
- 14  co2_mass_tons              252664 non-null  float32       
- 15  co2_mass_measurement_code  252664 non-null  category      
+ 4   year                       582504 non-null  int32
+ 5   state                      582504 non-null  category
+ 6   operating_time_hours       582504 non-null  float32
+ 7   gross_load_mw              252664 non-null  float32
+ 8   heat_content_mmbtu         252664 non-null  float32
+ 9   steam_load_1000_lbs        0 non-null       float32
+ 10  so2_mass_lbs               252664 non-null  float32
+ 11  so2_mass_measurement_code  252664 non-null  category
+ 12  nox_mass_lbs               252663 non-null  float32
+ 13  nox_mass_measurement_code  252663 non-null  category
+ 14  co2_mass_tons              252664 non-null  float32
+ 15  co2_mass_measurement_code  252664 non-null  category
 dtypes: category(4), datetime64[ms](1), float32(7), int32(3), object(1)
 memory usage: 33.3+ MB
 ```
@@ -82,14 +82,14 @@ eia930.info()
 <class 'pandas.core.frame.DataFrame'>
 RangeIndex: 1171331 entries, 0 to 1171330
 Data columns (total 6 columns):
- #   Column                        Non-Null Count    Dtype         
----  ------                        --------------    -----         
+ #   Column                        Non-Null Count    Dtype
+---  ------                        --------------    -----
  0   datetime_utc                  1171331 non-null  datetime64[ms]
- 1   balancing_authority_code_eia  1171331 non-null  object        
- 2   generation_energy_source      1171331 non-null  category      
- 3   net_generation_reported_mwh   343374 non-null   float32       
- 4   net_generation_adjusted_mwh   343376 non-null   float32       
- 5   net_generation_imputed_mwh    6 non-null        float32       
+ 1   balancing_authority_code_eia  1171331 non-null  object
+ 2   generation_energy_source      1171331 non-null  category
+ 3   net_generation_reported_mwh   343374 non-null   float32
+ 4   net_generation_adjusted_mwh   343376 non-null   float32
+ 5   net_generation_imputed_mwh    6 non-null        float32
 dtypes: category(1), datetime64[ms](1), float32(3), object(1)
 memory usage: 32.4+ MB
 ```
@@ -129,8 +129,8 @@ Fine, 1-year time series showing piles of emissions in summer and a lesser amoun
 plt.rcParams['figure.figsize'] = [12, 7] # adjust until subplots are legible
 for i, ci in enumerate(["heat_content_mmbtu","co2_mass_tons","so2_mass_lbs","nox_mass_lbs"]):
     epacems_sum_all_plants.plot(
-        x="gross_load_mw", 
-        y=ci, 
+        x="gross_load_mw",
+        y=ci,
         kind="hexbin", # scatter plot hides data density when points are close together
         ax=plt.subplot(2,2,i+1) # without this we get four separate plots
     )
@@ -155,7 +155,7 @@ for key,group in eia930_by_energy_source:
             .plot(
                 x="net_generation_reported_mwh", # not precisely the same as load, but our closest source-specific equivalent
                 y=ci,
-                kind="hexbin", 
+                kind="hexbin",
                 ax=plt.subplot(2,2,i+1)
             )
         )
@@ -165,7 +165,7 @@ for key,group in eia930_by_energy_source:
 
 Emissions increase with coal and gas generation, as expected
 
-Also increase with hydro and maybe nuclear too, which is odd. maybe those are times when demand is generally high? 
+Also increase with hydro and maybe nuclear too, which is odd. maybe those are times when demand is generally high?
 
 But also hydro and nuclear have some weird gaps/bands, what's up with that
 
