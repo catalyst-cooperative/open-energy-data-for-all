@@ -29,7 +29,15 @@ exercises: 2
 
 ## The stages of an open data project
 
-### Finding data
+This lesson follows the arc of an open data analysis project, providing concrete skills and
+strategies to resolve common challenges along the way. 
+
+1. Collecting and reading in data
+2. Identifying and reproducibly addressing data problems
+3. Debugging code and working with 'big data'
+4. 
+
+### Finding appropriate research data
 
 Once you've identified your research problem, the first step is to find dataset(s) you
 can use to investigate it. In choosing your dataset(s), you'll need to consider the
@@ -44,7 +52,8 @@ means that nobody can legally use or republish data. Standardized, open licenses
 a creator gives the public legal permission to use their work, while retaining some control.
 Some licenses might impose additional restrictions - e.g.,
 prohibiting commercial use, or prohibiting processing and republishing the data as part
-of a new dataset.
+of a new dataset. Verify that a dataset's license meets your needs as soon as possible
+in the research process.
 - **Documentation:** Is the data published with descriptions of any processing done or notable caveats,
 explanations of variable definitions, and contact information for any further questions?
 - **Level and type of processing:** The more processed a dataset is, the more you're
@@ -54,14 +63,23 @@ a great trade-off. Pre-processed datasets may combine multiple datasets together
 use extensive validation techniques, or handle missing and outlying values - depending on
 your research needs, these can save valuable time and effort or enable you to ask questions
 that would otherwise be out of scope for a research project.
+- **Format:** Data contained in poorly scanned PDFs will require much more extensive
+processing to use than data contained in spreadsheets or computer-optimized data formats
+such as Parquet. If you require multiple years of data for your research, look out for
+changes in data formats over time.
 
 
 We won't teach you how to do this.
 But. Look at public sources like EIA/FERC/EPA, PUCs, pudl
 
+:::::::: challenge
 
-discussion/icebreaker:
-* what data is interesting to you for your own work?
+## Discussion: challenges in finding data
+
+Think of a time you tried to find a dataset for an energy research project. What was
+one unexpected challenge that came up as you were trying to find an appropriate dataset
+to answer your research question? Share with a peer.
+::::::::
 
 ### Working with the data
 
