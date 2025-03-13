@@ -168,46 +168,60 @@ eia_923_906s = [a for a in a_with_zip if "nonutil" not in a["href"].lower()]
 eia_923_906s
 ```
 
-OK, now we have our links.
-
-In the end we'd love to have some sort of dictionary that maps the filename to a URL we can pass in to `requests.get`... something like:
+OK, now we have our tags, time to download them, right?
 
 ```python
-links = {"eia923_2010": "https://www.eia.gov/...", ...}
-
-for name, url in links.items():
-    response = requests.get(url)
-    # ... write the file to disk somewhere
+for tag in eia_923_906s:
+    # get a nice name for the file
+    # download the file from the URL
+    # write the outputs somewhere
 ```
-
-To get there, we'll need to:
-* clean up the URL
 * generate a nice name for each file
-* actually download the file to disk
+  * if you just look on the page, everything is called "ZIP"
+  * if you look at the links, everything is `fXXX_YYYY`
+  * it would be nice to have something readable like `eia_923_2010`
+  * there's a title attribute that gets you the year, so let's do some fstring stuff to make this.
+  * `file_name = f"eia_923_{tag['title']}"`
+* download the URL
+  * oh wait, need to clean up the URL
+  * clean up the URL:
+    * looks like tags have weird fragments: relative paths 
+      * ... relative to what? the URL of the page. good thing we have that
+    * requests needs an absolute path
+    * use urljoin to get an absolute path: `url = urljoin(base_url, fragment)`
+  * then put it into normal requests.
+* write the outputs somewhere
+  * resp.text is... not what you want. because it's binary blob.
+    * **TODO** how to explain the difference between text and binary blob...?
+  * instead you want resp.content
+  * then you need to `with open(filename, "wb") as f: f.write(resp.content)` - wb for 'write binary'
+  
 
-Let's start by cleaning up the URLs. You may have noticed that the `href`s don't include the whole link.
+### Exercise:
 
-If you "copy link address" from the website for the 2024 data, you see: `https://www.eia.gov/electricity/data/eia923/xls/f923_2024.zip`. But the `a` tag only has `xls/f923_2024.zip`. That's because the `href` can be a relative path, much like the relative paths we ran into in episode 2.
-
-
-Exercise:
-Get historical 906 data
-
+Get historical 906 data off of this site:
 https://www.eia.gov/electricity/data/eia923/eia906u.php
+
+**TODO** should we move the first part of this exercise to right after they see the bs4 stuff? might be nice to ground the "do something useful with these tags" if they've played with the tags a bit first
+1. get the relevant links using bs4: 10m
+2. make filenames, clean urls, download: 10m
 
 ```
 import bs4
+import requests
 
 
 def get_spreadsheet_links(soup) -> list[url]:
+    ...
+    
+def download_a_link(tag) -> None:
     ...
 
 def main():
     soup = bs4...
     links = get_spreadsheet_links(soup)
     for link in links:
-        request.get(...)
-
+        download_a_link(link)
 ```
 
 :::: discussion
@@ -223,36 +237,80 @@ Why else might you choose to do this instead of just manually collecting links?
 
 ### pagination
 
-Motivation: API only returns 5k rows at a time. You want MORE.
+* Another place you need lots of URLs is when APIs don't give you everything all at once
+* API only returns 5k rows at a time
+* this time, you're generating the URLs yourself instead of scraping them from a page
+* the process of getting the first 5k rows, then the next 5k rows, etc. is "pagination" - like going to the next page of Google results.
+
+* Closer look at EIA API - check out limit and offset in the docs. also check out the "total" in response
 
 Example:
 
-One single limit/offset request - get 10 rows, then show how you can get that as 2 sets of 5 rows instead.
+Get the first 10 rows
 
 Exercise:
-Grab *all* of one specific facet.
 
-Basically - this would be a fill in the blank / complete the code exercise - we have most of the loop body
+Get the second 10 rows
+
+Example:
+
+Get 10 pages:
 
 ```python
-# get first page
-# get total row count
-# pre-calculate how many pages there are
+n_pages = 10
+page_size = 10
+
+all_records = []
+for page_num in range(n_pages)0:
+    offset = page_num * page_size
+    requests.get(...)
+    all_records.extend(...)
+```
+
+Exercise:
+
+We have total XXX rows, how many pages do we need?
+
+```python
+import math
+
+total_rows = response["response"]["total"]
+page_size = 100
+n_pages = math.ceil(total_rows / page_size)
+```
+
+Exercise:
+
+OK, now put it all together!
+
+```python
 all_records = []
 for ______:
-    # params missing limit & offset
-    page_of_data = requests.get("...", params={}).json()
-    all_records.append(page_of_data["response"]["data"])
+    offset = ___
+    page_of_data = requests.get("...", params={...}).json()
+    all_records.extend(page_of_data["response"]["data"])
 ```
 
 ### Further resources
 
-Motivate: sometimes this won't be enough.
+* Sometimes, there are obstacles. We can't teach you how to overcome all of them here...
 
-* inspect html structure
-* javascript
-* user agents
-* network tab
+* But here is a little guide of "something weird? maybe try searching for these tools/ideas"
+
+* links aren't showing up in your `bs4` a tags?
+  * look at the links using the *html inspector*
+  * look at what's happening when you download files by using *network tab*
+    * when you click something to download data, or when you load in data for a graph, keep an eye on this. you might find some suspicious looking URLs
+* is the html you see in browser *different* from what you get from `requests`?
+  * sometimes there's code that your browser runs after the initial load. try playwright which automates a browser for you, instead of just using requests. keyword is `headless browser automation`
+  * sometimes servers will be mean to you because of who you say you are (*user agent*).
+    * giving you some sort of error/captcha
+    * just not giving you anything at all
+    * if you suspect that... try telling them you're a real human instead of a bot by "spoofing user agent"
+* do you get blocked a lot for scraping?
+  * try adding some delays in your scraping code so that it's not hammering the server so hard.
+  * do double-check the terms & conditions of the website you're using...
+  * you might need a 'web scraping proxy' service.
 
 
 ::::::::::::::::::::::::::::::::::::: keypoints
