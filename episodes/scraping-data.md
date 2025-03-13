@@ -21,11 +21,11 @@ exercises: 0
 
 Now we've learned about how to download data from websites and from APIs. But some questions linger...
 
-* you might remember seeing that 'warning' from the EIA API about only returning 5000 rows at a time... how can we get more?
-
 * often there are webpages with lots of links to data you want... copy-pasting each link into our code is a pain, and hardly better than just clicking each link to download the data. Is there a better way?
 
-The thread connecting these two questions/problems is that sometimes your data lives behind *many* URLs, not just one.
+* you might also remember seeing that 'warning' from the EIA API about only returning 5000 rows at a time... how can we get more?
+
+The thread connecting these two questions/problems is that sometimes your data lives behind *many* URLs, not just one. So you have to go get a bunch of separate data and glue it all together.
 
 ## Web scraping
 
@@ -39,7 +39,7 @@ There's only a couple dozen, so we could probably get away with just downloading
 
 You can imagine how this would be annoying if you needed to download, say, a hundred files instead. To keep things simple we'll use the EIA data as an example.
 
-### Example: EIA 923
+### Example: EIA 923/906
 
 To get the links, first we need to actually get the webpage that the links are on.
 
@@ -103,6 +103,36 @@ soup.find_all("a")
  ...
 ```
 
+:::: challenge
+
+#### Challenge: get all the `a` tags from EIA 906
+
+Lots of the data that is collected in EIA 923 was collected in EIA 906 in the past.
+
+We'll have you work through the scraping steps on the 906 data to get a sense of how this all works.
+
+
+The first step is to get all the `a` tags from this page:
+
+```
+https://www.eia.gov/electricity/data/eia923/eia906u.php
+```
+
+:::::::: solution
+```python
+import bs4
+import requests
+
+url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
+response = requests.get(url)
+soup = bs4.BeautifulSoup(response.text)
+
+a_tags = soup.find_all("a")
+```
+::::::::
+
+::::
+
 OK, so we see a big list of tags, some of which appear to be links to form 923 ZIP files. The URLs for those are included in an `href` attribute. The world of HTML is vast and chaotic, but almost every URL you'll want to use will live in one of these `href` attributes (it stands for "hypertext reference" if that helps you remember).
 
 We can filter based on attributes like this:
@@ -160,75 +190,92 @@ a_with_zip
  <a class="ico zip" href="archive/xls/f906nonutil1989.zip" title="1989-1998"><span>ZIP</span></a>]
 ```
 
-That looks about right - maybe we want to skip those non-utility links at the bottom as well.
 
+In the 923 data, we probably want to skip those 906 links too.
 
 ```python
-eia_923_906s = [a for a in a_with_zip if "nonutil" not in a["href"].lower()]
-eia_923_906s
+eia_923s = [a for a in a_with_zip if "f906" not in a["href"].lower()]
+eia_923s
 ```
+
+**TODO** don't use comprehensions!!
+
+:::: challenge
+
+#### Challenge: only get the relevant `a` tags
+
+Let's grab only the `a` tags that are links to the actual data files.
+
+This will look a little bit different from the 923 example, since the links are all to XLS files instead of ZIP files.
+
+:::::::: solution
+
+```python
+import bs4
+import requests
+
+url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
+response = requests.get(url)
+soup = bs4.BeautifulSoup(response.text)
+
+a_tags = soup.find_all("a", href=True)
+xls_tags = []
+for a in a_tags:
+    if ".xls" in a["href"].lower():
+        xls_tags.append(a)
+```
+::::::::
+::::
 
 OK, now we have our tags, time to download them, right?
 
 ```python
 for tag in eia_923_906s:
-    # get a nice name for the file
     # download the file from the URL
-    # write the outputs somewhere
+    # shove into dataframe
 ```
-* generate a nice name for each file
-  * if you just look on the page, everything is called "ZIP"
-  * if you look at the links, everything is `fXXX_YYYY`
-  * it would be nice to have something readable like `eia_923_2010`
-  * there's a title attribute that gets you the year, so let's do some fstring stuff to make this.
-  * `file_name = f"eia_923_{tag['title']}"`
 * download the URL
   * oh wait, need to clean up the URL
   * clean up the URL:
+    * looks like tags have weird fragments: relative paths
     * looks like tags have weird fragments: relative paths
       * ... relative to what? the URL of the page. good thing we have that
     * requests needs an absolute path
     * use urljoin to get an absolute path: `url = urljoin(base_url, fragment)`
   * then put it into normal requests.
-* write the outputs somewhere
-  * resp.text is... not what you want. because it's binary blob.
-    * **TODO** how to explain the difference between text and binary blob...?
-  * instead you want resp.content
-  * then you need to `with open(filename, "wb") as f: f.write(resp.content)` - wb for 'write binary'
 
+:::: challenge
 
-### Exercise:
+#### Challenge: get the URLs
 
-Get historical 906 data off of this site:
-https://www.eia.gov/electricity/data/eia923/eia906u.php
+::::::: solution
 
-**TODO** should we move the first part of this exercise to right after they see the bs4 stuff? might be nice to ground the "do something useful with these tags" if they've played with the tags a bit first
-1. get the relevant links using bs4: 10m
-2. make filenames, clean urls, download: 10m
+```python
+from urllib.parse import urljoin
 
+urls = []
+for tag in xls_tags:
+    tag_url = urljoin(url, tag["href"])
+    urls.append(tag_url)
 ```
-import bs4
-import requests
+:::::::
+
+::::
 
 
-def get_spreadsheet_links(soup) -> list[url]:
-    ...
+**TODO** flesh out text
+Finally - let's concatenate this data together. We'll:
+* use 906 data, since the 923 data has a bit more complicated of a structure
 
-def download_a_link(tag) -> None:
-    ...
+* put them in a dataframe with trusty `pandas.read_xls()`. here's the skiprows stuff, whatever, i believe you learned it the first time.
+* pick some columns to concat across all dataframes ... do 906 since you don't have to unzip :)
 
-def main():
-    soup = bs4...
-    links = get_spreadsheet_links(soup)
-    for link in links:
-        download_a_link(link)
-```
+**TODO**: what's the exercise here?
 
 :::: discussion
 
 Why else might you choose to do this instead of just manually collecting links?
 
-* If there are lots of links to download
 * If it's a lot of effort to get to each link
 * If the data is frequently updated
 * If I have to download all the files multiple times
@@ -246,31 +293,13 @@ Why else might you choose to do this instead of just manually collecting links?
 
 Example:
 
-Get the first 10 rows
+* Get the first 10 rows
+* Get the second 10 rows
 
-Exercise:
-
-Get the second 10 rows
-
-Example:
-
-Get 10 pages:
-
-```python
-n_pages = 10
-page_size = 10
-
-all_records = []
-for page_num in range(n_pages)0:
-    offset = page_num * page_size
-    requests.get(...)
-    all_records.extend(...)
-```
-
-Exercise:
-
+Q in chat:
 We have total XXX rows, how many pages do we need?
 
+Do the code as example:
 ```python
 import math
 
@@ -297,7 +326,7 @@ for ______:
 
 * But here is a little guide of "something weird? maybe try searching for these tools/ideas"
 
-* links aren't showing up in your `bs4` a tags?
+* links aren't showing up in your `bs4` `a` tags?
   * look at the links using the *html inspector*
   * look at what's happening when you download files by using *network tab*
     * when you click something to download data, or when you load in data for a graph, keep an eye on this. you might find some suspicious looking URLs
@@ -311,7 +340,8 @@ for ______:
   * try adding some delays in your scraping code so that it's not hammering the server so hard.
   * do double-check the terms & conditions of the website you're using...
   * you might need a 'web scraping proxy' service.
-
+* what if you need to download the file?
+  * response.content
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
