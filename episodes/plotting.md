@@ -171,7 +171,7 @@ But also hydro and nuclear have some weird gaps/bands, what's up with that
 
 Emissions _decrease_ with wind generation, which feels neat; maybe indicating that on very windy days other sources shut down.
 
-### Gaps and bands
+### Where are these gaps and bands coming from?
 
 ```python
 merged["hydro"]['netgen_p'] = (
@@ -206,13 +206,71 @@ for ci in ["hydro","nuclear"]:
 
 what is it about nuclear that makes it so easy/common to provide such distinct mwh rates?
 
+```python
+eia930_bysource = eia930.groupby('generation_energy_source',observed=True)
+eia930_bysource.get_group("nuclear").plot.scatter(x='datetime_utc',y='net_generation_reported_mwh')
+```
+
+aha!
+
+```python
+eia930_nuclear = eia930_bysource.get_group("nuclear")
+ax = plt.gca()
+for (bac, df) in eia930_nuclear.groupby("balancing_authority_code_eia", observed=True):
+    df.sort_values(by='datetime_utc').plot(x='datetime_utc', y='net_generation_reported_mwh', ax=ax, label=bac) # without label, legend is silly
+```
+
+```python
+eia930_nuclear_bacs = (
+    eia930_nuclear
+    .loc[:,['datetime_utc','balancing_authority_code_eia','net_generation_reported_mwh']].dropna() # add when we see that all bacs have the same nominal coverage
+    .groupby('balancing_authority_code_eia')
+    .size()
+)
+eia930_nuclear_bacs
+```
+
+Okay, only two BAs have nuclear, and they both show this discretization of netgen.
+
+This is as far as we can go with the data we have -- to go further we need to connect these two balancing authorities with the actual nuclear plants.
+
+```python
+# https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/out_eia__yearly_plants.parquet
+eia_plants = pd.read_parquet(
+    pudl.output_dir / "parquet/out_eia__yearly_plants.parquet",
+    columns=[
+        "plant_id_eia",
+        "plant_name_eia",
+        "report_date",
+        "balancing_authority_code_eia",
+        "plant_id_pudl",
+        "utility_name_eia",
+        "utility_id_pudl"
+    ],
+    filters = [
+        ("state","=","CO"),
+        ("data_maturity","=","final"),
+    ]
+)
+```
+
+```python
+(
+    eia_plants
+    # .dropna(subset=["balancing_authority_code_eia"])
+    .set_index(["balancing_authority_code_eia", "report_date"])
+    .sort_index()
+    .loc[eia930_nuclear_bacs.index.values] # if we take out the nas, pandas complains -- ERCO is not represented in this set of plants
+)
+```
+
 
 ## Data transformations
 
 - _What are the basic steps of the data cleaning & processing pipeline that we need?_
 - _How can we string them together in a way that still gives us opportunities to inspect intermediate results when something goes wrong?_
 
-### [Second debugging scenario]
+### Why does ERCO appear to have no plants in CO, even though we only selected CO BAs?
 
 ### [Third debugging scenario]
 
@@ -224,6 +282,23 @@ what is it about nuclear that makes it so easy/common to provide such distinct m
 ## Module development slush pile
 
 ### EDA
+
+The unstack() here was key; matplotlib really likes plotting columns and really hates plotting groups, so anything you can do to turn the things you want into columns is a good idea
+
+```python
+(
+    eia930
+    .sort_values(by=["generation_energy_source","datetime_utc",])
+    .groupby(["generation_energy_source","datetime_utc"], observed=True)
+    .net_generation_reported_mwh
+    .sum() # combine all balancing authorities
+    .unstack("generation_energy_source") # give us one column of netgen per energy source
+    # .resample("24h").sum() # optional denoising
+    .plot()
+    # .legend(loc="center left", bbox_to_anchor=(1,0.5)) # get that thing out of the way
+)
+```
+
 
 ```python
 df = pd.read_parquet("https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/out_eia923__generation_fuel_combined.parquet")
@@ -242,6 +317,8 @@ Key columns:
   - `fuel_consumed*`
   - `net_generation*`
 
+
+
 #### General trends?
 
 ```python
@@ -252,6 +329,7 @@ df.plot("report_date","net_generation_mwh", kind="scatter")
 Uhh not useful.
 
 refinement:
+
 ```python
 tbd
 ```
@@ -259,9 +337,11 @@ tbd
 ```python
 len(df.groupby("plant_id_eia").groups)
 ```
+
 ```output
 14565
 ```
+
 oof that's a lotta series lines if we wanted one per plant.
 
 ```python
@@ -269,6 +349,7 @@ cats = ["plant_id_eia","energy_source_code","fuel_type_code_pudl","fuel_type_cod
 for c in cats:
     print(f"{c}: {len(df.groupby(c, observed=True).groups)}")
 ```
+
 ```outputs
 plant_id_eia: 14565
 energy_source_code: 39
