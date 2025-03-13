@@ -185,7 +185,7 @@ for tag in eia_923_906s:
 * download the URL
   * oh wait, need to clean up the URL
   * clean up the URL:
-    * looks like tags have weird fragments: relative paths 
+    * looks like tags have weird fragments: relative paths
       * ... relative to what? the URL of the page. good thing we have that
     * requests needs an absolute path
     * use urljoin to get an absolute path: `url = urljoin(base_url, fragment)`
@@ -195,7 +195,7 @@ for tag in eia_923_906s:
     * **TODO** how to explain the difference between text and binary blob...?
   * instead you want resp.content
   * then you need to `with open(filename, "wb") as f: f.write(resp.content)` - wb for 'write binary'
-  
+
 
 ### Exercise:
 
@@ -213,7 +213,7 @@ import requests
 
 def get_spreadsheet_links(soup) -> list[url]:
     ...
-    
+
 def download_a_link(tag) -> None:
     ...
 
