@@ -35,7 +35,7 @@ For all the benefits of the API, some of the EIA 923 data is only available thro
 
 ![Screenshot of the EIA 923 data page. A listing of each year's files is in the right sidebar.](./fig/ep-4/eia-923-spreadsheets.png){alt="Screenshot of the EIA 923 data page. A listing of each year's files is in the right sidebar."}
 
-There's only a couple dozen, so we could probably get away with just downloading the files by clicking. 
+There's only a couple dozen, so we could probably get away with just downloading the files by clicking.
 
 You can imagine how this would be annoying if you needed to download, say, a hundred files instead. To keep things simple we'll use the EIA data as an example.
 
