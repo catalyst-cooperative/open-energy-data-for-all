@@ -6,7 +6,6 @@ exercises: 2
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-
 * what do I need to think about so that my project doesn't fall apart halfway to the finish line?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
@@ -17,27 +16,76 @@ exercises: 2
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-### Narrative
+### Narrative / why open data
 
+TODO: Do we want this to be in the second-person, or 3rd?
 
+You're poking around your research lab's collaborative drive when you find a folder
+containing data, code and some notes from a former postdoctoral researcher. They were
+investigating patterns in the emissions intensity of electricity production
+in Colorado as exploratory work for a potential research project, but wound up pursuing
+another idea instead.
 
-* you're trying to pick up this project from someone else
-* goals: transparency & reproducibility for others
-* here are the phases of an open research process: finding data, working with the data, sharing code & data with other people (as you're working on it!)
+As you prepare for your qualifying exams, you're interested in picking up on their
+work and developing it further. While they give you the go-ahead over email, they let
+you know that they're travelling for field work for the next six months and won't be
+able to respond to further questions - the documents in the drive will be your only
+source of information going forward.
 
-**TODO figure out if we want to have all these discussions as separate discussions, or one set of breakout groups***
+As you peruse their Python notebooks and scattered notes in preparation for your
+qualifying exams, you decide you want to do things differently. Rather than filing your
+work away on a hard drive after the final paper is published, you set out to work on a
+research project in a way that meets the following principles:
+
+- **Open and transparent:** You want people to be able to freely access your data inputs and outputs,
+and to be able to clearly see the decisions and assumptions you've made across the way.
+You want your work to conform to academic standards for open access.
+- **Collaborative:** You want other lab members to be able to review your work, provide
+feedback, and contribute to parts of the analysis.
+- **Reproducible:** You want researchers in other labs to be able to reproduce your outputs,
+and to build on the tedious data cleaning you're about to do.
+
+### Working with the data
+
+Though coursework often focuses on analysis techniques (e.g., selecting the appropriate
+statistical method), researchers often encounter more foundational roadblocks to
+effective, reproducible and open analysis of the data. Over the course of this lesson, we
+cover practical solutions to the following roadblocks:
+
+Challenges with the data:
+- My data is in a format I've never worked before
+- The data I want to work with is published through an Application Programming Interface
+(API), and I don't know how to download it.
+- My data is too big to work with on a desktop computer
+- My data changes format or content over time
+- There's something unexpected about my input data, but I'm not sure what.
+
+Challenges with the code:
+- The code runs on some of my data, but errors on other input data
+- When I re-run my code I get different results, and I'm not sure why
+- I have no idea which part of my code is causing a particular problem.
+
+Challenges with collaboration:
+- I'm not sure how to make it simple for collaborators to run and contribute to my code.
+- I need to publish my code and/or data for a paper I'm submitting to, but I'm not sure
+how best to do so.
+- A colleague wants to build on my existing code, but I'm not sure how to clearly document
+what I've done to make it possible for them to adapt it.
 
 ## The stages of an open data project
 
-This lesson follows the arc of an open data analysis project, providing concrete skills and
-strategies to resolve common challenges along the way. 
+This lesson follows the arc of an open data analysis project in Python, providing concrete
+skills and strategies to resolve common challenges along the way. We structure these
+episodes into four sections:
 
 1. Collecting and reading in data
 2. Identifying and reproducibly addressing data problems
 3. Debugging code and working with 'big data'
-4. 
+4. Collaborative development and sharing your work
 
-### Finding appropriate research data
+### Strategies for finding appropriate research data
+
+**TODO:** this section feels somewhat out of place / off-topic, but probably worth covering?
 
 Once you've identified your research problem, the first step is to find dataset(s) you
 can use to investigate it. In choosing your dataset(s), you'll need to consider the
@@ -68,36 +116,22 @@ processing to use than data contained in spreadsheets or computer-optimized data
 such as Parquet. If you require multiple years of data for your research, look out for
 changes in data formats over time.
 
-
-We won't teach you how to do this.
-But. Look at public sources like EIA/FERC/EPA, PUCs, pudl
+This lesson will use a few key open energy data sets to illustrate the arc of data
+analysis. For a start finding appropriate data for your research project, we recommend:
+- For national-scale research, federal agencies such as the EIA, EPA and FERC all publish 
+free and regularly-updated data.
+- For local/state-level research: some states maintain their own data portals (e.g., the
+[Alaska Energy Data Gateway](https://akenergygateway.alaska.edu/)), and some ISOs publish
+regularly-updated operational data (e.g., [CAISO's hourly data](https://www.caiso.com/todays-outlook)).
+- For analysis-ready data: projects such as the [Public Utility Data Liberation (PUDL) project](https://catalystcoop-pudl.readthedocs.io/en/latest/index.html),
+[PowerGenome](https://github.com/PowerGenome/PowerGenome?tab=readme-ov-file), **TODO: some more examples** publish pre-processed data that addresses many
+of the common foundational challenges that make federal energy data hard to work with.
 
 :::::::: challenge
 
-## Discussion: challenges in finding data
+#### Discussion: challenges in finding data
 
 Think of a time you tried to find a dataset for an energy research project. What was
 one unexpected challenge that came up as you were trying to find an appropriate dataset
 to answer your research question? Share with a peer.
 ::::::::
-
-### Working with the data
-
-Visualization
-Analysis - this is your problem, not ours
-Reusability - how to keep this ball of wax together
-(chapters 2 and 3)
-
-discussion:
-
-* think about a time you had to re-run your old code. what were challenges you faced?
-
-### Collaborating
-
-You want your work to matter, right? Also sometimes you need to do this pro forma
-
-GH, python environments, data environments/versioning, documentation
-
-discussion:
-
-* what was hard about working with someone else's code in the past?
