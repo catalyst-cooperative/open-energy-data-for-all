@@ -118,7 +118,7 @@ changes in data formats over time.
 
 This lesson will use a few key open energy data sets to illustrate the arc of data
 analysis. For a start finding appropriate data for your research project, we recommend:
-- For national-scale research, federal agencies such as the EIA, EPA and FERC all publish 
+- For national-scale research, federal agencies such as the EIA, EPA and FERC all publish
 free and regularly-updated data.
 - For local/state-level research: some states maintain their own data portals (e.g., the
 [Alaska Energy Data Gateway](https://akenergygateway.alaska.edu/)), and some ISOs publish
