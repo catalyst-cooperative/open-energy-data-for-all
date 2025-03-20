@@ -1,28 +1,137 @@
 ---
-title: "Introduction to Open Data"
+title: "Introduction"
 teaching: 10
 exercises: 2
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-- What do I need to think about when I'm choosing a dataset to work with?
+* what do I need to think about so that my project doesn't fall apart halfway to the finish line?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Explain the tradeoffs between open and commercial data
-- Describe high-level data needs for a research question
-- Describe the impact of the data production process for XYZ dataset on downstream transformations?
+* describe the phases of a data processing project
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-## Introduction
+### Narrative / why open data
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: instructor
+TODO: Do we want this to be in the second-person, or 3rd?
 
-Inline instructor notes can help inform instructors of timing challenges
-associated with the lessons. They appear in the "Instructor View"
+You're poking around your research lab's collaborative drive when you find a folder
+containing data, code and some notes from a former postdoctoral researcher. They were
+investigating patterns in the emissions intensity of electricity production
+in Colorado as exploratory work for a potential research project, but wound up pursuing
+another idea instead.
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+As you prepare for your qualifying exams, you're interested in picking up on their
+work and developing it further. While they give you the go-ahead over email, they let
+you know that they're travelling for field work for the next six months and won't be
+able to respond to further questions - the documents in the drive will be your only
+source of information going forward.
+
+As you peruse their Python notebooks and scattered notes in preparation for your
+qualifying exams, you decide you want to do things differently. Rather than filing your
+work away on a hard drive after the final paper is published, you set out to work on a
+research project in a way that meets the following principles:
+
+- **Open and transparent:** You want people to be able to freely access your data inputs and outputs,
+and to be able to clearly see the decisions and assumptions you've made across the way.
+You want your work to conform to academic standards for open access.
+- **Collaborative:** You want other lab members to be able to review your work, provide
+feedback, and contribute to parts of the analysis.
+- **Reproducible:** You want researchers in other labs to be able to reproduce your outputs,
+and to build on the tedious data cleaning you're about to do.
+
+### Working with the data
+
+Though coursework often focuses on analysis techniques (e.g., selecting the appropriate
+statistical method), researchers often encounter more foundational roadblocks to
+effective, reproducible and open analysis of the data. Over the course of this lesson, we
+cover practical solutions to the following roadblocks:
+
+Challenges with the data:
+- My data is in a format I've never worked before
+- The data I want to work with is published through an Application Programming Interface
+(API), and I don't know how to download it.
+- My data is too big to work with on a desktop computer
+- My data changes format or content over time
+- There's something unexpected about my input data, but I'm not sure what.
+
+Challenges with the code:
+- The code runs on some of my data, but errors on other input data
+- When I re-run my code I get different results, and I'm not sure why
+- I have no idea which part of my code is causing a particular problem.
+
+Challenges with collaboration:
+- I'm not sure how to make it simple for collaborators to run and contribute to my code.
+- I need to publish my code and/or data for a paper I'm submitting to, but I'm not sure
+how best to do so.
+- A colleague wants to build on my existing code, but I'm not sure how to clearly document
+what I've done to make it possible for them to adapt it.
+
+## The stages of an open data project
+
+This lesson follows the arc of an open data analysis project in Python, providing concrete
+skills and strategies to resolve common challenges along the way. We structure these
+episodes into four sections:
+
+1. Collecting and reading in data
+2. Identifying and reproducibly addressing data problems
+3. Debugging code and working with 'big data'
+4. Collaborative development and sharing your work
+
+### Strategies for finding appropriate research data
+
+**TODO:** this section feels somewhat out of place / off-topic, but probably worth covering?
+
+Once you've identified your research problem, the first step is to find dataset(s) you
+can use to investigate it. In choosing your dataset(s), you'll need to consider the
+following questions:
+
+- **Relevancy:** Does the data contain the variables you need to answer your question? Does
+the spatial and temporal scale of the data match your research needs? For example, you
+data at the utility level probably won't be sufficient to answer questions about boiler-level operations.
+- **Licensing:** People often assume that any content they can download from the internet is
+freely available for use. By default, all creative works are protected by copyright – “All rights reserved”
+means that nobody can legally use or republish data. Standardized, open licenses are how
+a creator gives the public legal permission to use their work, while retaining some control.
+Some licenses might impose additional restrictions - e.g.,
+prohibiting commercial use, or prohibiting processing and republishing the data as part
+of a new dataset. Verify that a dataset's license meets your needs as soon as possible
+in the research process.
+- **Documentation:** Is the data published with descriptions of any processing done or notable caveats,
+explanations of variable definitions, and contact information for any further questions?
+- **Level and type of processing:** The more processed a dataset is, the more you're
+depending on others' judgement. If you trust those people, and they make it clear what
+they’ve done and why, and the result is a dataset that’s much easier to use, this can be
+a great trade-off. Pre-processed datasets may combine multiple datasets together,
+use extensive validation techniques, or handle missing and outlying values - depending on
+your research needs, these can save valuable time and effort or enable you to ask questions
+that would otherwise be out of scope for a research project.
+- **Format:** Data contained in poorly scanned PDFs will require much more extensive
+processing to use than data contained in spreadsheets or computer-optimized data formats
+such as Parquet. If you require multiple years of data for your research, look out for
+changes in data formats over time.
+
+This lesson will use a few key open energy data sets to illustrate the arc of data
+analysis. For a start finding appropriate data for your research project, we recommend:
+- For national-scale research, federal agencies such as the EIA, EPA and FERC all publish
+free and regularly-updated data.
+- For local/state-level research: some states maintain their own data portals (e.g., the
+[Alaska Energy Data Gateway](https://akenergygateway.alaska.edu/)), and some ISOs publish
+regularly-updated operational data (e.g., [CAISO's hourly data](https://www.caiso.com/todays-outlook)).
+- For analysis-ready data: projects such as the [Public Utility Data Liberation (PUDL) project](https://catalystcoop-pudl.readthedocs.io/en/latest/index.html),
+[PowerGenome](https://github.com/PowerGenome/PowerGenome?tab=readme-ov-file), **TODO: some more examples** publish pre-processed data that addresses many
+of the common foundational challenges that make federal energy data hard to work with.
+
+:::::::: challenge
+
+#### Discussion: challenges in finding data
+
+Think of a time you tried to find a dataset for an energy research project. What was
+one unexpected challenge that came up as you were trying to find an appropriate dataset
+to answer your research question? Share with a peer.
+::::::::
