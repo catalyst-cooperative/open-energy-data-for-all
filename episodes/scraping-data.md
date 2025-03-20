@@ -56,7 +56,7 @@ response.text
 '<!doctype html>\r\n<html>\r\n\r\n<head>\r\n\t<title>\r\n\t\tForm EIA-923 detailed data with previous form data (EIA-906/920) -\r\n\t\tU.S. Energy Information Administration (EIA)\t</title>\r\n\t<meta property="og:title" content="Form EIA-923 detailed data with previous form data (EIA-906/920) - U.S. Energy Information Administration (EIA)">\r\n\t<meta property="og:url" content="https://www.eia.gov/electricity/data/eia923/index.php">\r\n\t<meta name="url" content="https://www.eia.gov/electricity/data/eia923/index.php">\r\n\t<meta name="description" content="Clean Air Act Data Browser" />\r\n\t...
 ```
 
-OK, so that looks like some XML, which we saw a couple episodes ago. We don't expect a *data table*, though - more a jumble of links. We need to use a different tool to make sense of all this - a library called `beautifulsoup`. For historical reasons it's imported as `bs4`.
+OK, so that looks like some XML, which we saw a couple episodes ago. We don't expect a *data table* directly in the page, like we did last time. We're more expecting a jumble of links. We need to use a different tool to make sense of all this - a library called `beautifulsoup`. For historical reasons it's imported as `bs4`.
 
 ```python
 import bs4
@@ -76,7 +76,7 @@ The first thing you'll notice is that the output looks neater:
 <meta content="Form EIA-923 detailed data with previous form data (EIA-906/920) - U.S. Energy Information Administration (EIA)" property="og:title"/>
 ```
 
-More importantly, we'll be able to filter through this complicated set of tags.
+We'll also be able to filter through this complicated set of tags.
 
 ```python
 soup.find_all("title")
@@ -165,23 +165,7 @@ a_with_zip
  <a class="ico zip" href="archive/xls/f923_2023.zip" title="2023"><span>ZIP</span></a>,
  <a class="ico zip" href="archive/xls/f923_2022.zip" title="2022"><span>ZIP</span></a>,
  <a class="ico zip" href="archive/xls/f923_2021.zip" title="2021"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2020.zip" title="2020"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2019.zip" title="2019"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2018.zip" title="2018"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2017.zip" title="2017"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2016.zip" title="2016"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2015.zip" title="2015"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2014.zip" title="2014"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2013.zip" title="2013"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2012.zip" title="2012"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2011.zip" title="2011"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2010.zip" title="2010"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2009.zip" title="2009"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f923_2008.zip" title="2008"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f906920_2007.zip" title="2007"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f906920_2006.zip" title="2006"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f906920_2005.zip" title="2005"><span>ZIP</span></a>,
- <a class="ico zip" href="archive/xls/f906920_2004.zip" title="2004"><span>ZIP</span></a>,
+ ...
  <a class="ico zip" href="archive/xls/f906920_2003.zip" title="2003"><span>ZIP</span></a>,
  <a class="ico zip" href="archive/xls/f906920_2002.zip" title="2002"><span>ZIP</span></a>,
  <a class="ico zip" href="archive/xls/f906920_2001.zip" title="2001"><span>ZIP</span></a>,
@@ -191,14 +175,16 @@ a_with_zip
 ```
 
 
-In the 923 data, we probably want to skip those 906 links too.
+We probably want to skip those Form 906 links too.
 
 ```python
-eia_923s = [a for a in a_with_zip if "f906" not in a["href"].lower()]
-eia_923s
-```
+eia_923_links = []
+for a in a_with_zip:
+  if "f906" not in a["href"].lower():
+    eia_923_links.append(a)
 
-**TODO** don't use comprehensions!!
+eia_923_links
+```
 
 :::: challenge
 
@@ -214,134 +200,380 @@ This will look a little bit different from the 923 example, since the links are 
 import bs4
 import requests
 
-url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
-response = requests.get(url)
+eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
+response = requests.get(eia_906_url)
 soup = bs4.BeautifulSoup(response.text)
 
 a_tags = soup.find_all("a", href=True)
-xls_tags = []
+eia_906_links = []
 for a in a_tags:
     if ".xls" in a["href"].lower():
-        xls_tags.append(a)
+        eia_906_links.append(a)
 ```
 ::::::::
 ::::
 
-OK, now we have our tags, time to download them, right?
+OK, now we have our tags, time to use them to download the data! The EIA 923 data all comes in ZIP files - we'll skip over the handling of those for now. Instead we'll use the 906 data that you just got.
 
 ```python
-for tag in eia_923_906s:
-    # download the file from the URL
-    # shove into dataframe
-```
-* download the URL
-  * oh wait, need to clean up the URL
-  * clean up the URL:
-    * looks like tags have weird fragments: relative paths
-    * looks like tags have weird fragments: relative paths
-      * ... relative to what? the URL of the page. good thing we have that
-    * requests needs an absolute path
-    * use urljoin to get an absolute path: `url = urljoin(base_url, fragment)`
-  * then put it into normal requests.
+import pandas as pd
 
+eia_923_blobs = []
+for a in eia_923_links:
+  response = requests.get(a["href"])
+  eia_923_blobs.append(response.content)
+```
+
+Oh no! We get an error:
+
+```output
+MissingSchema: Invalid URL 'xls/f923_2024.zip': No scheme supplied. Perhaps you meant https://xls/f923_2024.zip?
+```
+
+Looks like the URL in the `href` is incomplete. It turns out that this is a *relative path* - much like the relative paths you had to deal with when loading data on your computer. The full URL we want is
+`https://www.eia.gov/electricity/data/eia923/xls/f923_2024.zip` - which combines the URL of the page we got the link from (`https://www.eia.gov/electricity/data/eia923/eia906u.php`) with the fragment we got in the `href` (`xls/f923_2024.zip`).
+
+This is a super common thing to have to do, so there's a useful bit of the Python standard library for this: `urllib.parse.urljoin`:
+
+```
+from urllib.parse import urljoin
+
+urljoin(eia_923_url, "xls/f923_2024.zip")
+```
+
+We can also do the string concatenation ourselves with `eia_906_url + "..."`, but there are a surprising amount of details to get wrong here so it's nice to just use the function that works.
+
+Let's add that into our loop:
+
+```
+for a in eia_923_links:
+  full_link = urljoin(eia_923_url, a["href"])
+  response = requests.get(a["href"])
+  eia_923_blobs.append(response.content)
+```
 :::: challenge
 
-#### Challenge: get the URLs
+#### Challenge: get the Form 906 file contents
 
-::::::: solution
+OK, so now we know how to scrape a bunch of URLs from a webpage. Let's read the Form 906 files into our program! Since they're XLS files, we can read them directly from a URL using `pandas.read_excel` - no need for manually downloading with `requests`.
+
+Try filling out the body of this for loop.
 
 ```python
 from urllib.parse import urljoin
 
-urls = []
-for tag in xls_tags:
-    tag_url = urljoin(url, tag["href"])
-    urls.append(tag_url)
+import bs4
+import requests
+import pandas as pd
+
+eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
+response = requests.get(eia_906_url)
+soup = bs4.BeautifulSoup(response.text)
+
+a_tags = soup.find_all("a", href=True)
+eia_906_links = []
+for a in a_tags:
+    if ".xls" in a["href"].lower():
+        eia_906_links.append(a)
+
+eia_906_dataframes = []
+for a in eia_906_links:
+    ...
+```
+
+::::::: solution
+
+```python
+for a in eia_906_links:
+    full_url = urljoin(eia_906_url, a["href"])
+    eia_906_dataframes = pandas.read_excel(full_url)
 ```
 :::::::
 
 ::::
 
+Once we've completed the challenge above, we have a list of a bunch of dataframes. To bring them all into one dataframe, we can use `pd.concat`:
 
-**TODO** flesh out text
-Finally - let's concatenate this data together. We'll:
-* use 906 data, since the 923 data has a bit more complicated of a structure
+```python
+mega_906 = pd.concat(eia_906_dataframes)
+```
 
-* put them in a dataframe with trusty `pandas.read_xls()`. here's the skiprows stuff, whatever, i believe you learned it the first time.
-* pick some columns to concat across all dataframes ... do 906 since you don't have to unzip :)
+If you use `DataFrame.info()` you can quickly see that some columns (YEAR, FIPST, UTILNAME) are more populated than others (MULTIST, GEN01, etc):
 
-**TODO**: what's the exercise here?
+```python
+mega_906.info()
+```
+
+And if you start to dig into the data a bit, such as pulling out the various values of `YEAR`, you see that you have *plenty* of data cleaning to do before this is really usable for analysis. But at least you have all of the data in one dataframe now! We'll go over some more tips for exploratory data analysis in the next episode.
+
+```python
+mega_906.YEAR.value_counts()
+```
+
+```output
+YEAR
+96      10507
+97      10468
+1999    10296
+2000     9617
+74       6429
+73       6363
+75       6362
+76       6307
+72       6198
+71       6130
+70       6100
+81       5692
+85       5692
+80       5678
+82       5669
+84       5661
+83       5650
+87       5647
+86       5634
+77       5627
+78       5594
+79       5554
+98       5470
+89       5263
+88       5241
+95       5119
+1998     5118
+93       5109
+91       5107
+94       5102
+92       5100
+90       5074
+99         40
+0          14
+Name: count, dtype: int64
+```
 
 :::: discussion
 
-Why else might you choose to do this instead of just manually collecting links?
+Why might you choose to do all this instead of just manually collecting links?
 
 * If it's a lot of effort to get to each link
 * If the data is frequently updated
 * If I have to download all the files multiple times
+* If I have to combine everything into one big dataset programmatically anyways
 
 ::::
 
 ### pagination
 
-* Another place you need lots of URLs is when APIs don't give you everything all at once
-* API only returns 5k rows at a time
-* this time, you're generating the URLs yourself instead of scraping them from a page
-* the process of getting the first 5k rows, then the next 5k rows, etc. is "pagination" - like going to the next page of Google results.
+Another time you'll need lots of URLs is when APIs don't give you everything all at once. For example, the EIA API kept giving us this warning:
 
-* Closer look at EIA API - check out limit and offset in the docs. also check out the "total" in response
+```
+The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.
+```
 
-Example:
+So if we want a dataset that's bigger than 5000 rows, we'll need to make multiple requests. Instead of scraping many URLs from a page, we'll be generating the URLs ourselves.
 
-* Get the first 10 rows
-* Get the second 10 rows
+This process of "get N rows, then the next N rows, etc." is called "pagination" - like going to the next page of Google results.
 
-Q in chat:
-We have total XXX rows, how many pages do we need?
+We'll go to the docs to look at this `offset` parameter:
 
-Do the code as example:
+> Offset stipulates the row number the API should begin its return with, out of all the eligible rows our query would otherwise provide.
+>
+> [...]
+>
+> `https://api.eia.gov/v2/electricity/retail_sales/data?api_key=xxxxxx&data[]=price&facets[sectorid][]=RES&facets[stateid][]=CO&frequency=monthly&sort[0][column]=period&sort[0][direction]=desc&offset=24`
+>
+> In the above example, the API will skip over the first 24 eligible rows (offset=24), which translates into 24 months (frequency=monthly).
+
+Let's try it out - first, let's make an API request and look at the output. A few things to note:
+
+* we're filtering for CO generation to get a manageable amount of data that's still more than 5000 rows
+* we're sorting by the time period - this lets us have a stable order so that the "next 5000 rows" means something well-defined.
+
+```python
+import requests
+
+base_url = "https://api.eia.gov/v2/electricity"
+api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+
+# remember from last time that the shape is a JSON object with everything in "response"
+first_page = requests.get(
+  f"{base_url}/facility-fuel/data",
+  params={
+    "data[]": "generation",
+    "facets[state][]": "CO",
+    "sort[0][column]": "period",
+    "sort[0][direction]": "desc",
+    "api_key": api_key
+  }
+).json()["response"]
+
+net_generation.keys()
+```
+
+Let's grab the next 5000 rows:
+
+```python
+next_page = requests.get(
+  f"{base_url}/facility-fuel/data",
+  params={
+    "data[]": "generation",
+    "facets[state][]": "CO",
+    "sort[0][column]": "period",
+    "sort[0][direction]": "desc",
+    "offset": 5000,
+    "api_key": api_key
+  }
+).json()["response"]
+```
+
+And if we wanted to grab the first 5 pages, we could use a `for` loop combined with the `range()` function - here's how `range` works:
+
+```python
+for page_num in range(5):
+    print(page_num)
+```
+
+Here the `range()` lets you go through the loop 5 times.
+
+When we are looking to get *all* of the pages, we can use the `"total"` field in the EIA API response to figure out how many total rows there are:
+
+```python
+first_page["total"]
+```
+
+```output
+155130
+```
+
+So there are 155,130 rows in this dataset.
+
+:::: discussion
+Question for chat: if we have N rows total, and P rows per page, how many pages do we need to get all the data?
+
+:::::::: solution
+
+$ceil(N/P)$
+
+::::::::
+::::
+
+And here's how we'd get from the number of total rows to the number of pages we need:
+
 ```python
 import math
 
-total_rows = response["response"]["total"]
-page_size = 100
-n_pages = math.ceil(total_rows / page_size)
+total_rows = net_generation["total"]
+page_size = 5000
+num_pages = math.ceil(total_rows / page_size)
 ```
 
-Exercise:
+:::: challenge
 
-OK, now put it all together!
+#### Challenge: pagination
+OK, now let's put it all together! Let's fill in the blanks for this code:
 
 ```python
+import math
+
+base_url = "https://api.eia.gov/v2/electricity"
+api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+
+page = requests.get(
+  f"{base_url}/facility-fuel/data",
+  params={
+    "data[]": "generation",
+    "facets[state][]": "CO",
+    "api_key": api_key
+  }
+).json()["response"]
+
+total_rows = ___
+page_size = 5000
+num_pages = ___
+
 all_records = []
-for ______:
+for page_num in range(num_pages):
     offset = ___
-    page_of_data = requests.get("...", params={...}).json()
-    all_records.extend(page_of_data["response"]["data"])
+    page = requests.get(
+      f"{base_url}/facility-fuel/data",
+      params={
+        "data[]": "generation",
+        "facets[state][]": "CO",
+        ___,
+        "api_key": api_key
+      }
+    ).json()["response"]
+    all_records.extend(page_of_data["data"])
 ```
+
+:::::::: solution
+
+```python
+import math
+import requests
+
+base_url = "https://api.eia.gov/v2/electricity"
+api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+
+net_generation = requests.get(
+  f"{base_url}/facility-fuel/data",
+  params={
+    "data[]": "generation",
+    "facets[state][]": "CO",
+    "api_key": api_key
+  }
+).json()["response"]
+
+total_rows = int(net_generation["total"])
+page_size = 5000
+num_pages = math.ceil(total_rows / page_size)
+
+all_records = []
+
+for page_num in range(num_pages):
+    offset = page_num * page_size
+    print(offset)
+    page = requests.get(
+      f"{base_url}/facility-fuel/data",
+      params={
+        "data[]": "generation",
+        "facets[state][]": "CO",
+        "sort[][column]": "period",
+        "sort[][direction]": "desc",
+        "offset": offset,
+        "api_key": api_key
+      }
+    ).json()["response"]["data"]
+    all_records.extend(page)
+```
+
+::::::::
+
+::::
 
 ### Further resources
 
-* Sometimes, there are obstacles. We can't teach you how to overcome all of them here...
+We've only just scratched the surface of programmatically getting data from the Internet here. Sometimes, there are obstacles. We can't teach you how to overcome all of them, but here is a little troubleshooting guide of "something weird? maybe try searching for these keywords."
 
-* But here is a little guide of "something weird? maybe try searching for these tools/ideas"
-
-* links aren't showing up in your `bs4` `a` tags?
-  * look at the links using the *html inspector*
-  * look at what's happening when you download files by using *network tab*
+* Links not showing up in your `bs4` `a` tags?
+  * look at the links using the *html inspector* in your browser dev tools.
+  * look at what's happening when you download files by using the *network tab* of your browser dev tools.
     * when you click something to download data, or when you load in data for a graph, keep an eye on this. you might find some suspicious looking URLs
-* is the html you see in browser *different* from what you get from `requests`?
-  * sometimes there's code that your browser runs after the initial load. try playwright which automates a browser for you, instead of just using requests. keyword is `headless browser automation`
+* The HTML you see in *browser dev tools* is different from what you get from `requests`?
+  * sometimes there's code that your browser runs after the initial load, which changes the HTML after the fact. `requests` won't catch that, but try `playwright` which runs that post-load code. keyword is `headless browser automation`.
   * sometimes servers will be mean to you because of who you say you are (*user agent*).
-    * giving you some sort of error/captcha
-    * just not giving you anything at all
-    * if you suspect that... try telling them you're a real human instead of a bot by "spoofing user agent"
-* do you get blocked a lot for scraping?
-  * try adding some delays in your scraping code so that it's not hammering the server so hard.
-  * do double-check the terms & conditions of the website you're using...
-  * you might need a 'web scraping proxy' service.
-* what if you need to download the file?
-  * response.content
+    * sometimes they'll give you some sort of error, or a CAPTCHA
+    * sometimes they will just not give you any response at all
+    * If you suspect that... try telling them you're a real human instead of a bot. Look for "spoofing the user agent" to see guides on how to do this.
+* Running into rate limits for making too many requests?
+  * Try adding some delays in your scraping code so that it's not hammering the server so hard. The `time.sleep` method here is your friend.
+  * Do double-check the terms & conditions of the website you're using - if a website is implementing some rate limit, they probably don't want you using automated tools to download the data in the first place.
+  * You might need a 'web scraping proxy' service, which will let you get around a lot of limits.
+* Have to download a file to disk instead of turning it into a DataFrame immediately?
+  * Use `response.content` to get the literal bytes that the response is made of - this will help with files like ZIP files that don't have a nice text representation.
+  * Then use the "wb" mode ("write binary") to write that data to disk:
+  ```python
+  with open(some_filename, "wb") as f:
+      f.write(response.content)
+  ```
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
