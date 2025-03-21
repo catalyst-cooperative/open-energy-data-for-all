@@ -82,7 +82,7 @@ We'll also be able to filter through this complicated set of tags.
 soup.find_all("title")
 ```
 
-To get all the links, we need to get all the `a` tags:
+To get all the links, we need to get all the `a` tags - that's where links in HTML usually live:
 
 ```python
 soup.find_all("a")
@@ -116,6 +116,17 @@ The first step is to get all the `a` tags from this page:
 
 ```
 https://www.eia.gov/electricity/data/eia923/eia906u.php
+```
+
+Start with this skeleton code:
+
+```python
+import bs4
+import requests
+
+eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
+
+# get the page contents, then use bs4 to get the `a` tags
 ```
 
 :::::::: solution
@@ -194,7 +205,20 @@ Let's grab only the `a` tags that are links to the actual data files.
 
 This will look a little bit different from the 923 example, since the links are all to XLS files instead of ZIP files.
 
+Let's start with this code:
+
+```python
+import bs4
+import requests
+
+eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
+response = requests.get(eia_906_url)
+soup = bs4.BeautifulSoup(response.text)
+
+# get only the `a` tags that are links to Form 906 data files.
+```
 :::::::: solution
+
 
 ```python
 import bs4
@@ -278,7 +302,7 @@ for a in a_tags:
 
 eia_906_dataframes = []
 for a in eia_906_links:
-    ...
+    ___
 ```
 
 ::::::: solution
@@ -502,12 +526,16 @@ for page_num in range(num_pages):
       }
     ).json()["response"]
     all_records.extend(page_of_data["data"])
+
+df = pd.concat(all_records)
 ```
 
 :::::::: solution
 
 ```python
 import math
+
+import pandas as pd
 import requests
 
 base_url = "https://api.eia.gov/v2/electricity"
@@ -542,12 +570,16 @@ for page_num in range(num_pages):
         "api_key": api_key
       }
     ).json()["response"]["data"]
-    all_records.extend(page)
+    all_records.extend(pd.DataFrame(page_of_data["data"]))
+
+df = pd.concat(all_records)
 ```
 
 ::::::::
 
 ::::
+
+This is just one common way APIs do pagination. You'll have to flex those API learning skills (play with the data, read the docs, bounce back and forth) to learn how each new API handles this.
 
 ### Further resources
 
@@ -578,6 +610,7 @@ We've only just scratched the surface of programmatically getting data from the 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - beautiful soup lets you grab links out of a webpage so that you can then download them
-- ... pagination?
+- if you need to get more than one request worth of results from an API, they usually provide some "pagination" capabilities so you can make all the requests programmatically.
+- web scraping is a wide world - if you get stuck, try searching for some of the keywords above.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
