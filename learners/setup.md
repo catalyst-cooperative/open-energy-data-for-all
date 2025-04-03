@@ -24,14 +24,8 @@ Fortunately `git` is free!
 Try opening a terminal window and running:
 
 ```bash
-> git --version
+% git --version
 ```
-
-:::: callout
-A formatting note for these examples:
-
-The `> ` is just the character that indicates that the terminal is waiting for your input - don't literally type `> git --version`. Type `git --version` instead.
-::::
 
 If you get some sort of "command not found" error,
 follow the [official installation instructions](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
@@ -42,19 +36,15 @@ Let's assume you have a `courses` directory that you want to store the course ma
 This will download the materials to `course/open-energy-data-for-all`.
 
 ```bash
-> cd courses
-courses/ > git clone https://github.com/catalyst-cooperative/open-energy-data-for-all.git
+% cd courses
+courses/ % git clone https://github.com/catalyst-cooperative/open-energy-data-for-all.git
 ```
-
-:::: callout
-The `courses/` before the `>` indicates what directory you're in.
-::::
 
 If you open the `open-energy-data-for-all` directory you just made, you should be able to see the course materials.
 
 ```bash
-courses/ > cd open-energy-data-for-all
-courses/open-energy-data-for-all/ > ls # or dir, if you're in Command Prompt on Windows
+courses/ % cd open-energy-data-for-all
+courses/open-energy-data-for-all/ % ls # or dir, if you're in Command Prompt on Windows
 CITATION.cff
 CODE_OF_CONDUCT.md
 ...
@@ -71,17 +61,17 @@ Once you've installed `uv`, you can use it to install the Python libraries into 
 
 1. Using a terminal, enter the course repository you downloaded above:
    ```bash
-   > cd ~/courses/open-energy-data-for-all
+   % cd ~/courses/open-energy-data-for-all
    ```
 
 2. Install the libraries:
    ```bash
-   courses/open-energy-data-for-all/ > uv sync
+   courses/open-energy-data-for-all/ % uv sync
    ```
 
 3. Test out to see if the dependencies were installed by opening a Jupyter notebook:
    ```bash
-   courses/open-energy-data-for-all/ > uv run jupyter notebook
+   courses/open-energy-data-for-all/ % uv run jupyter notebook
    ```
 
    You should see a directory listing in your browser:
