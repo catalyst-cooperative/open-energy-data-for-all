@@ -32,18 +32,36 @@ you know that they're travelling for field work for the next six months and won'
 able to respond to further questions - the documents in the drive will be your only
 source of information going forward.
 
-As you peruse their Python notebooks and scattered notes in preparation for your
-qualifying exams, you decide you want to do things differently. Rather than filing your
-work away on a hard drive after the final paper is published, you set out to work on a
-research project in a way that meets the following principles:
+This is not a resilient way to work on a research project. Many common events
+can cause big challenges:
 
-- **Open and transparent:** You want people to be able to freely access your data inputs and outputs,
-and to be able to clearly see the decisions and assumptions you've made across the way.
-You want your work to conform to academic standards for open access.
-- **Collaborative:** You want other lab members to be able to review your work, provide
-feedback, and contribute to parts of the analysis.
-- **Reproducible:** You want researchers in other labs to be able to reproduce your outputs,
-and to build on the tedious data cleaning you're about to do.
+* someone leaves the project, temporarily or permanently
+* the project gets put on pause for a while
+* someone new wants to join the project and help out
+* someone wants to build new work on top of the project
+
+As you are left to puzzle everything out on your own, you daydream about a
+project where these events are much less disruptive. What might that look like?
+
+You'd want to be able to **collaborate** with other people starting early on in
+the project - it'd be nice if your other team members could review your work,
+provide feedback, and contribute to parts of the analysis. Then if you have to
+disappear for a while, other people can carry the project forward.
+
+You'd want to be **open and transparent** about the data - what the inputs are,
+what the outputs are, and how you got from A to B. When you're talking to a
+potential collaborator, a new teammate, or just getting back into the project
+after a break, being able to see the core data flows can save you a lot of
+pain.
+
+You'd also want the project outcomes to be **reproducible**, so researchers in
+other labs can build on the work that you're about to do, and confirm your
+results. Maybe you end up getting a new job, leaving someone else in the lab to
+keep the project going. In your new role, you might find that you yourself want
+to build on all your old work.
+
+We'll keep these principles in mind as we work through the material in this
+course.
 
 ### Working with the data
 
