@@ -576,80 +576,108 @@ any links that you are not going to use.
  --></tbody></table><p>
       The actual schedule may vary slightly depending on the topics and exercises chosen by the instructor.
       </p>
-      </section><section id="setup"><p>FIXME: Setup instructions live in this document. Please specify the
-tools and the data sets the Learner needs to have installed.</p>
-<section><h2 class="section-heading" id="data-sets">Data Sets<a class="anchor" aria-label="anchor" href="#data-sets"></a></h2>
-<hr class="half-width"><!--
-FIXME: place any data you want learners to use in `episodes/data` and then use
-       a relative link ( [data zip file](data/lesson-data.zip) ) to provide a
-       link to it, replacing the example.com link.
---><p>Download the <a href="https://example.com/FIXME" class="external-link">data zip file</a>
-and unzip it to your Desktop</p>
-</section><section><h2 class="section-heading" id="software-setup">Software Setup<a class="anchor" aria-label="anchor" href="#software-setup"></a></h2>
-<hr class="half-width"><div id="details" class="callout discussion">
-<div class="callout-square">
-<i class="callout-icon" data-feather="message-circle"></i>
+      </section><section id="setup"><section><h2 class="section-heading" id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a></h2>
+<hr class="half-width"><p>You’ll need a few things set up before starting the course:</p>
+<ul><li>the course materials should be downloaded to your computer</li>
+<li>the Python libraries used in the course should be installed</li>
+</ul><p>We’ll assume you have some familiarity with the command line:</p>
+<ul><li>you can run commands</li>
+<li>you can navigate directories with <code>cd</code>
+</li>
+<li>you can inspect directories with <code>ls</code> (or
+<code>dir</code> if you’re using Command Prompt on Windows)</li>
+</ul><div class="section level3">
+<h3 id="getting-the-course-materials">Getting the course materials<a class="anchor" aria-label="anchor" href="#getting-the-course-materials"></a></h3>
+<p>The course materials are hosted on GitHub and you’ll need
+<code>git</code> installed to access them. Fortunately <code>git</code>
+is free!</p>
+<p>Try opening a terminal window and running:</p>
+<div class="codewrapper sourceCode" id="cb1">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">%</span> git <span class="at">--version</span></span></code></pre>
 </div>
-<div id="details" class="callout-inner">
-<h3 class="callout-title">Details</h3>
-<div class="callout-content">
-<p>Setup for different systems can be presented in dropdown menus via a
-<code>spoiler</code> tag. They will join to this discussion block, so
-you can give a general overview of the software used in this lesson here
-and fill out the individual operating systems (and potentially add more,
-e.g. online setup) in the solutions blocks.</p>
+<p>If you get some sort of “command not found” error, follow the <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" class="external-link">official
+installation instructions</a>.</p>
+<p>Once you have <code>git</code> installed, open a terminal window and
+download a copy of the materials using <code>git clone</code>.</p>
+<p>Let’s assume you have a <code>courses</code> directory that you want
+to store the course materials under. This will download the materials to
+<code>course/open-energy-data-for-all</code>.</p>
+<div class="codewrapper sourceCode" id="cb2">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">%</span> cd courses</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="ex">courses/</span> % git clone https://github.com/catalyst-cooperative/open-energy-data-for-all.git</span></code></pre>
 </div>
-</div>
-</div>
-<div id="accordionSpoiler1" class="accordion spoiler-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
-  <h3 class="accordion-header" id="headingSpoiler1">
-  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div>
-  Windows
-  </h3>
-</button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
-<div class="accordion-body">
-<p>Use PuTTY</p>
-</div>
-</div>
-</div>
-</div>
-<div id="accordionSpoiler2" class="accordion spoiler-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
-  <h3 class="accordion-header" id="headingSpoiler2">
-  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div>
-  MacOS
-  </h3>
-</button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
-<div class="accordion-body">
-<p>Use Terminal.app</p>
+<p>If you open the <code>open-energy-data-for-all</code> directory you
+just made, you should be able to see the course materials.</p>
+<div class="codewrapper sourceCode" id="cb3">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">courses/</span> % cd open-energy-data-for-all</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="ex">courses/open-energy-data-for-all/</span> % ls <span class="co"># or dir, if you're in Command Prompt on Windows</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="ex">CITATION.cff</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="ex">CODE_OF_CONDUCT.md</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="ex">...</span></span></code></pre>
 </div>
 </div>
+<div class="section level3">
+<h3 id="installing-the-python-libraries">Installing the Python libraries<a class="anchor" aria-label="anchor" href="#installing-the-python-libraries"></a></h3>
+<p>To install the Python libraries this course depends on, you will need
+<code>uv</code>.</p>
+<p>If you don’t have <code>uv</code> installed, check out their <a href="https://docs.astral.sh/uv/getting-started/installation/" class="external-link">official
+installation documentation</a>.</p>
+<p>Once you’ve installed <code>uv</code>, you can use it to install the
+Python libraries into an isolated environment only for this course.</p>
+<ol style="list-style-type: decimal"><li>
+<p>Using a terminal, enter the course repository you downloaded
+above:</p>
+<div class="codewrapper sourceCode" id="cb4">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">%</span> cd ~/courses/open-energy-data-for-all</span></code></pre>
 </div>
+</li>
+<li>
+<p>Install the libraries:</p>
+<div class="codewrapper sourceCode" id="cb5">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="ex">courses/open-energy-data-for-all/</span> % uv sync</span></code></pre>
 </div>
-<div id="accordionSpoiler3" class="accordion spoiler-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
-  <h3 class="accordion-header" id="headingSpoiler3">
-  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div>
-  Linux
-  </h3>
-</button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
-<div class="accordion-body">
-<p>Use Terminal</p>
+</li>
+<li>
+<p>Test out to see if the dependencies were installed by opening a
+Jupyter notebook:</p>
+<div class="codewrapper sourceCode" id="cb6">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="ex">courses/open-energy-data-for-all/</span> % uv run jupyter notebook</span></code></pre>
 </div>
-</div>
-</div>
-</div>
-<!--
+<p>You should see a directory listing in your browser:</p>
+<figure><img src=".././notebook-home.png" alt="A directory listing, showing the contents of the course repository." class="figure mx-auto d-block"><div class="figcaption">A directory listing, showing the contents of the
+course repository.</div>
+</figure><p>Click on <code>/notebooks</code>, and then double-click the
+<code>00-test-installation.ipynb</code> notebook. You should see a
+single cell:</p>
+<figure><img src=".././test-notebook-success.png" alt="A cell that imports the high-level dependencies we need in the course." class="figure mx-auto d-block"><div class="figcaption">A cell that imports the high-level dependencies
+we need in the course.</div>
+</figure><p>Run that cell - if it doesn’t print <code>Success!</code>, then
+you’re missing some dependencies for the course.</p>
+<p>Double-check:</p>
+<ul><li>that you ran <code>jupyter notebook</code> with
+<code>uv run jupyter notebook</code>
+</li>
+<li>that the libraries that are imported are listed in
+<code>pyproject.toml</code>
+</li>
+</ul><p>If both are true, contact your instructor for help.</p>
+</li>
+</ol><!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
- -->
+ --></div>
 </section></section></main><nav class="bottom-pagination mx-md-4" aria-label="Next Chapter"><!-- content for small screens --><div class="d-block d-sm-block d-md-none">
         <a class="chapter-link float-end" href="../instructor/introduction.html">Next<i aria-hidden="true" class="small-arrow" data-feather="arrow-right"></i></a>
       </div>
@@ -699,8 +727,8 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/index.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/index.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2025-04-01",
-  "datePublished": "2025-04-01"
+  "dateModified": "2025-04-03",
+  "datePublished": "2025-04-03"
 }
 
   </script><script>
