@@ -6,40 +6,24 @@ exercises: 6
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-* where do I start? /how do i know where to begin?
-* is it normal to feel like my project has gone nowhere and I should start over?
-* my coursework makes sense. what makes research so much harder?
-* this sucks. how can I make sure no one else has to suffer this misery?
-* what can I do to feel like part of a research community?
-* what can I do to help my work have lasting impact?
-* what do I need to think about so that my project doesn't fall apart halfway to the finish line?
+* My coursework makes sense. What makes research so much harder?
+* This sucks. How can I make sure no one else has to suffer this misery?
+* What can I do to feel like part of a research community?
+* What can I do to help my work have lasting impact?
+* What do I need to think about so that my project doesn't fall apart halfway to the finish line?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-* describe (/explain?) the phases of a data processing project (/research project?)
-* discuss the benefits of open data principles
-* list(/summarize? briefly describe?) the modules covered in this course
-* identify key considerations in selecting a dataset for an open data project
+* Summarize the phases of a data-centric research project.
+* Discuss the benefits of open data principles.
+* Briefly describe the modules covered in this course.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-### lost & found bin for unassigned challenges
-
-:::::::: challenge
-
-#### Introspection: durability
-
-Think of one of the well-established ideas or techniques in your field of research, something many people have built upon since it was first published. What do you think made that idea so useful? What helped it take hold? What helped it spread?
-
-::::::::
-
-
-### Narrative / why open data
-
-TODO: I love this as a cold open but at some point we need a "welcome to OED4A" moment and that transition is being obstinate
+### Setting the scene
 
 You're poking around your research lab's collaborative drive when you find a folder
 containing data, code and some notes from a former postdoctoral researcher. They were
@@ -52,6 +36,8 @@ work and developing it further. While they give you the go-ahead over email, the
 you know that they're travelling for field work for the next six months and won't be
 able to respond to further questions - the documents in the drive will be your only
 source of information going forward.
+
+You are a little alarmed. The data has only hints of where it came from, the code barely has any comments, and the notes are mostly about open TODOs. There are no instructions for running anything. You have your work cut out for you.
 
 :::::::: challenge
 
@@ -94,13 +80,17 @@ course.
 
 ### Welcome
 
+Welcome to Open Energy Data for All!
+
 :::: instructor
-deliver this as if you are in an infomercial
+
+Deliver this as if you are in an infomercial, and as if everyone is on board with the character you are playing.
+
 ::::
 
-* have you ever struggled with all the weird little auxiliary bits of writing research software?
-* does it ever seem like those weird little auxiliary bits are, like, all of the work you do, and the actual interesting analysis stuff falls by the wayside?
-* do you ever feel like there must be a better way to do your research?
+* Have you ever struggled with all the weird little auxiliary bits of writing research software?
+* Does it ever seem like those weird little auxiliary bits are, like, all of the work you do, and the actual interesting analysis stuff falls by the wayside?
+* Do you ever feel like there must be a better way to do your research?
 
 That's all normal. There's a lot to the research process that doesn't get covered in class, and people are usually left to learn through personal struggle. We won't be able to cover all of that material, but we've chosen a few areas to cover in our time together to help close that gap.
 
@@ -111,11 +101,38 @@ You may have seen a diagram like this in a research methods class or as part of 
 If not, that's okay!
 You don't need to know it by heart to succeed in this course.
 
-[image]
+![Project life cycle diagram. Main sequence in yellow shows research stages, from choosing a topic to publication and archiving. Central to the yellow cycle is sharing work-in-progress, with components for ensuring source data is available, making data preparation methods available, distributing tools, and making results replicable. Data sequence in grey includes finding, fetching, cleaning, debugging, and fixing problems, with a looming backdrop of dealing with scale. Scattered grey bubbles indicate connections to data processes throughout the research and collaboration components.](./fig/ep1-data-project-lifecycle.png)
 
-KM TODO: Paragraph: summary
+The general flow is clockwise: from choosing a topic, doing some initial exploration, and narrowing your focus, you develop a hypothesis; perhaps that a certain model or analysis might work well with a particular dataset and lead to new insights.
+If all your guesses and assumptions turn out to be correct, you run your experiment, collect your results, publish a paper, and move on to the next project... but that rarely happens smoothly in practice.
+Maybe you find an implementation detail while developing your model that leads you to refine your intuition about what will work best.
+Maybe an experiment reveals an edge case you hadn't considered.
+Maybe the analysis shows a suspicious gap that you could investigate with only a small modification to your approach.
+You might get almost to the end and find that some early assumption you made was complete nonsense that invalidated all of your results.
+Such setbacks are normal -- though heartbreaking -- and often necessary.
+Sometimes it's a quick trip backwards, and sometimes it's longer, but it is very common to learn more from something that doesn't quite work than from something that works perfectly on the first try.
 
-KM TODO: Paragraph: parts of the research process which benefit from collaboration
+Publication is a great way to share what you have learned with others, and learn from others in turn.
+However,
+
+- False starts and wrong turns are not often included in research papers, even if a conference or journal would accept negative results.
+- When page limits are tight, details about the data processing and code are usually cut before details about the model and results.
+- While preprint venues can offer a way to collect feedback in advance of full peer review, it is almost always more focused on assumptions and approach than on troubleshooting a stack trace.
+- While many publication venues require code and data to be published alongside each paper, not all do, which can make replicating another lab's results difficult or even impossible.
+
+Introducing collaboration earlier in the research process can help with all of these problems.
+If you start your project with code sharing in mind, there will be less cleanup to do at publication time, and it will be easier to ask for advice from other researchers when you run into trouble.
+Most people are more willing to look at a nicely-organized and documented GitHub repository than wade into a 5,000-line Python notebook. It is also significantly easier to extract a minimum example of a problem if your code is already organized in functions.
+If you select source data that is publicly available, it is more likely that others will have seen and solved the same problems that you will encounter.
+There may even be existing tools to clean and process the data you are interested in -- or if not, publishing your cleaning and processing code independently of your research results can pay off on multiple axes. Other researchers will be able to replicate your results more easily if they can rely on a common starting point, you will help increase activity and accelerate development in your research area by reducing toil and duplicated effort, and your tooling can be a source of citations you may not have considered before.
+
+:::::::: challenge
+
+#### Introspection: durability
+
+Think of one of the well-established ideas or techniques in your field of research, something many people have built upon since it was first published. What do you think made that idea so useful? What helped it take hold? What helped it spread?
+
+::::::::
 
 Data has its own mini-cycle. It comes into play fully at the beginning of a project, and then repeats in parts along the way.
 When you identify a new data need, either at the beginning of a project or to solve a problem when you're deep in the middle, you will need to locate an appropriate source for that data, and figure out how to access it.
@@ -166,7 +183,15 @@ how best to do so
 what I've done to make it possible for them to adapt it
 - I wrote this code myself six months ago, and I do not recognize it, nor can I remember what I was trying to do
 
-The next episode will discuss reading data in unexpected file formats. But first, we have to locate some data that will help with our research goals.
+The next episode will discuss reading data in unexpected file formats.
+
+:::::::: instructor
+
+The remaining section is useful, but not central, and can be cut for time if necessary. If cut, direct students to the course website for tips on locating and identifying appropriate datasets for open research projects.
+
+::::::::
+
+But first, we have to locate some data that will help with our research goals.
 
 ### Strategies for finding appropriate research data
 
