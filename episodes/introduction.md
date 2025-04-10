@@ -94,7 +94,15 @@ course.
 
 ### Welcome
 
-TODO: break the fourth wall, get students to understand that they belong here
+:::: instructor
+deliver this as if you are in an infomercial
+::::
+
+* have you ever struggled with all the weird little auxiliary bits of writing research software?
+* does it ever seem like those weird little auxiliary bits are, like, all of the work you do, and the actual interesting analysis stuff falls by the wayside?
+* do you ever feel like there must be a better way to do your research?
+
+That's all normal. There's a lot to the research process that doesn't get covered in class, and people are usually left to learn through personal struggle. We won't be able to cover all of that material, but we've chosen a few areas to cover in our time together to help close that gap.
 
 ### The research life cycle
 
