@@ -1,7 +1,7 @@
 ---
 title: "Introduction"
-teaching: 30
-exercises: 6
+teaching: 20
+exercises: 12
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions
@@ -97,11 +97,11 @@ That's all normal. There's a lot to the research process that doesn't get covere
 ### The research life cycle
 
 Research is cyclic by nature: we ask questions about the world, and as we investigate them, we make hypotheses, test those hypotheses, and reveal more questions along with our conclusions.
-You may have seen a diagram like this in a research methods class or as part of orientation for your research institute.
+You may have seen a diagram like this in a research methods class or as part of orientation for your library or research institute.
 If not, that's okay!
 You don't need to know it by heart to succeed in this course.
 
-![Project life cycle diagram. Main sequence in yellow shows research stages, from choosing a topic to publication and archiving. Central to the yellow cycle is sharing work-in-progress, with components for ensuring source data is available, making data preparation methods available, distributing tools, and making results replicable. Data sequence in grey includes finding, fetching, cleaning, debugging, and fixing problems, with a looming backdrop of dealing with scale. Scattered grey bubbles indicate connections to data processes throughout the research and collaboration components.](./fig/ep1-data-project-lifecycle.png)
+![Life cycle of a research project.](./fig/ep1-data-project-lifecycle.png){alt="Project life cycle diagram. Main sequence in yellow shows research stages, from choosing a topic to publication and archiving. Central to the yellow cycle is sharing work-in-progress, with components for ensuring source data is available, making data preparation methods available, distributing tools, and making results replicable. Data sequence in grey includes finding, fetching, cleaning, debugging, and fixing problems, with a looming backdrop of dealing with scale. Scattered grey bubbles indicate connections to data processes throughout the research and collaboration components."}
 
 The general flow is clockwise: from choosing a topic, doing some initial exploration, and narrowing your focus, you develop a hypothesis; perhaps that a certain model or analysis might work well with a particular dataset and lead to new insights.
 If all your guesses and assumptions turn out to be correct, you run your experiment, collect your results, publish a paper, and move on to the next project... but that rarely happens smoothly in practice.
@@ -142,9 +142,6 @@ You might have a clear idea mathematically of what processing and analysis you w
 You will need to develop strategies for checking that your code has done the right thing, and ways to inspect the data at different points in your pipeline when something has gone wrong.
 If your project requires large quantities of data, sufficiently large that your computer cannot load it all into memory at once, you will need to use techniques and tools that are built to handle data at scale.
 
-<!-- Throughout the process, you may wish to get feedback from your peers and mentors about your progress and approach. -->
-<!-- There are many steps you can take to make collaboration easier technologically as well as ensuring your work is legible to others. -->
-
 The parts of the research project life cycle that typically receive explicit attention in coursework include selecting a research question, analysis techniques (e.g., selecting the appropriate statistical method), and publication.
 Training in the remaining portions is often assumed to happen naturally through research experience, but this is not always effective in practice.
 Gaps in these areas can create roadblocks to conducting effective, reproducible and open research, even for experienced researchers.
@@ -163,11 +160,13 @@ Think of a skill you've found useful in your research that wasn't taught in one 
 This course is focused on practical solutions to roadblocks you may encounter in dealing with data, code, and collaboration. We will be following the arc of an open data analysis project in Python, structuring the course into three sections:
 
 Roadblocks to data acquisition:
+
 - My data is in a format I've never worked before
 - The data I want to work with is published through an Application Programming Interface
 (API), and I don't know how to download it
 
 Roadblocks to data cleaning & processing:
+
 - There's something unexpected about my input data, but I'm not sure what
 - The code runs on some of my data, but errors on other input data
 - When I re-run my code I get different results, and I'm not sure why
@@ -176,6 +175,7 @@ Roadblocks to data cleaning & processing:
 - My data is too big to work with on a desktop computer
 
 Roadblocks to collaboration:
+
 - I'm not sure how to make it simple for collaborators to run and contribute to my code
 - I need to publish my code and/or data for a paper I'm submitting to, but I'm not sure
 how best to do so
@@ -235,7 +235,8 @@ such as Parquet. If you require multiple years of data for your research, look o
 changes in data formats over time.
 
 This lesson will use a few key open energy data sets to illustrate the arc of data
-analysis. For a start finding appropriate data for your research project, we recommend:
+analysis. We also have several recommendations to give you a start finding appropriate data for your own research project, depending on your area of interest:
+
 - For national-scale research, federal agencies such as the EIA, EPA and FERC all publish
 free and regularly-updated data.
 - For local/state-level research: some states maintain their own data portals (e.g., the
@@ -244,3 +245,11 @@ regularly-updated operational data (e.g., [CAISO's hourly data](https://www.cais
 - For analysis-ready data: projects such as the [Public Utility Data Liberation (PUDL) project](https://catalystcoop-pudl.readthedocs.io/en/latest/index.html),
 [PowerGenome](https://github.com/PowerGenome/PowerGenome?tab=readme-ov-file), **TODO: some more examples** publish pre-processed data that addresses many
 of the common foundational challenges that make federal energy data hard to work with.
+
+:::: keypoints
+
+* Open data principles such as reproducibility, transparency, and collaboration make it easier to share, interpret, and build upon research projects.
+* A data research project cycles through choosing a topic, initial explorations, forming a hypothesis, developing models and analyses, running experiments, and analyzing and publishing results. Data tasks such as gathering, loading, cleaning, and debugging are guaranteed at the beginning of the process, and may recur throughout as new data needs arise. Collaborate early & collaborate often to avoid pitfalls and more easily climb out of the ones you do fall into.
+* This course will discuss data acquisition, cleaning & processing, and collaboration.
+
+::::
