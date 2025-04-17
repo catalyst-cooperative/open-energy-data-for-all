@@ -233,12 +233,20 @@
 <div class="accordion accordion-flush" id="accordionFlushcurrent">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-headingcurrent">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapsecurrent" aria-expanded="true" aria-controls="flush-collapsecurrent">
         <span class="visually-hidden">Current Chapter</span>
         <span class="current-chapter">
         4. Scraping Data
         </span>
-      
+      </button>
     </div><!--/div.accordion-header-->
+
+    <div id="flush-collapsecurrent" class="accordion-collapse collapse show" aria-labelledby="flush-headingcurrent" data-bs-parent="#accordionFlushcurrent">
+      <div class="accordion-body">
+        <ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#web-scraping">Web scraping</a></li>
+        </ul></div><!--/div.accordion-body-->
+    </div><!--/div.accordion-collapse-->
 
   </div><!--/div.accordion-item-->
 </div><!--/div.accordion-flush-->
@@ -400,7 +408,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Scraping Data</h1>
-        <p>Last updated on 2025-02-27 |
+        <p>Last updated on 2025-04-17 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/scraping-data.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -419,11 +427,8 @@
 <div class="card-body">
 <div class="inner">
 <h3 class="card-title">Questions</h3>
-<ul><li>How do I get <em>all</em> of the data out of an API call when we’ve
-hit the limit for a single request?</li>
-<li>How do I download all the data files from a webpage?</li>
-<li>Can I download files from a webpage even there are no visible
-links?</li>
+<ul><li>How do I avoid the tedium/error-prone-ness of clicking lots of links
+or making lots of API requests by hand?</li>
 </ul></div>
 </div>
 </div>
@@ -431,24 +436,772 @@ links?</li>
 <div class="card-body">
 <div class="inner bordered">
 <h3 class="card-title">Objectives</h3>
-<ul><li>Automatically download files from a long listing of links on a
+<ul><li>Use pagination to get all available data</li>
+<li>Automatically download files from a long listing of links on a
 page</li>
-<li>Investigate webpage structure with browser dev tools</li>
-<li>Observe network requests and form hypotheses about how to copy
-them</li>
 </ul></div>
 </div>
 </div>
 </div>
 </div>
-<div id="keypoints1" class="callout keypoints">
+<section><h2 class="section-heading" id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a></h2>
+<hr class="half-width"><p>Now we’ve learned about how to download data from websites and from
+APIs. But some questions linger…</p>
+<ul><li><p>often there are webpages with lots of links to data you want…
+copy-pasting each link into our code is a pain, and hardly better than
+just clicking each link to download the data. Is there a better
+way?</p></li>
+<li><p>you might also remember seeing that ‘warning’ from the EIA API
+about only returning 5000 rows at a time… how can we get more?</p></li>
+</ul><p>The thread connecting these two questions/problems is that sometimes
+your data lives behind <em>many</em> URLs, not just one. So you have to
+go get a bunch of separate data and glue it all together.</p>
+</section><section><h2 class="section-heading" id="web-scraping">Web scraping<a class="anchor" aria-label="anchor" href="#web-scraping"></a></h2>
+<hr class="half-width"><p>Let’s start by downloading files from a webpage that has many links -
+the good old EIA website.</p>
+<p>For all the benefits of the API, some of the EIA 923 data is only
+available through the downloadable spreadsheets - and the spreadsheets
+are only available by clicking through the list of links on the EIA 923
+page:</p>
+<figure><img src="./fig/ep-4/eia-923-spreadsheets.png" alt="Screenshot of the EIA 923 data page. A listing of each year's files is in the right sidebar." class="figure mx-auto d-block"><div class="figcaption">Screenshot of the EIA 923 data page. A listing
+of each year’s files is in the right sidebar.</div>
+</figure><p>There’s only a couple dozen, so we could probably get away with just
+downloading the files by clicking.</p>
+<p>You can imagine how this would be annoying if you needed to download,
+say, a hundred files instead. To keep things simple we’ll use the EIA
+data as an example.</p>
+<div class="section level3">
+<h3 id="example-eia-923906">Example: EIA 923/906<a class="anchor" aria-label="anchor" href="#example-eia-923906"></a></h3>
+<p>To get the links, first we need to actually get the webpage that the
+links are on.</p>
+<div class="codewrapper sourceCode" id="cb1">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://www.eia.gov/electricity/data/eia923/"</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>response <span class="op">=</span> requests.get(url)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>response.text</span></code></pre>
+</div>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>'&lt;!doctype html&gt;\r\n&lt;html&gt;\r\n\r\n&lt;head&gt;\r\n\t&lt;title&gt;\r\n\t\tForm EIA-923 detailed data with previous form data (EIA-906/920) -\r\n\t\tU.S. Energy Information Administration (EIA)\t&lt;/title&gt;\r\n\t&lt;meta property="og:title" content="Form EIA-923 detailed data with previous form data (EIA-906/920) - U.S. Energy Information Administration (EIA)"&gt;\r\n\t&lt;meta property="og:url" content="https://www.eia.gov/electricity/data/eia923/index.php"&gt;\r\n\t&lt;meta name="url" content="https://www.eia.gov/electricity/data/eia923/index.php"&gt;\r\n\t&lt;meta name="description" content="Clean Air Act Data Browser" /&gt;\r\n\t...</code></pre>
+</div>
+<p>OK, so that looks like some XML, which we saw a couple episodes ago.
+We don’t expect a <em>data table</em> directly in the page, like we did
+last time. We’re more expecting a jumble of links. We need to use a
+different tool to make sense of all this - a library called
+<code>beautifulsoup</code>. For historical reasons it’s imported as
+<code>bs4</code>.</p>
+<div class="codewrapper sourceCode" id="cb3">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="im">import</span> bs4</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>soup <span class="op">=</span> bs4.BeautifulSoup(response.text)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>soup</span></code></pre>
+</div>
+<p>The first thing you’ll notice is that the output looks neater:</p>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;
+		Form EIA-923 detailed data with previous form data (EIA-906/920) -
+		U.S. Energy Information Administration (EIA)	&lt;/title&gt;
+&lt;meta content="Form EIA-923 detailed data with previous form data (EIA-906/920) - U.S. Energy Information Administration (EIA)" property="og:title"/&gt;</code></pre>
+</div>
+<p>We’ll also be able to filter through this complicated set of
+tags.</p>
+<div class="codewrapper sourceCode" id="cb5">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>soup.find_all(<span class="st">"title"</span>)</span></code></pre>
+</div>
+<p>To get all the links, we need to get all the <code>a</code> tags -
+that’s where links in HTML usually live:</p>
+<div class="codewrapper sourceCode" id="cb6">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>soup.find_all(<span class="st">"a"</span>)</span></code></pre>
+</div>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>[&lt;a name="top"&gt;&lt;/a&gt;,
+ &lt;a href="http://x.com/eiagov/" target="_blank"&gt;&lt;span class="ico-sticker twitter"&gt;&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="addthis_button_tweet"&gt;&lt;/a&gt;,
+ &lt;a href="https://www.facebook.com/eiagov" target="_blank"&gt;&lt;span class="ico-sticker facebook"&gt;&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="addthis_button_facebook_like at300b" fb:like:layout="button_count"&gt;&lt;/a&gt;,
+ ...
+ &lt;a class="ico zip" href="xls/f923_2024.zip" title="2024"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f923_2023.zip" title="2023"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f923_2022.zip" title="2022"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f923_2021.zip" title="2021"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f923_2020.zip" title="2020"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ ...</code></pre>
+</div>
+<div id="challenge-get-all-the-a-tags-from-eia-906" class="callout challenge">
+<div class="callout-square">
+<i class="callout-icon" data-feather="zap"></i>
+</div>
+<div id="challenge-get-all-the-a-tags-from-eia-906" class="callout-inner">
+<h3 class="callout-title">Challenge: get all the <code>a</code> tags
+from EIA 906</h3>
+<div class="callout-content">
+<p>Lots of the data that is collected in EIA 923 was collected in EIA
+906 in the past.</p>
+<p>We’ll have you work through the scraping steps on the 906 data to get
+a sense of how this all works.</p>
+<p>The first step is to get all the <code>a</code> tags from this
+page:</p>
+<pre><code>https://www.eia.gov/electricity/data/eia923/eia906u.php</code></pre>
+<p>Start with this skeleton code:</p>
+<div class="codewrapper sourceCode" id="cb9">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="im">import</span> bs4</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>eia_906_url <span class="op">=</span> <span class="st">"https://www.eia.gov/electricity/data/eia923/eia906u.php"</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co"># get the page contents, then use bs4 to get the `a` tags</span></span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div id="accordionSolution1" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
+  <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
+</button>
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div class="accordion-body">
+<div class="codewrapper sourceCode" id="cb10">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="im">import</span> bs4</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://www.eia.gov/electricity/data/eia923/eia906u.php"</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>response <span class="op">=</span> requests.get(url)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>soup <span class="op">=</span> bs4.BeautifulSoup(response.text)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>a_tags <span class="op">=</span> soup.find_all(<span class="st">"a"</span>)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>OK, so we see a big list of tags, some of which appear to be links to
+form 923 ZIP files. The URLs for those are included in an
+<code>href</code> attribute. The world of HTML is vast and chaotic, but
+almost every URL you’ll want to use will live in one of these
+<code>href</code> attributes (it stands for “hypertext reference” if
+that helps you remember).</p>
+<p>We can filter based on attributes like this:</p>
+<div class="codewrapper sourceCode" id="cb11">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>soup.find_all(<span class="st">"a"</span>, href<span class="op">=</span><span class="va">True</span>)</span></code></pre>
+</div>
+<p>This shows us only the <code>a</code> tags with <code>href</code>s
+defined:</p>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>[&lt;a href="http://x.com/eiagov/" target="_blank"&gt;&lt;span class="ico-sticker twitter"&gt;&lt;/span&gt;&lt;/a&gt;,
+ &lt;a href="https://www.facebook.com/eiagov" target="_blank"&gt;&lt;span class="ico-sticker facebook"&gt;&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="eia-accessibility" href="#page-sub-nav"&gt;Skip to sub-navigation&lt;/a&gt;,
+ &lt;a class="logo" href="/"&gt;
+ &lt;h1&gt;U.S. Energy Information Administration - EIA - Independent Statistics and Analysis&lt;/h1&gt;
+ &lt;/a&gt;,
+ &lt;a class="nav-primary-item-link menu-toggle" href="javascript:;"&gt;</code></pre>
+</div>
+<p>And then you can filter those only for the ones that point at actual
+ZIP files:</p>
+<div class="codewrapper sourceCode" id="cb13">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>a_with_zip <span class="op">=</span> [a <span class="cf">for</span> a <span class="kw">in</span> a_with_href <span class="cf">if</span> <span class="st">"zip"</span> <span class="kw">in</span> a[<span class="st">"href"</span>].lower()]</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>a_with_zip</span></code></pre>
+</div>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>[&lt;a class="ico zip" href="xls/f923_2024.zip" title="2024"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f923_2023.zip" title="2023"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f923_2022.zip" title="2022"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f923_2021.zip" title="2021"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ ...
+ &lt;a class="ico zip" href="archive/xls/f906920_2003.zip" title="2003"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f906920_2002.zip" title="2002"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f906920_2001.zip" title="2001"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f906nonutil2000.zip" title="2000"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f906nonutil1999.zip" title="1999"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;,
+ &lt;a class="ico zip" href="archive/xls/f906nonutil1989.zip" title="1989-1998"&gt;&lt;span&gt;ZIP&lt;/span&gt;&lt;/a&gt;]</code></pre>
+</div>
+<p>We probably want to skip those Form 906 links too.</p>
+<div class="codewrapper sourceCode" id="cb15">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>eia_923_links <span class="op">=</span> []</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> a_with_zip:</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  <span class="cf">if</span> <span class="st">"f906"</span> <span class="kw">not</span> <span class="kw">in</span> a[<span class="st">"href"</span>].lower():</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>    eia_923_links.append(a)</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>eia_923_links</span></code></pre>
+</div>
+<div id="challenge-only-get-the-relevant-a-tags" class="callout challenge">
+<div class="callout-square">
+<i class="callout-icon" data-feather="zap"></i>
+</div>
+<div id="challenge-only-get-the-relevant-a-tags" class="callout-inner">
+<h3 class="callout-title">Challenge: only get the relevant
+<code>a</code> tags</h3>
+<div class="callout-content">
+<p>Let’s grab only the <code>a</code> tags that are links to the actual
+data files.</p>
+<p>This will look a little bit different from the 923 example, since the
+links are all to XLS files instead of ZIP files.</p>
+<p>Let’s start with this code:</p>
+<div class="codewrapper sourceCode" id="cb16">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="im">import</span> bs4</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>eia_906_url <span class="op">=</span> <span class="st">"https://www.eia.gov/electricity/data/eia923/eia906u.php"</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>response <span class="op">=</span> requests.get(eia_906_url)</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>soup <span class="op">=</span> bs4.BeautifulSoup(response.text)</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co"># get only the `a` tags that are links to Form 906 data files.</span></span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div id="accordionSolution2" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
+  <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
+</button>
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div class="accordion-body">
+<div class="codewrapper sourceCode" id="cb17">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="im">import</span> bs4</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>eia_906_url <span class="op">=</span> <span class="st">"https://www.eia.gov/electricity/data/eia923/eia906u.php"</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>response <span class="op">=</span> requests.get(eia_906_url)</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>soup <span class="op">=</span> bs4.BeautifulSoup(response.text)</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>a_tags <span class="op">=</span> soup.find_all(<span class="st">"a"</span>, href<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>eia_906_links <span class="op">=</span> []</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> a_tags:</span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">".xls"</span> <span class="kw">in</span> a[<span class="st">"href"</span>].lower():</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>        eia_906_links.append(a)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>OK, now we have our tags, time to use them to download the data! The
+EIA 923 data all comes in ZIP files - we’ll skip over the handling of
+those for now. Instead we’ll use the 906 data that you just got.</p>
+<div class="codewrapper sourceCode" id="cb18">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>eia_923_blobs <span class="op">=</span> []</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> eia_923_links:</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>  response <span class="op">=</span> requests.get(a[<span class="st">"href"</span>])</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>  eia_923_blobs.append(response.content)</span></code></pre>
+</div>
+<p>Oh no! We get an error:</p>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>MissingSchema: Invalid URL 'xls/f923_2024.zip': No scheme supplied. Perhaps you meant https://xls/f923_2024.zip?</code></pre>
+</div>
+<p>Looks like the URL in the <code>href</code> is incomplete. It turns
+out that this is a <em>relative path</em> - much like the relative paths
+you had to deal with when loading data on your computer. The full URL we
+want is
+<code>https://www.eia.gov/electricity/data/eia923/xls/f923_2024.zip</code>
+- which combines the URL of the page we got the link from
+(<code>https://www.eia.gov/electricity/data/eia923/eia906u.php</code>)
+with the fragment we got in the <code>href</code>
+(<code>xls/f923_2024.zip</code>).</p>
+<p>This is a super common thing to have to do, so there’s a useful bit
+of the Python standard library for this:
+<code>urllib.parse.urljoin</code>:</p>
+<pre><code>from urllib.parse import urljoin
+
+urljoin(eia_923_url, "xls/f923_2024.zip")</code></pre>
+<p>We can also do the string concatenation ourselves with
+<code>eia_906_url + "..."</code>, but there are a surprising amount of
+details to get wrong here so it’s nice to just use the function that
+works.</p>
+<p>Let’s add that into our loop:</p>
+<pre><code>for a in eia_923_links:
+  full_link = urljoin(eia_923_url, a["href"])
+  response = requests.get(a["href"])
+  eia_923_blobs.append(response.content)</code></pre>
+<div id="challenge-get-the-form-906-file-contents" class="callout challenge">
+<div class="callout-square">
+<i class="callout-icon" data-feather="zap"></i>
+</div>
+<div id="challenge-get-the-form-906-file-contents" class="callout-inner">
+<h3 class="callout-title">Challenge: get the Form 906 file contents</h3>
+<div class="callout-content">
+<p>OK, so now we know how to scrape a bunch of URLs from a webpage.
+Let’s read the Form 906 files into our program! Since they’re XLS files,
+we can read them directly from a URL using
+<code>pandas.read_excel</code> - no need for manually downloading with
+<code>requests</code>.</p>
+<p>Try filling out the body of this for loop.</p>
+<div class="codewrapper sourceCode" id="cb22">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="im">from</span> urllib.parse <span class="im">import</span> urljoin</span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="im">import</span> bs4</span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a>eia_906_url <span class="op">=</span> <span class="st">"https://www.eia.gov/electricity/data/eia923/eia906u.php"</span></span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a>response <span class="op">=</span> requests.get(eia_906_url)</span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a>soup <span class="op">=</span> bs4.BeautifulSoup(response.text)</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a>a_tags <span class="op">=</span> soup.find_all(<span class="st">"a"</span>, href<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a>eia_906_links <span class="op">=</span> []</span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> a_tags:</span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">".xls"</span> <span class="kw">in</span> a[<span class="st">"href"</span>].lower():</span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a>        eia_906_links.append(a)</span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a></span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a>eia_906_dataframes <span class="op">=</span> []</span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> eia_906_links:</span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a>    ___</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
+  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
+</button>
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div class="accordion-body">
+<div class="codewrapper sourceCode" id="cb23">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> eia_906_links:</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>    full_url <span class="op">=</span> urljoin(eia_906_url, a[<span class="st">"href"</span>])</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>    eia_906_dataframes <span class="op">=</span> pandas.read_excel(full_url)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Once we’ve completed the challenge above, we have a list of a bunch
+of dataframes. To bring them all into one dataframe, we can use
+<code>pd.concat</code>:</p>
+<div class="codewrapper sourceCode" id="cb24">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>mega_906 <span class="op">=</span> pd.concat(eia_906_dataframes)</span></code></pre>
+</div>
+<p>If you use <code>DataFrame.info()</code> you can quickly see that
+some columns (YEAR, FIPST, UTILNAME) are more populated than others
+(MULTIST, GEN01, etc):</p>
+<div class="codewrapper sourceCode" id="cb25">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>mega_906.info()</span></code></pre>
+</div>
+<p>And if you start to dig into the data a bit, such as pulling out the
+various values of <code>YEAR</code>, you see that you have
+<em>plenty</em> of data cleaning to do before this is really usable for
+analysis. But at least you have all of the data in one dataframe now!
+We’ll go over some more tips for exploratory data analysis in the next
+episode.</p>
+<div class="codewrapper sourceCode" id="cb26">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>mega_906.YEAR.value_counts()</span></code></pre>
+</div>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>YEAR
+96      10507
+97      10468
+1999    10296
+2000     9617
+74       6429
+73       6363
+75       6362
+76       6307
+72       6198
+71       6130
+70       6100
+81       5692
+85       5692
+80       5678
+82       5669
+84       5661
+83       5650
+87       5647
+86       5634
+77       5627
+78       5594
+79       5554
+98       5470
+89       5263
+88       5241
+95       5119
+1998     5118
+93       5109
+91       5107
+94       5102
+92       5100
+90       5074
+99         40
+0          14
+Name: count, dtype: int64</code></pre>
+</div>
+<div id="discussion1" class="callout discussion">
+<div class="callout-square">
+<i class="callout-icon" data-feather="message-circle"></i>
+</div>
+<div class="callout-inner">
+<h3 class="callout-title">Discussion</h3>
+<div class="callout-content">
+<p>Why might you choose to do all this instead of just manually
+collecting links?</p>
+<ul><li>If it’s a lot of effort to get to each link</li>
+<li>If the data is frequently updated</li>
+<li>If I have to download all the files multiple times</li>
+<li>If I have to combine everything into one big dataset
+programmatically anyways</li>
+</ul></div>
+</div>
+</div>
+</div>
+<div class="section level3">
+<h3 id="pagination">pagination<a class="anchor" aria-label="anchor" href="#pagination"></a></h3>
+<p>Another time you’ll need lots of URLs is when APIs don’t give you
+everything all at once. For example, the EIA API kept giving us this
+warning:</p>
+<pre><code>The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.</code></pre>
+<p>So if we want a dataset that’s bigger than 5000 rows, we’ll need to
+make multiple requests. Instead of scraping many URLs from a page, we’ll
+be generating the URLs ourselves.</p>
+<p>This process of “get N rows, then the next N rows, etc.” is called
+“pagination” - like going to the next page of Google results.</p>
+<p>We’ll go to the docs to look at this <code>offset</code>
+parameter:</p>
+<blockquote>
+<p>Offset stipulates the row number the API should begin its return
+with, out of all the eligible rows our query would otherwise
+provide.</p>
+<p>[…]</p>
+<p><code>https://api.eia.gov/v2/electricity/retail_sales/data?api_key=xxxxxx&amp;data[]=price&amp;facets[sectorid][]=RES&amp;facets[stateid][]=CO&amp;frequency=monthly&amp;sort[0][column]=period&amp;sort[0][direction]=desc&amp;offset=24</code></p>
+<p>In the above example, the API will skip over the first 24 eligible
+rows (offset=24), which translates into 24 months
+(frequency=monthly).</p>
+</blockquote>
+<p>Let’s try it out - first, let’s make an API request and look at the
+output. A few things to note:</p>
+<ul><li>we’re filtering for CO generation to get a manageable amount of data
+that’s still more than 5000 rows</li>
+<li>we’re sorting by the time period - this lets us have a stable order
+so that the “next 5000 rows” means something well-defined.</li>
+</ul><div class="codewrapper sourceCode" id="cb29">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>base_url <span class="op">=</span> <span class="st">"https://api.eia.gov/v2/electricity"</span></span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>api_key <span class="op">=</span> <span class="st">"3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span></span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a><span class="co"># remember from last time that the shape is a JSON object with everything in "response"</span></span>
+<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>first_page <span class="op">=</span> requests.get(</span>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>  <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a>  params<span class="op">=</span>{</span>
+<span id="cb29-10"><a href="#cb29-10" tabindex="-1"></a>    <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" tabindex="-1"></a>    <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb29-12"><a href="#cb29-12" tabindex="-1"></a>    <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
+<span id="cb29-13"><a href="#cb29-13" tabindex="-1"></a>    <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb29-14"><a href="#cb29-14" tabindex="-1"></a>    <span class="st">"api_key"</span>: api_key</span>
+<span id="cb29-15"><a href="#cb29-15" tabindex="-1"></a>  }</span>
+<span id="cb29-16"><a href="#cb29-16" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span>
+<span id="cb29-17"><a href="#cb29-17" tabindex="-1"></a></span>
+<span id="cb29-18"><a href="#cb29-18" tabindex="-1"></a>net_generation.keys()</span></code></pre>
+</div>
+<p>Let’s grab the next 5000 rows:</p>
+<div class="codewrapper sourceCode" id="cb30">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>next_page <span class="op">=</span> requests.get(</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>  <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>  params<span class="op">=</span>{</span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a>    <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a>    <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1"></a>    <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" tabindex="-1"></a>    <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb30-8"><a href="#cb30-8" tabindex="-1"></a>    <span class="st">"offset"</span>: <span class="dv">5000</span>,</span>
+<span id="cb30-9"><a href="#cb30-9" tabindex="-1"></a>    <span class="st">"api_key"</span>: api_key</span>
+<span id="cb30-10"><a href="#cb30-10" tabindex="-1"></a>  }</span>
+<span id="cb30-11"><a href="#cb30-11" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span></code></pre>
+</div>
+<p>And if we wanted to grab the first 5 pages, we could use a
+<code>for</code> loop combined with the <code>range()</code> function -
+here’s how <code>range</code> works:</p>
+<div class="codewrapper sourceCode" id="cb31">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="cf">for</span> page_num <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>    <span class="bu">print</span>(page_num)</span></code></pre>
+</div>
+<p>Here the <code>range()</code> lets you go through the loop 5
+times.</p>
+<p>When we are looking to get <em>all</em> of the pages, we can use the
+<code>"total"</code> field in the EIA API response to figure out how
+many total rows there are:</p>
+<div class="codewrapper sourceCode" id="cb32">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>first_page[<span class="st">"total"</span>]</span></code></pre>
+</div>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code><span><span class="fl">155130</span></span></code></pre>
+</div>
+<p>So there are 155,130 rows in this dataset.</p>
+<div id="discussion2" class="callout discussion">
+<div class="callout-square">
+<i class="callout-icon" data-feather="message-circle"></i>
+</div>
+<div class="callout-inner">
+<h3 class="callout-title">Discussion</h3>
+<div class="callout-content">
+<p>Question for chat: if we have N rows total, and P rows per page, how
+many pages do we need to get all the data?</p>
+<div id="accordionSolution4" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
+  <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
+</button>
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div class="accordion-body">
+<p><span class="math inline">\(ceil(N/P)\)</span></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>And here’s how we’d get from the number of total rows to the number
+of pages we need:</p>
+<div class="codewrapper sourceCode" id="cb34">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>total_rows <span class="op">=</span> net_generation[<span class="st">"total"</span>]</span>
+<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a>page_size <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a>num_pages <span class="op">=</span> math.ceil(total_rows <span class="op">/</span> page_size)</span></code></pre>
+</div>
+<div id="challenge-pagination" class="callout challenge">
+<div class="callout-square">
+<i class="callout-icon" data-feather="zap"></i>
+</div>
+<div id="challenge-pagination" class="callout-inner">
+<h3 class="callout-title">Challenge: pagination</h3>
+<div class="callout-content">
+<p>OK, now let’s put it all together! Let’s fill in the blanks for this
+code:</p>
+<div class="codewrapper sourceCode" id="cb35">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>base_url <span class="op">=</span> <span class="st">"https://api.eia.gov/v2/electricity"</span></span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>api_key <span class="op">=</span> <span class="st">"3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span></span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>page <span class="op">=</span> requests.get(</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>  <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>  params<span class="op">=</span>{</span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>    <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb35-10"><a href="#cb35-10" tabindex="-1"></a>    <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb35-11"><a href="#cb35-11" tabindex="-1"></a>    <span class="st">"api_key"</span>: api_key</span>
+<span id="cb35-12"><a href="#cb35-12" tabindex="-1"></a>  }</span>
+<span id="cb35-13"><a href="#cb35-13" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span>
+<span id="cb35-14"><a href="#cb35-14" tabindex="-1"></a></span>
+<span id="cb35-15"><a href="#cb35-15" tabindex="-1"></a>total_rows <span class="op">=</span> ___</span>
+<span id="cb35-16"><a href="#cb35-16" tabindex="-1"></a>page_size <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb35-17"><a href="#cb35-17" tabindex="-1"></a>num_pages <span class="op">=</span> ___</span>
+<span id="cb35-18"><a href="#cb35-18" tabindex="-1"></a></span>
+<span id="cb35-19"><a href="#cb35-19" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
+<span id="cb35-20"><a href="#cb35-20" tabindex="-1"></a><span class="cf">for</span> page_num <span class="kw">in</span> <span class="bu">range</span>(num_pages):</span>
+<span id="cb35-21"><a href="#cb35-21" tabindex="-1"></a>    offset <span class="op">=</span> ___</span>
+<span id="cb35-22"><a href="#cb35-22" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
+<span id="cb35-23"><a href="#cb35-23" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb35-24"><a href="#cb35-24" tabindex="-1"></a>      params<span class="op">=</span>{</span>
+<span id="cb35-25"><a href="#cb35-25" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb35-26"><a href="#cb35-26" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb35-27"><a href="#cb35-27" tabindex="-1"></a>        ___,</span>
+<span id="cb35-28"><a href="#cb35-28" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb35-29"><a href="#cb35-29" tabindex="-1"></a>      }</span>
+<span id="cb35-30"><a href="#cb35-30" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>]</span>
+<span id="cb35-31"><a href="#cb35-31" tabindex="-1"></a>    all_records.extend(page_of_data[<span class="st">"data"</span>])</span>
+<span id="cb35-32"><a href="#cb35-32" tabindex="-1"></a></span>
+<span id="cb35-33"><a href="#cb35-33" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div id="accordionSolution5" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
+  <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
+</button>
+<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
+<div class="accordion-body">
+<div class="codewrapper sourceCode" id="cb36">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a>base_url <span class="op">=</span> <span class="st">"https://api.eia.gov/v2/electricity"</span></span>
+<span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a>api_key <span class="op">=</span> <span class="st">"3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span></span>
+<span id="cb36-8"><a href="#cb36-8" tabindex="-1"></a></span>
+<span id="cb36-9"><a href="#cb36-9" tabindex="-1"></a>net_generation <span class="op">=</span> requests.get(</span>
+<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a>  <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a>  params<span class="op">=</span>{</span>
+<span id="cb36-12"><a href="#cb36-12" tabindex="-1"></a>    <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb36-13"><a href="#cb36-13" tabindex="-1"></a>    <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb36-14"><a href="#cb36-14" tabindex="-1"></a>    <span class="st">"api_key"</span>: api_key</span>
+<span id="cb36-15"><a href="#cb36-15" tabindex="-1"></a>  }</span>
+<span id="cb36-16"><a href="#cb36-16" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span>
+<span id="cb36-17"><a href="#cb36-17" tabindex="-1"></a></span>
+<span id="cb36-18"><a href="#cb36-18" tabindex="-1"></a>total_rows <span class="op">=</span> <span class="bu">int</span>(net_generation[<span class="st">"total"</span>])</span>
+<span id="cb36-19"><a href="#cb36-19" tabindex="-1"></a>page_size <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb36-20"><a href="#cb36-20" tabindex="-1"></a>num_pages <span class="op">=</span> math.ceil(total_rows <span class="op">/</span> page_size)</span>
+<span id="cb36-21"><a href="#cb36-21" tabindex="-1"></a></span>
+<span id="cb36-22"><a href="#cb36-22" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
+<span id="cb36-23"><a href="#cb36-23" tabindex="-1"></a></span>
+<span id="cb36-24"><a href="#cb36-24" tabindex="-1"></a><span class="cf">for</span> page_num <span class="kw">in</span> <span class="bu">range</span>(num_pages):</span>
+<span id="cb36-25"><a href="#cb36-25" tabindex="-1"></a>    offset <span class="op">=</span> page_num <span class="op">*</span> page_size</span>
+<span id="cb36-26"><a href="#cb36-26" tabindex="-1"></a>    <span class="bu">print</span>(offset)</span>
+<span id="cb36-27"><a href="#cb36-27" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
+<span id="cb36-28"><a href="#cb36-28" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb36-29"><a href="#cb36-29" tabindex="-1"></a>      params<span class="op">=</span>{</span>
+<span id="cb36-30"><a href="#cb36-30" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb36-31"><a href="#cb36-31" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb36-32"><a href="#cb36-32" tabindex="-1"></a>        <span class="st">"sort[][column]"</span>: <span class="st">"period"</span>,</span>
+<span id="cb36-33"><a href="#cb36-33" tabindex="-1"></a>        <span class="st">"sort[][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb36-34"><a href="#cb36-34" tabindex="-1"></a>        <span class="st">"offset"</span>: offset,</span>
+<span id="cb36-35"><a href="#cb36-35" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb36-36"><a href="#cb36-36" tabindex="-1"></a>      }</span>
+<span id="cb36-37"><a href="#cb36-37" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>][<span class="st">"data"</span>]</span>
+<span id="cb36-38"><a href="#cb36-38" tabindex="-1"></a>    all_records.extend(pd.DataFrame(page_of_data[<span class="st">"data"</span>]))</span>
+<span id="cb36-39"><a href="#cb36-39" tabindex="-1"></a></span>
+<span id="cb36-40"><a href="#cb36-40" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>This is just one common way APIs do pagination. You’ll have to flex
+those API learning skills (play with the data, read the docs, bounce
+back and forth) to learn how each new API handles this.</p>
+</div>
+<div class="section level3">
+<h3 id="further-resources">Further resources<a class="anchor" aria-label="anchor" href="#further-resources"></a></h3>
+<p>We’ve only just scratched the surface of programmatically getting
+data from the Internet here. Sometimes, there are obstacles. We can’t
+teach you how to overcome all of them, but here is a little
+troubleshooting guide of “something weird? maybe try searching for these
+keywords.”</p>
+<ul><li>Links not showing up in your <code>bs4</code> <code>a</code> tags?
+<ul><li>look at the links using the <em>html inspector</em> in your browser
+dev tools.</li>
+<li>look at what’s happening when you download files by using the
+<em>network tab</em> of your browser dev tools.
+<ul><li>when you click something to download data, or when you load in data
+for a graph, keep an eye on this. you might find some suspicious looking
+URLs</li>
+</ul></li>
+</ul></li>
+<li>The HTML you see in <em>browser dev tools</em> is different from
+what you get from <code>requests</code>?
+<ul><li>sometimes there’s code that your browser runs after the initial
+load, which changes the HTML after the fact. <code>requests</code> won’t
+catch that, but try <code>playwright</code> which runs that post-load
+code. keyword is <code>headless browser automation</code>.</li>
+<li>sometimes servers will be mean to you because of who you say you are
+(<em>user agent</em>).
+<ul><li>sometimes they’ll give you some sort of error, or a CAPTCHA</li>
+<li>sometimes they will just not give you any response at all</li>
+<li>If you suspect that… try telling them you’re a real human instead of
+a bot. Look for “spoofing the user agent” to see guides on how to do
+this.</li>
+</ul></li>
+</ul></li>
+<li>Running into rate limits for making too many requests?
+<ul><li>Try adding some delays in your scraping code so that it’s not
+hammering the server so hard. The <code>time.sleep</code> method here is
+your friend.</li>
+<li>Do double-check the terms &amp; conditions of the website you’re
+using - if a website is implementing some rate limit, they probably
+don’t want you using automated tools to download the data in the first
+place.</li>
+<li>You might need a ‘web scraping proxy’ service, which will let you
+get around a lot of limits.</li>
+</ul></li>
+<li>Have to download a file to disk instead of turning it into a
+DataFrame immediately?
+<ul><li>Use <code>response.content</code> to get the literal bytes that the
+response is made of - this will help with files like ZIP files that
+don’t have a nice text representation.</li>
+<li>Then use the “wb” mode (“write binary”) to write that data to
+disk:</li>
+</ul><div class="codewrapper sourceCode" id="cb37">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(some_filename, <span class="st">"wb"</span>) <span class="im">as</span> f:</span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>    f.write(response.content)</span></code></pre>
+</div>
+</li>
+</ul><div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
 </div>
 <div class="callout-inner">
 <h3 class="callout-title">Key Points</h3>
 <div class="callout-content">
-<ul><li>placeholder</li>
+<ul><li>beautiful soup lets you grab links out of a webpage so that you can
+then download them</li>
+<li>if you need to get more than one request worth of results from an
+API, they usually provide some “pagination” capabilities so you can make
+all the requests programmatically.</li>
+<li>web scraping is a wide world - if you get stuck, try searching for
+some of the keywords above.</li>
 </ul></div>
 </div>
 </div>
@@ -456,10 +1209,8 @@ them</li>
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
  -->
-
-
-
-      </div> <!-- / div.lesson-content -->
+</div>
+</section></div> <!-- / div.lesson-content -->
     </main><!-- / main#main-content.main-content --><nav class="bottom-pagination mx-md-4" aria-label="Previous and Next Chapter"><div class="d-block d-sm-block d-md-none">
         <a class="chapter-link" href="accessing-remote-data.html"><i aria-hidden="true" class="small-arrow" data-feather="arrow-left"></i>Previous</a>
         <a class="chapter-link float-end" href="plotting.html">Next<i aria-hidden="true" class="small-arrow" data-feather="arrow-right"></i></a>
@@ -517,8 +1268,8 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/scraping-data.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/scraping-data.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2025-02-27",
-  "datePublished": "2025-04-15"
+  "dateModified": "2025-04-17",
+  "datePublished": "2025-04-17"
 }
 
   </script><script>
