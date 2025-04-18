@@ -31,7 +31,7 @@ The thread connecting these two questions/problems is that sometimes your data l
 
 Let's start by downloading files from a webpage that has many links - the good old EIA website.
 
-For all the benefits of the API, some of the EIA 923 data is only available through the downloadable spreadsheets - and the spreadsheets are only available by clicking through the list of links on the EIA 923 page:
+For all the benefits of the API, some of the EIA 923 data is only available through the downloadable spreadsheets - and the spreadsheets are only available by clicking through the list of links on the [EIA 923 page](https://www.eia.gov/electricity/data/eia923/):
 
 ![Screenshot of the EIA 923 data page. A listing of each year's files is in the right sidebar.](./fig/ep-4/eia-923-spreadsheets.png){alt="Screenshot of the EIA 923 data page. A listing of each year's files is in the right sidebar."}
 
@@ -46,23 +46,25 @@ To get the links, first we need to actually get the webpage that the links are o
 ```python
 import requests
 
-url = "https://www.eia.gov/electricity/data/eia923/"
-response = requests.get(url)
-
-response.text
+eia_923_url = "https://www.eia.gov/electricity/data/eia923/"
+eia_923_response = requests.get(url)
+eia_923_response.text
 ```
 
 ```output
 '<!doctype html>\r\n<html>\r\n\r\n<head>\r\n\t<title>\r\n\t\tForm EIA-923 detailed data with previous form data (EIA-906/920) -\r\n\t\tU.S. Energy Information Administration (EIA)\t</title>\r\n\t<meta property="og:title" content="Form EIA-923 detailed data with previous form data (EIA-906/920) - U.S. Energy Information Administration (EIA)">\r\n\t<meta property="og:url" content="https://www.eia.gov/electricity/data/eia923/index.php">\r\n\t<meta name="url" content="https://www.eia.gov/electricity/data/eia923/index.php">\r\n\t<meta name="description" content="Clean Air Act Data Browser" />\r\n\t...
 ```
 
-OK, so that looks like some XML, which we saw a couple episodes ago. We don't expect a *data table* directly in the page, like we did last time. We're more expecting a jumble of links. We need to use a different tool to make sense of all this - a library called `beautifulsoup`. For historical reasons it's imported as `bs4`.
+OK, so that looks like some XML, which we saw a couple episodes ago - notice the many angle brackets containing words that seem to be trying to tell us something. We can use those *tags* to understand the content of the file, and then filter through it to find what we actually need.
+
+We don't expect a *data table* directly in the page, like we did last time. We're more expecting a jumble of links. We need to use a different tool to make sense of all this - a library called `beautifulsoup`. For historical reasons it's imported as `bs4`.
 
 ```python
 import bs4
-soup = bs4.BeautifulSoup(response.text)
 
-soup
+eia_923_soup = bs4.BeautifulSoup(eia_923_response.text)
+
+eia_923_soup
 ```
 
 The first thing you'll notice is that the output looks neater:
@@ -79,13 +81,13 @@ The first thing you'll notice is that the output looks neater:
 We'll also be able to filter through this complicated set of tags.
 
 ```python
-soup.find_all("title")
+eia_923_soup.find_all("title")
 ```
 
 To get all the links, we need to get all the `a` tags - that's where links in HTML usually live:
 
 ```python
-soup.find_all("a")
+eia_923_all_a_tags = eia_923_soup.find_all("a")
 ```
 
 ```output
@@ -103,53 +105,12 @@ soup.find_all("a")
  ...
 ```
 
-:::: challenge
-
-#### Challenge: get all the `a` tags from EIA 906
-
-Lots of the data that is collected in EIA 923 was collected in EIA 906 in the past.
-
-We'll have you work through the scraping steps on the 906 data to get a sense of how this all works.
-
-
-The first step is to get all the `a` tags from this page:
-
-```
-https://www.eia.gov/electricity/data/eia923/eia906u.php
-```
-
-Start with this skeleton code:
-
-```python
-import bs4
-import requests
-
-eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
-
-# get the page contents, then use bs4 to get the `a` tags
-```
-
-:::::::: solution
-```python
-import bs4
-import requests
-
-url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
-response = requests.get(url)
-soup = bs4.BeautifulSoup(response.text)
-
-a_tags = soup.find_all("a")
-```
-::::::::
-
-::::
-
-OK, so we see a big list of tags, some of which appear to be links to form 923 ZIP files. The URLs for those are included in an `href` attribute. The world of HTML is vast and chaotic, but almost every URL you'll want to use will live in one of these `href` attributes (it stands for "hypertext reference" if that helps you remember).
+OK, so we see a big list of tags, some of which appear to be links to form 923 ZIP files. The URLs for those are included in an `href` attribute. The world of HTML is vast and chaotic, but almost every URL you'll want to use will live in one of these `href` attributes.
 
 We can filter based on attributes like this:
 
 ```python
-soup.find_all("a", href=True)
+eia_923_a_hrefs = eia_923_soup.find_all("a", href=True)
 ```
 
 This shows us only the `a` tags with `href`s defined:
@@ -167,8 +128,11 @@ This shows us only the `a` tags with `href`s defined:
 And then you can filter those only for the ones that point at actual ZIP files:
 
 ```python
-a_with_zip = [a for a in a_with_href if "zip" in a["href"].lower()]
-a_with_zip
+eia_923_zip_tags = []
+for a in eia_923_a_hrefs:
+    if a["href"].lower().endswith(".zip"):
+        eia_923_zip_tags.append(a)
+eia_923_zip_tags
 ```
 
 ```output
@@ -189,120 +153,89 @@ a_with_zip
 We probably want to skip those Form 906 links too.
 
 ```python
-eia_923_links = []
-for a in a_with_zip:
-  if "f906" not in a["href"].lower():
-    eia_923_links.append(a)
-
-eia_923_links
+eia_923_zip_tags = []
+for a in eia_923_a_hrefs:
+    if a["href"].lower().endswith(".zip") and "f906" not in a["href"]:
+        eia_923_zip_tags.append(a)
+eia_923_zip_tags
 ```
 
 :::: challenge
 
-#### Challenge: only get the relevant `a` tags
+#### Challenge: get all the relevant `a` tags from EIA 906
+Lots of the data that is collected in EIA 923 was collected in EIA 906 in the past.
 
-Let's grab only the `a` tags that are links to the actual data files.
+We'll have you work through the scraping steps on the 906 data to get a sense of how this all works.
 
-This will look a little bit different from the 923 example, since the links are all to XLS files instead of ZIP files.
 
-Let's start with this code:
+Let's get the relevant `a` tags from the [EIA 906 page](https://www.eia.gov/electricity/data/eia923/eia906u.php):
+
+Start with the skeleton code outlined below - we expect a variable called `eia_906_xls_tags` at the end, which holds all the tags that refer to the actual 1970-2000 data files.
 
 ```python
-import bs4
-import requests
-
 eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
-response = requests.get(eia_906_url)
-soup = bs4.BeautifulSoup(response.text)
-
-# get only the `a` tags that are links to Form 906 data files.
+# get the page contents
+# turn it into a collection of tags
+# filter them down to the tags that contain the links to XLS data - for all years 1970-2000
 ```
 :::::::: solution
 
 
 ```python
-import bs4
-import requests
-
 eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
-response = requests.get(eia_906_url)
-soup = bs4.BeautifulSoup(response.text)
+eia_906_response = requests.get(eia_906_url)
+eia_906_soup = bs4.BeautifulSoup(eia_906_response.text)
 
-a_tags = soup.find_all("a", href=True)
-eia_906_links = []
-for a in a_tags:
+eia_906_a_hrefs = eia_906_soup.find_all("a", href=True)
+eia_906_xls_tags = []
+for a in eia_906_a_hrefs:
     if ".xls" in a["href"].lower():
-        eia_906_links.append(a)
+        eia_906_xls_tags.append(a)
 ```
 ::::::::
 ::::
 
-OK, now we have our tags, time to use them to download the data! The EIA 923 data all comes in ZIP files - we'll skip over the handling of those for now. Instead we'll use the 906 data that you just got.
+OK, now we have our tags, time to use them to download the data! Let's try it with one tag first:
 
 ```python
-import pandas as pd
-
-eia_923_blobs = []
-for a in eia_923_links:
-  response = requests.get(a["href"])
-  eia_923_blobs.append(response.content)
+eia_923_one_link = eia_923_zip_tags[0]
+eia_923_one_response = requests.get(eia_923_one_link["href"])
 ```
 
 Oh no! We get an error:
 
 ```output
-MissingSchema: Invalid URL 'xls/f923_2024.zip': No scheme supplied. Perhaps you meant https://xls/f923_2024.zip?
+MissingSchema: Invalid URL 'xls/f923_2025.zip': No scheme supplied. Perhaps you meant https://xls/f923_2025.zip?
 ```
 
 Looks like the URL in the `href` is incomplete. It turns out that this is a *relative path* - much like the relative paths you had to deal with when loading data on your computer. The full URL we want is
-`https://www.eia.gov/electricity/data/eia923/xls/f923_2024.zip` - which combines the URL of the page we got the link from (`https://www.eia.gov/electricity/data/eia923/eia906u.php`) with the fragment we got in the `href` (`xls/f923_2024.zip`).
+`https://www.eia.gov/electricity/data/eia923/xls/f923_2025.zip` - which combines the URL of the page we got the link from (`https://www.eia.gov/electricity/data/eia923`) with the fragment we got in the `href` (`xls/f923_2025.zip`).
 
 This is a super common thing to have to do, so there's a useful bit of the Python standard library for this: `urllib.parse.urljoin`:
 
 ```
 from urllib.parse import urljoin
 
-urljoin(eia_923_url, "xls/f923_2024.zip")
+eia_923_one_full_url = urljoin(eia_923_url, eia_923_one_link["href"])
+response = requests.get(eia_923_one_full_url)
 ```
 
-We can also do the string concatenation ourselves with `eia_906_url + "..."`, but there are a surprising amount of details to get wrong here so it's nice to just use the function that works.
+We can also do the string concatenation ourselves with `eia_923_url + "..."`, but there are a surprising amount of details to get wrong here so it's nice to just use the function that works.
 
-Let's add that into our loop:
-
-```
-for a in eia_923_links:
-  full_link = urljoin(eia_923_url, a["href"])
-  response = requests.get(a["href"])
-  eia_923_blobs.append(response.content)
-```
 :::: challenge
 
 #### Challenge: get the Form 906 file contents
 
-OK, so now we know how to scrape a bunch of URLs from a webpage. Let's read the Form 906 files into our program! Since they're XLS files, we can read them directly from a URL using `pandas.read_excel` - no need for manually downloading with `requests`.
+OK, so now we know how to scrape a bunch of URLs from a webpage. Let's read the Form 906 files into our program! Since they're XLS files, we can read them directly from a URL using `pandas.read_excel`.
 
-Try filling out the body of this for loop.
+Try making a list, `eia_906_dataframes`, that includes all of the data files from the [EIA 906 page](https://www.eia.gov/electricity/data/eia923/eia906u.php) - start with the (minimal) scaffold below!
 
 ```python
-from urllib.parse import urljoin
-
-import bs4
-import requests
 import pandas as pd
 
-eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
-response = requests.get(eia_906_url)
-soup = bs4.BeautifulSoup(response.text)
-
-a_tags = soup.find_all("a", href=True)
-eia_906_links = []
-for a in a_tags:
-    if ".xls" in a["href"].lower():
-        eia_906_links.append(a)
-
 eia_906_dataframes = []
-for a in eia_906_links:
-    ___
+
+# loop through the eia_906_xls_tags and make a pd.DataFrame for each one
 ```
 
 ::::::: solution
@@ -384,7 +317,7 @@ Why might you choose to do all this instead of just manually collecting links?
 
 ::::
 
-### pagination
+### Pagination
 
 Another time you'll need lots of URLs is when APIs don't give you everything all at once. For example, the EIA API kept giving us this warning:
 
@@ -396,7 +329,7 @@ So if we want a dataset that's bigger than 5000 rows, we'll need to make multipl
 
 This process of "get N rows, then the next N rows, etc." is called "pagination" - like going to the next page of Google results.
 
-We'll go to the docs to look at this `offset` parameter:
+We'll go to the [docs](https://www.eia.gov/opendata/documentation.php) to look at this `offset` parameter:
 
 > Offset stipulates the row number the API should begin its return with, out of all the eligible rows our query would otherwise provide.
 >
@@ -406,33 +339,36 @@ We'll go to the docs to look at this `offset` parameter:
 >
 > In the above example, the API will skip over the first 24 eligible rows (offset=24), which translates into 24 months (frequency=monthly).
 
-Let's try it out - first, let's make an API request and look at the output. A few things to note:
-
-* we're filtering for CO generation to get a manageable amount of data that's still more than 5000 rows
-* we're sorting by the time period - this lets us have a stable order so that the "next 5000 rows" means something well-defined.
+Let's try it out - first, let's make an API request and look at the output. Note that we're sorting by the time period and plant code - this lets us have a stable order so that the "next 5000 rows" means something well-defined.
 
 ```python
-import requests
-
-base_url = "https://api.eia.gov/v2/electricity"
+eia_api_base_url = "https://api.eia.gov/v2/electricity"
 api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
 
 # remember from last time that the shape is a JSON object with everything in "response"
 first_page = requests.get(
-  f"{base_url}/facility-fuel/data",
+  f"{eia_api_base_url}/facility-fuel/data",
   params={
     "data[]": "generation",
     "facets[state][]": "CO",
     "sort[0][column]": "period",
     "sort[0][direction]": "desc",
+    "sort[1][column]": "plantCode",
+    "sort[1][direction]": "desc",
     "api_key": api_key
   }
 ).json()["response"]
 
-net_generation.keys()
+first_page.keys()
 ```
 
-Let's grab the next 5000 rows:
+Right. The data lives in the `"data"` key, so let's take a quick look at that:
+
+```python
+pd.DataFrame(first_page["data"])
+```
+
+So we have the last several months of data! Let's grab the next 5000 rows using that `offset` parameter:
 
 ```python
 next_page = requests.get(
@@ -448,11 +384,18 @@ next_page = requests.get(
 ).json()["response"]
 ```
 
+If we look at *that* we can see that we do indeed get the next several months of data:
+
+```python
+pd.DataFrame(next_page["data"])
+```
+
 And if we wanted to grab the first 5 pages, we could use a `for` loop combined with the `range()` function - here's how `range` works:
 
 ```python
 for page_num in range(5):
-    print(page_num)
+    print(f"Getting page {page_num}")
+    # actually get the page here...
 ```
 
 Here the `range()` lets you go through the loop 5 times.
@@ -463,23 +406,9 @@ When we are looking to get *all* of the pages, we can use the `"total"` field in
 first_page["total"]
 ```
 
-```output
-155130
-```
+So there are about 155,000 rows in this dataset.
 
-So there are 155,130 rows in this dataset.
-
-:::: discussion
-Question for chat: if we have N rows total, and P rows per page, how many pages do we need to get all the data?
-
-:::::::: solution
-
-$ceil(N/P)$
-
-::::::::
-::::
-
-And here's how we'd get from the number of total rows to the number of pages we need:
+To get the number of pages we need we divide the total by the page size, and round up using `math.ceil`:
 
 ```python
 import math
@@ -492,40 +421,32 @@ num_pages = math.ceil(total_rows / page_size)
 :::: challenge
 
 #### Challenge: pagination
-OK, now let's put it all together! Let's fill in the blanks for this code:
+
+OK, now let's put it all together!
+
+Let's try to get all of the net generation data in Colorado that is in the EIA API.
+
+Start with the following code and modify it to work:
 
 ```python
-import math
-
-base_url = "https://api.eia.gov/v2/electricity"
-api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
-
-page = requests.get(
-  f"{base_url}/facility-fuel/data",
-  params={
-    "data[]": "generation",
-    "facets[state][]": "CO",
-    "api_key": api_key
-  }
-).json()["response"]
-
-total_rows = ___
-page_size = 5000
-num_pages = ___
-
 all_records = []
 for page_num in range(num_pages):
+    print(f"Getting page {page_num}...")
     offset = ___
     page = requests.get(
-      f"{base_url}/facility-fuel/data",
+      f"{eia_api_base_url}/facility-fuel/data",
       params={
         "data[]": "generation",
         "facets[state][]": "CO",
+        "sort[0][column]": "period",
+        "sort[0][direction]": "desc",
+        "sort[1][column]": "plantCode",
+        "sort[1][direction]": "desc",
         ___,
         "api_key": api_key
       }
     ).json()["response"]
-    all_records.extend(page_of_data["data"])
+    all_records.append(pd.DataFrame(page["data"]))
 
 df = pd.concat(all_records)
 ```
@@ -533,46 +454,27 @@ df = pd.concat(all_records)
 :::::::: solution
 
 ```python
-import math
-
-import pandas as pd
-import requests
-
-base_url = "https://api.eia.gov/v2/electricity"
-api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
-
-net_generation = requests.get(
-  f"{base_url}/facility-fuel/data",
-  params={
-    "data[]": "generation",
-    "facets[state][]": "CO",
-    "api_key": api_key
-  }
-).json()["response"]
-
-total_rows = int(net_generation["total"])
-page_size = 5000
-num_pages = math.ceil(total_rows / page_size)
-
 all_records = []
-
 for page_num in range(num_pages):
+    print(f"Getting page {page_num}...")
     offset = page_num * page_size
-    print(offset)
     page = requests.get(
-      f"{base_url}/facility-fuel/data",
+      f"{eia_api_base_url}/facility-fuel/data",
       params={
         "data[]": "generation",
         "facets[state][]": "CO",
-        "sort[][column]": "period",
-        "sort[][direction]": "desc",
+        "sort[0][column]": "period",
+        "sort[0][direction]": "desc",
+        "sort[1][column]": "plantCode",
+        "sort[1][direction]": "desc",
         "offset": offset,
         "api_key": api_key
       }
-    ).json()["response"]["data"]
-    all_records.extend(pd.DataFrame(page_of_data["data"]))
+    ).json()["response"]
+    all_records.append(pd.DataFrame(page["data"]))
 
-df = pd.concat(all_records)
+df = pd.concat(all_records) # combines all pages into one big dataframe
+len(df.drop_duplicates())
 ```
 
 ::::::::
