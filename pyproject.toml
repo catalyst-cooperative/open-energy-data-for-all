@@ -1,0 +1,14 @@
+[project]
+name = "open-energy-data-for-all"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "bs4>=0.0.2",
+    "jupyter>=1.1.1",
+    "pandas[excel, xml, plot, parquet]>=2.2.3",
+    "pytest>=8.3.5",
+    "requests>=2.32.3",
+    "xlrd>=2.0.1",
+]
