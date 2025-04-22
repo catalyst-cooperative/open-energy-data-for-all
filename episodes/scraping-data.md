@@ -47,7 +47,7 @@ To get the links, first we need to actually get the webpage that the links are o
 import requests
 
 eia_923_url = "https://www.eia.gov/electricity/data/eia923/"
-eia_923_response = requests.get(url)
+eia_923_response = requests.get(eia_923_url)
 eia_923_response.text
 ```
 
@@ -57,7 +57,7 @@ eia_923_response.text
 
 OK, so that looks like some XML, which we saw a couple episodes ago - notice the many angle brackets containing words that seem to be trying to tell us something. We can use those *tags* to understand the content of the file, and then filter through it to find what we actually need.
 
-We don't expect a *data table* directly in the page, like we did last time. We're more expecting a jumble of links. We need to use a different tool to make sense of all this - a library called `beautifulsoup`. For historical reasons it's imported as `bs4`.
+This is actually a *special type* of XML called HTML, which is what most webpages are described in (see the `doctype html` tag.) We need to use a different tool to make sense of all this - a library called `beautifulsoup`. For historical reasons it's imported as `bs4`.
 
 ```python
 import bs4
@@ -155,7 +155,7 @@ We probably want to skip those Form 906 links too.
 ```python
 eia_923_zip_tags = []
 for a in eia_923_a_hrefs:
-    if a["href"].lower().endswith(".zip") and "f906" not in a["href"]:
+    if a["href"].lower().endswith(".zip") and "f923" in a["href"]:
         eia_923_zip_tags.append(a)
 eia_923_zip_tags
 ```
@@ -180,7 +180,6 @@ eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
 ```
 :::::::: solution
 
-
 ```python
 eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
 eia_906_response = requests.get(eia_906_url)
@@ -195,32 +194,34 @@ for a in eia_906_a_hrefs:
 ::::::::
 ::::
 
+
+### Downloading the data
 OK, now we have our tags, time to use them to download the data! Let's try it with one tag first:
 
 ```python
-eia_923_one_link = eia_923_zip_tags[0]
-eia_923_one_response = requests.get(eia_923_one_link["href"])
+eia_906_one_link = eia_906_xls_tags[0]
+eia_923_one_response = pd.read_excel(eia_923_one_link["href"])
 ```
 
 Oh no! We get an error:
 
 ```output
-MissingSchema: Invalid URL 'xls/f923_2025.zip': No scheme supplied. Perhaps you meant https://xls/f923_2025.zip?
+FileNotFoundError: [Errno 2] No such file or directory: '/electricity/data/eia923/archive/xls/utility/f7592000mu.xls'
 ```
 
 Looks like the URL in the `href` is incomplete. It turns out that this is a *relative path* - much like the relative paths you had to deal with when loading data on your computer. The full URL we want is
-`https://www.eia.gov/electricity/data/eia923/xls/f923_2025.zip` - which combines the URL of the page we got the link from (`https://www.eia.gov/electricity/data/eia923`) with the fragment we got in the `href` (`xls/f923_2025.zip`).
+`https://www.eia.gov/electricity/data/eia923/archive/xls/utility/f7592000mu.xls` - which combines the URL of the page we got the link from (`https://www.eia.gov/electricity/data/eia923/eia906u.php`) with the fragment we got in the `href` (`electricity/data/eia923/eia906u.php`).
 
 This is a super common thing to have to do, so there's a useful bit of the Python standard library for this: `urllib.parse.urljoin`:
 
 ```
 from urllib.parse import urljoin
 
-eia_923_one_full_url = urljoin(eia_923_url, eia_923_one_link["href"])
-response = requests.get(eia_923_one_full_url)
+eia_906_one_full_url = urljoin(eia_906_url, eia_906_one_link["href"])
+response = requests.get(eia_906_one_full_url)
 ```
 
-We can also do the string concatenation ourselves with `eia_923_url + "..."`, but there are a surprising amount of details to get wrong here so it's nice to just use the function that works.
+We can also do the string concatenation ourselves with `eia_906_url + "..."`, but there are a surprising amount of details to get wrong here so it's nice to just use the function that works.
 
 :::: challenge
 
@@ -241,15 +242,15 @@ eia_906_dataframes = []
 ::::::: solution
 
 ```python
-for a in eia_906_links:
+for a in eia_906_xls_tags:
     full_url = urljoin(eia_906_url, a["href"])
-    eia_906_dataframes = pandas.read_excel(full_url)
+    eia_906_dataframes.append(pd.read_excel(full_url))
 ```
 :::::::
 
 ::::
 
-Once we've completed the challenge above, we have a list of a bunch of dataframes. To bring them all into one dataframe, we can use `pd.concat`:
+Once we've completed the challenge above, we have a list of a bunch of dataframes. To bring them all into one dataframe, we can use `pd.concat`, which "concatenates" several dataframes together:
 
 ```python
 mega_906 = pd.concat(eia_906_dataframes)
@@ -317,9 +318,47 @@ Why might you choose to do all this instead of just manually collecting links?
 
 ::::
 
-### Pagination
+## Pagination
 
-Another time you'll need lots of URLs is when APIs don't give you everything all at once. For example, the EIA API kept giving us this warning:
+Another time you'll need lots of URLs is when APIs don't give you everything all at once. Let's look at an example request to the EIA API we saw last time:
+
+```python
+eia_api_base_url = "https://api.eia.gov/v2/electricity"
+api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
+
+first_page = requests.get(
+    f"{eia_api_base_url}/facility-fuel/data",
+    params={
+        "data[]": "generation",
+        "facets[state][]": "CO",
+        "sort[0][column]": "period",
+        "sort[0][direction]": "desc",
+        "sort[1][column]": "plantCode",
+        "sort[1][direction]": "desc",
+        "api_key": api_key
+    }
+).json()["response"]
+```
+
+There's a lot of info in here so let's just look at the keys to start.
+
+```python
+first_page.keys()
+```
+
+The data lives in the `"data"` key, so let's take a quick look at that:
+
+```python
+pd.DataFrame(first_page["data"])
+```
+
+Seems like it's sensible data, but 5000 rows is a suspiciously round (and small) number. Is there anything funny going on?
+
+Ooh! There's a warning - what is it?
+
+```python
+first_page["warnings"]
+```
 
 ```
 The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.
@@ -339,36 +378,7 @@ We'll go to the [docs](https://www.eia.gov/opendata/documentation.php) to look a
 >
 > In the above example, the API will skip over the first 24 eligible rows (offset=24), which translates into 24 months (frequency=monthly).
 
-Let's try it out - first, let's make an API request and look at the output. Note that we're sorting by the time period and plant code - this lets us have a stable order so that the "next 5000 rows" means something well-defined.
-
-```python
-eia_api_base_url = "https://api.eia.gov/v2/electricity"
-api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
-
-# remember from last time that the shape is a JSON object with everything in "response"
-first_page = requests.get(
-  f"{eia_api_base_url}/facility-fuel/data",
-  params={
-    "data[]": "generation",
-    "facets[state][]": "CO",
-    "sort[0][column]": "period",
-    "sort[0][direction]": "desc",
-    "sort[1][column]": "plantCode",
-    "sort[1][direction]": "desc",
-    "api_key": api_key
-  }
-).json()["response"]
-
-first_page.keys()
-```
-
-Right. The data lives in the `"data"` key, so let's take a quick look at that:
-
-```python
-pd.DataFrame(first_page["data"])
-```
-
-So we have the last several months of data! Let's grab the next 5000 rows using that `offset` parameter:
+Let's try using that:
 
 ```python
 next_page = requests.get(
@@ -390,33 +400,39 @@ If we look at *that* we can see that we do indeed get the next several months of
 pd.DataFrame(next_page["data"])
 ```
 
-And if we wanted to grab the first 5 pages, we could use a `for` loop combined with the `range()` function - here's how `range` works:
+And if we wanted to grab the first 5 pages, we could use a `for` loop combined with the `range()` function.
+
+`range()` is super useful - at its simplest, it just produces, well... a range of numbers.
 
 ```python
-for page_num in range(5):
-    print(f"Getting page {page_num}")
+for i in range(5):
+    print(i)
     # actually get the page here...
 ```
 
-Here the `range()` lets you go through the loop 5 times.
-
-When we are looking to get *all* of the pages, we can use the `"total"` field in the EIA API response to figure out how many total rows there are:
+If you want to start at a specific number, you can do something like:
 
 ```python
-first_page["total"]
+for i in range(10, 15):
+    print(i)
 ```
 
-So there are about 155,000 rows in this dataset.
-
-To get the number of pages we need we divide the total by the page size, and round up using `math.ceil`:
+And if you want to count in different increments, you can do:
 
 ```python
-import math
-
-total_rows = net_generation["total"]
-page_size = 5000
-num_pages = math.ceil(total_rows / page_size)
+for i in range(0, 15, 5):
+    print(i)
 ```
+
+
+:::: challenge: `range`
+
+So, in theory, if you wanted to set a fresh `offset` for every page in a number of rows, how would you do that?
+
+:::::::: solution
+::::::::
+
+::::
 
 :::: challenge
 
@@ -424,15 +440,16 @@ num_pages = math.ceil(total_rows / page_size)
 
 OK, now let's put it all together!
 
-Let's try to get all of the net generation data in Colorado that is in the EIA API.
+Let's try to get the net generation data in Colorado that is in the EIA API.
+
+Instead of getting all of it, which will take a lot of waiting around, let's just grab the first 12,345 rows.
 
 Start with the following code and modify it to work:
 
 ```python
 all_records = []
-for page_num in range(num_pages):
-    print(f"Getting page {page_num}...")
-    offset = ___
+# loop through the necessary pages to get 12,345 rows
+    print(f"Getting page starting at {offset}...")
     page = requests.get(
       f"{eia_api_base_url}/facility-fuel/data",
       params={
@@ -442,7 +459,7 @@ for page_num in range(num_pages):
         "sort[0][direction]": "desc",
         "sort[1][column]": "plantCode",
         "sort[1][direction]": "desc",
-        ___,
+        "offset": # what goes here?
         "api_key": api_key
       }
     ).json()["response"]
@@ -480,6 +497,19 @@ len(df.drop_duplicates())
 ::::::::
 
 ::::
+
+OK, so what if we were looking to get *all* of the pages - is there something we can use from the API response?
+
+```python
+first_page.keys()
+```
+That "total" field looks pretty suspicious.
+
+```python
+first_page["total"]
+```
+
+So there are about 155,000 rows in this dataset. We could plug that number in above.
 
 This is just one common way APIs do pagination. You'll have to flex those API learning skills (play with the data, read the docs, bounce back and forth) to learn how each new API handles this.
 

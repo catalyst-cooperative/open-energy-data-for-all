@@ -50,8 +50,6 @@ help(pd.read_parquet)
 It says that the path "could be a URL." Let's try it!
 
 ```python
-import pandas as pd
-
 df = pd.read_parquet("https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/core_eia923__monthly_generation_fuel.parquet")
 
 print(df.report_date.max())
@@ -255,8 +253,6 @@ For example, to answer that question, you can request this URL:
 
 
 ```python
-import requests
-
 response = requests.get("https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&facets[fueltypeid][]=NG&facets[sectorid][]=99&facets[location][]=CO&frequency=annual&start=2020&end=2023&api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
 
 response.json()
@@ -590,7 +586,7 @@ As we accumulate more and more parameters, this starts to get pretty unwieldy to
 
 ```python
 annual = requests.get(
-    "{base_url}/facility-fuel/data",
+    f"{base_url}/facility-fuel/data",
     params={
         "data[]": "generation",
         "frequency": "annual",
@@ -605,7 +601,11 @@ Next let's filter this to just natural gas. You'll often see the word "faceting"
 
 If we go back to our earlier metadata, we can see a list of such facets:
 
-```json
+```python
+facility_fuel.json()
+```
+
+```output
 ...
 'facets': [{'id': 'plantCode', 'description': 'Plant ID and Name'},
  {'id': 'fuel2002', 'description': 'Energy Source'},
@@ -657,7 +657,7 @@ Let's copy this pattern and see if that works:
 
 ```python
 annual_ng = requests.get(
-    "{base_url}/facility-fuel/data",
+    f"{base_url}/facility-fuel/data",
     params={
         "data[]": "generation",
         "frequency": "annual",
@@ -744,7 +744,7 @@ Limit the results to 2020-2023. Start from your last query:
 
 ```python
 annual_ng_co = requests.get(
-    "{base_url}/facility-fuel/data",
+    f"{base_url}/facility-fuel/data",
     params={
         "data[]": "generation",
         "frequency": "annual",
