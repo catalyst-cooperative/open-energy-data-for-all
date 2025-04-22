@@ -853,13 +853,12 @@ any links that you are not going to use.
  -->
 </div></section><section id="aio-working-with-diverse-filetypes"><p>Content from <a href="working-with-diverse-filetypes.html">Handling diverse filetypes in Pandas</a></p>
 <hr>
-<p>Last updated on 2025-02-27 |
+<p>Last updated on 2025-04-22 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/working-with-diverse-filetypes.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
           <button role="button" aria-pressed="false" tabindex="0" id="expand-code" class="pull-right" data-expand="Expand All Solutions " data-collapse="Collapse All Solutions "> Expand All Solutions <i aria-hidden="true" data-feather="plus"></i></button>
         </div>
-<p>Expected duration: 45 min?</p>
 <div class="overview card">
 <h2 class="card-header">Overview</h2>
 <div class="row g-0">
@@ -868,8 +867,8 @@ any links that you are not going to use.
 <div class="inner">
 <h3 class="card-title">Questions</h3>
 <ul>
-<li>How can I read in different tabular data types to a familiar format
-in Python?</li>
+<li>How can I read in different tabular file formats to a familiar data
+type in Python?</li>
 <li>What are some common errors that occur when importing data, and how
 can I troubleshoot them?</li>
 </ul>
@@ -883,8 +882,8 @@ can I troubleshoot them?</li>
 <ul>
 <li>Import tabular data from Excel, JSON, XML and Parquet formats to
 pandas dataframes using the <code>pandas</code> library</li>
-<li>Use <code>help</code> and function documentation to select and
-implement parameters in function calls.</li>
+<li>Use <code>help</code> and function documentation to select and set
+parameters in function calls.</li>
 </ul>
 </div>
 </div>
@@ -917,6 +916,18 @@ eclipsing the information previously recorded in EIA-906, EIA-920, FERC
 <p>Given your interest in generation and fuel consumption data for your
 research, the EIA Form 923 data is a great starting point for data
 exploration.</p>
+</section><section><h2 class="section-heading" id="get-ready">Get ready<a class="anchor" aria-label="anchor" href="#get-ready"></a>
+</h2>
+<hr class="half-width">
+<p>Open up the notebook for this lesson by running</p>
+<div class="codewrapper sourceCode" id="cb1">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">$</span> uv run jupyter notebook</span></code></pre>
+</div>
+<p>from the <code>open-energy-data-for-all</code> directory. Then in the
+Jupyter browser, open
+<code>notebooks/2-diverse-filetypes.ipynb</code>.</p>
 </section><section><h2 class="section-heading" id="reading-excel-files-with-pandas">Reading Excel files with Pandas<a class="anchor" aria-label="anchor" href="#reading-excel-files-with-pandas"></a>
 </h2>
 <hr class="half-width">
@@ -929,6 +940,7 @@ offers a variety of parameters designed to handle common complexities
 specific to the file type on import. For a refresher on Pandas, Pandas
 DataFrames and reading in files, see the <a href="https://datacarpentry.github.io/python-ecology-lesson/instructor/02-starting-with-data.html" class="external-link">Starting
 with Data</a> lesson.</p>
+
 <div id="identifying-file-paths" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -942,23 +954,24 @@ where that file lives. There are two ways to specify the path to any
 file on your computer:</p>
 <ul>
 <li>
-<strong>Relative path</strong>: A relative path specifies a location
-starting from the current location.</li>
-<li>
 <strong>Absolute path</strong>: An absolute path specifies a
 location from the root of the filesystem.</li>
+<li>
+<strong>Relative path</strong>: A relative path specifies a location
+starting from the current location. The relative path is just a subset
+of the absolute path.</li>
 </ul>
 <p>For example, to get to the <code>eia923_2022.json</code> file in the
 <code>data</code> folder from a notebook in the
 <code>open-energy-data-for-all</code> folder, we can either specify:</p>
 <ul>
 <li>
-<strong>Relative path</strong>:
-<code>data/eia923_2022.json</code>
-</li>
-<li>
 <strong>Absolute path</strong>:
 <code>/home/user/Desktop/path/to/open-energy-data-for-all/folder/data/eia923_2022.json</code>
+</li>
+<li>
+<strong>Relative path</strong>:
+<code>data/eia923_2022.json</code>
 </li>
 </ul>
 </div>
@@ -971,34 +984,30 @@ location from the root of the filesystem.</li>
 with the Excel spreadsheet. To read in an Excel spreadsheet using
 <code>pandas</code>, you will use the <code>read_excel()</code>
 function:</p>
-<div class="codewrapper sourceCode" id="cb1">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>pd.read_excel(<span class="st">'data/eia923_2022.xlsx'</span>)</span></code></pre>
-</div>
-<p>Unfortunately, something doesn’t look quite right! When opening the
-file in a spreadsheet software, you see that the first few rows look
-like this:</p>
-<figure><img src="fig/excelheader.png" alt="Snapshot of the Excel file showing the first 6 rows contain metadata, blank spaces and column names." class="figure mx-auto d-block"><div class="figcaption">The first few rows of the eia923_2022.xlsx
-file</div>
-</figure><p>To read the spreadsheet in correctly, we want to ignore these first
-five rows. Luckily, <code>read_excel()</code> offers built-in
-functionality to handle various Excel formatting challenges. To identify
-which parameter we need to use to skip these rows when reading in the
-file, we can use the <code>help()</code> function to pull up the
-function documentation:</p>
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="bu">help</span>(pd.read_excel)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>pd.read_excel(<span class="st">'data/eia923_2022.xlsx'</span>)</span></code></pre>
+</div>
+<p>That took a while! Luckily,<code>read_excel()</code> offers built-in
+functionality to handle various Excel formatting challenges. Let’s see
+if there’s a way to quickly explore a smaller subset of the data. While
+we can always look up documentation online, we can also access a
+function’s documentation right in Python. To identify which parameter
+might be able to help us, we can use the <code>help()</code> function to
+pull up the function documentation:</p>
+<div class="codewrapper sourceCode" id="cb3">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="bu">help</span>(pd.read_excel)</span></code></pre>
 </div>
 <p>For each parameter, the documentation provides the name of the
 parameter, the format for the parameter input (e.g., list, string, int),
 the default value if no value is provided, and an explanation of what
 the parameter does.</p>
-<p>For example, the <code>nrows</code> parameter provides the following
-documentation:</p>
+<p>We can see that the <code>nrows</code> parameter provides the
+following documentation:</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1007,11 +1016,19 @@ documentation:</p>
 </div>
 <p>So, if we only want to parse the first 100 rows of the data, we can
 call:</p>
-<div class="codewrapper sourceCode" id="cb4">
+<div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>pd.read_excel(<span class="st">'data/eia923_2022.xlsx'</span>, nrows<span class="op">=</span><span class="dv">100</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>pd.read_excel(<span class="st">'data/eia923_2022.xlsx'</span>, nrows<span class="op">=</span><span class="dv">100</span>)</span></code></pre>
 </div>
+<p>That’s better. But unfortunately, something doesn’t look quite right!
+When opening the file in a spreadsheet software, you see that the first
+few rows look like this:</p>
+
+<figure><img src="fig/excelheader.png" alt="Snapshot of the Excel file showing the first 6 rows contain metadata, blank spaces and column names." class="figure mx-auto d-block"><div class="figcaption">The first few rows of the eia923_2022.xlsx
+file</div>
+</figure><p>To read the spreadsheet in correctly, we want to ignore these first
+five rows.</p>
 <div id="challenge-1-handling-excel-formatting-on-read-in" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
@@ -1020,10 +1037,11 @@ call:</p>
 <h3 class="callout-title">Challenge 1: handling Excel formatting on read-in</h3>
 <div class="callout-content">
 <p>Looking at the documentation for <code>pd.read_excel()</code>,
-identify the parameter needed to skip the first few rows of the
-spreadsheet. Then, using <code>pd.read_excel()</code>, read in the “Page
-1 Generation and Fuel Data” sheet using this parameter to skip any rows
-that don’t contain the column headers.</p>
+identify the parameter needed to ignore the first few rows of the
+spreadsheet. Then, using <code>pd.read_excel()</code>, read in the
+<code>eia923_2022.xlsx</code> file using this parameter to skip any rows
+that don’t contain the column headers. Store the result in a variable
+called <code>eia923_excel_df</code>.</p>
 </div>
 </div>
 </div>
@@ -1032,17 +1050,14 @@ that don’t contain the column headers.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
-<div class="codewrapper sourceCode" id="cb5">
+<div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>excel_923 <span class="op">=</span> pd.read_excel(<span class="st">'data/eia923_2022.xlsx'</span>, sheet_name<span class="op">=</span><span class="st">"Page 1 Generation and Fuel Data"</span>, skiprows<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># sheet_name can also take the number of the sheet</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>excel_923 <span class="op">=</span> pd.read_excel(<span class="st">'data/eia923_2022.xlsx'</span>, sheet_name<span class="op">=</span><span class="dv">0</span>, skiprows<span class="op">=</span><span class="dv">5</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>eia923_excel_df <span class="op">=</span> pd.read_excel(<span class="st">'data/eia923_2022.xlsx'</span>, skiprows<span class="op">=</span><span class="dv">5</span>)</span></code></pre>
 </div>
 </div>
 </div>
@@ -1053,52 +1068,75 @@ mover. While a subset of plants fill out Form 923 at the boiler and
 generator, a large proportion of plants only report at this more
 aggregated level. For more on the nuances of the Form 923 data, see
 PUDL’s <a href="https://catalystcoop-pudl.readthedocs.io/en/latest/data_sources/eia923.html" class="external-link">data
-source page</a>.</p>
+source page for EIA-923</a>.</p>
 </div>
 </section><section><h2 class="section-heading" id="reading-in-json-files">Reading in JSON files<a class="anchor" aria-label="anchor" href="#reading-in-json-files"></a>
 </h2>
 <hr class="half-width">
 <p>JavaScript Object Notation (JSON) is a lightweight file format based
-on name-value pairs, similar to Python dictionaries. JSON often used to
-send data to and from web applications, and is one of the most common
-formats provided when you’re accessing data from an Application
+on name-value pairs, similar to Python dictionaries. JSON is often used
+to send data to and from web applications, and is one of the most common
+formats available when you’re accessing data from an Application
 Programming Interface (API). JSON data can be found saved as either
 <code>.json</code> or <code>.txt</code> files.</p>
 <div class="section level3">
-<h3 id="nested-formats-in-json-files">Nested formats in JSON files<a class="anchor" aria-label="anchor" href="#nested-formats-in-json-files"></a>
+<h3 id="nested-content-in-json-files">Nested content in JSON files<a class="anchor" aria-label="anchor" href="#nested-content-in-json-files"></a>
 </h3>
-<p>Pandas <code>read_*()</code> methods transform data into a tabular
-format. When a JSON file is already formatted as a table, we can use
+<p>Pandas <code>read_*()</code> methods assume tabular data. When a JSON
+file represents a table and nothing else, we can use
 <code>pd.read_json()</code> to read it in directly. Most often, we know
 a JSON file contains a table when we see a list of dictionaries, or a
 dictionary of lists.</p>
-<p>However, JSON files are very rarely formatted to <em>only</em>
-contain a table. Instead, most JSONs contain data in a <em>nested</em>
-format. To successfully extract tabular generation data from a nested
-JSON, we need to identify which part of the nested JSON contains the
-tabular data we’re looking for.</p>
-<p>A nested JSON contains multiple levels of data:</p>
+<p>However, JSON is a flexible format, and JSON files can be organized
+all kinds of ways. Unlike Excel or CSV spreadsheets, many JSON files
+don’t just contain a table. Instead, most JSONs contain data in a
+<em>nested</em> format.</p>
+<p>Nested JSON contains multiple levels of data:</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>{'response':
-    {'data': [
-        {'period':'2022-12',
-        'plantCode': '6761'},
-        {'period':'2022-12',
-        'plantCode': '54152'}
-        ]
-    }}</code></pre>
+<pre class="output" tabindex="0"><code>{
+  "response": {
+    "data": [
+      {
+        "period": "2022-12",
+        "plantCode": "6761"
+      },
+      {
+        "period": "2022-12",
+        "plantCode": "54152"
+      }
+    ]
+  }
+}</code></pre>
 </div>
-<p>Here, the <code>response</code> contains another name-value pair
-called <code>data</code>, and <code>data</code> contains a list with two
-records, each of which has two name-value pairs (<code>period</code> and
-<code>plantCode</code>).</p>
+<p>To successfully extract tabular data from nested JSON, we need to
+identify which part of the structure contains the tabular data we’re
+looking for. Here, the <code>response</code> contains another name-value
+pair called <code>data</code>, and <code>data</code> contains a list
+with two records, each of which has two name-value pairs
+(<code>period</code> and <code>plantCode</code>).</p>
 <p>The <code>data</code> contained in this JSON file can be represented
-as a table! In this data format, each dictionary corresponds to one row
-of the data, and each name (e.g., “period”) corresponds to a column
-name. JSON files typically represent this data format using lists of
-dictionaries, as above.</p>
+as a table! In this case, each dictionary corresponds to one row of the
+data, and each name (e.g., “period”) corresponds to a column name. This
+is the “list of dictionaries” approach to expressing a table in JSON
+format that we mentioned above.</p>
+<div id="callout2" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<div class="callout-inner">
+<h3 class="callout-title">Callout</h3>
+<div class="callout-content">
+<p>JSONs can include many levels of nesting, including different levels
+of nesting for similar records or other formatting that doesn’t obey the
+principles of tabular structure (where each row represents a single
+record, and each column represents a single variable). We focus on
+extracting tabular data from these nested JSONs in this lesson, but some
+JSON files may not contain tabular data at all.</p>
+</div>
+</div>
+</div>
 </div>
 <div class="section level3">
 <h3 id="reading-in-json-files-using-json-load">Reading in JSON files using <code>json.load()</code>
@@ -1108,10 +1146,11 @@ dictionaries, as above.</p>
 changing its format. To do this, we use the <code>json</code> package,
 and the <code>load</code> method.</p>
 <p>While Pandas handles opening a file in the <code>read_*()</code>
-methods, <code>json.load()</code> does not - so, we first need to open
-the file in Python. To do so, we use the <code>open()</code> function to
-read in the <code>eia923_2022.json</code> file.</p>
-<div id="callout2" class="callout">
+methods, <code>json.load()</code> does not - so, we first need to read
+the file into Python. To do so, we use the <code>open()</code>
+function.</p>
+
+<div id="callout3" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
 </div>
@@ -1128,16 +1167,16 @@ the code we want to run on the opened file into an indented block.</p>
 </div>
 </div>
 </div>
-<div class="codewrapper sourceCode" id="cb7">
+<div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="im">import</span> json</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/eia923_2022.json'</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    eia923_json <span class="op">=</span> json.load(<span class="bu">file</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>eia923_json</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/eia923_2022.json'</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>    eia923_json <span class="op">=</span> json.load(<span class="bu">file</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>eia923_json</span></code></pre>
 </div>
-<p>The first part of the response looks like this:</p>
+<p>The first part of the result looks like this:</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1158,88 +1197,42 @@ the code we want to run on the opened file into an indented block.</p>
     'gross-generation': '203283',
     'generation-units': 'megawatthours',
     'gross-generation-units': 'megawatthours'},
-    .....</code></pre>
+    ...</code></pre>
 </div>
-<p>Now we can treat <code>eia923_json</code> like any other Python
-dictionary. We can use <code>.keys()</code> to see a list of all the
-keys in the first level of the dictionary - this is a quick and helpful
-way to get a sense for what is contained in different parts of the JSON
-file, without having to scroll through the entire output.</p>
+<p>By using <code>json.load()</code>, we’ve read our file into a Python
+dictionary. Now, we can use <code>.keys()</code> to see a list of all
+the keys in the first level of the dictionary - this is a quick and
+helpful way to get a sense for what is contained in different parts of
+the JSON file, without having to scroll through the entire output.</p>
 <p>To see the value of any particular key, we can call it in square
 brackets by name:</p>
-<div class="codewrapper sourceCode" id="cb9">
+<div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>eia923_json[<span class="st">'response'</span>]</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>eia923_json[<span class="st">'response'</span>]</span></code></pre>
 </div>
 <p>This returns yet another dictionary with a list of keys. To look more
 closely at the <code>warnings</code> the file contains, we can add
 another square bracket:</p>
-<div class="codewrapper sourceCode" id="cb10">
+<div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>eia923_json[<span class="st">'response'</span>][<span class="st">'warnings'</span>]</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>eia923_json[<span class="st">'response'</span>][<span class="st">'warnings'</span>]</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>[{"warning":"incomplete return","description":"The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results."}, {"warning":"another warning", "description":"Hey! Watch out!"}]</code></pre>
+<pre class="output" tabindex="0"><code>[{'warning': 'incomplete return',
+  'description': 'The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.'},
+ {'warning': 'another warning', 'description': 'Hey! Watch out!'}]</code></pre>
 </div>
-<div id="challenge-2-find-that-table" class="callout challenge">
-<div class="callout-square">
-<i class="callout-icon" data-feather="zap"></i>
-</div>
-<div id="challenge-2-find-that-table" class="callout-inner">
-<h3 class="callout-title">Challenge 2: find that table!</h3>
-<div class="callout-content">
-<p>Load the <code>eia923_2022.json</code> file using
-<code>json.load()</code>, and find the data table containing net
-generation data by iterating through the dictionary keys.</p>
-</div>
-</div>
-</div>
-<div id="accordionSolution2" class="accordion challenge-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
-  <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
-</button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
-<div class="accordion-body">
-<div class="codewrapper sourceCode" id="cb12">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="im">import</span> json</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="im">import</span> json</span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/eia923_2022.json'</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>    eia923_json <span class="op">=</span> json.load(<span class="bu">file</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>eia923_json[<span class="st">'response'</span>][<span class="st">'data'</span>]</span></code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="section level3">
-<h3 id="using-json-normalize">Using <code>json.normalize()</code>
-<a class="anchor" aria-label="anchor" href="#using-json-normalize"></a>
-</h3>
 <p>Now that we’ve found the path to our data table in the JSON file, we
-still need to transform the data into a Pandas DataFrame. Luckily for
-us, Pandas has a function to transform nested or semi-structured JSON
-files into Pandas DataFrames: <code>json_normalize()</code>.</p>
-<p>Unlike <code>read_json()</code>, <code>json_normalize()</code>
-expects that the JSON object has already been read into Python using
-<code>json.load()</code>. Once we’ve loaded the JSON file, we can use
-the <code>record_path</code> parameter to specify the path to follow to
-get to our tabular data - for the warnings data, first
-<code>response</code> and then <code>warnings</code>:</p>
+can use <code>pd.DataFrame()</code> to transform it into a Pandas
+DataFrame:</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>pd.read_json(eia923_json, record_path <span class="op">=</span> [<span class="st">'response'</span>,<span class="st">'warnings'</span>])</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>pd.DataFrame(eia923_json[<span class="st">'response'</span>,<span class="st">'warnings'</span>])</span></code></pre>
 </div>
 <p>The function returns a DataFrame that looks like this:</p>
 <div class="codewrapper">
@@ -1254,36 +1247,47 @@ get to our tabular data - for the warnings data, first
 queried and saved this data from the API, he only got the first 5,000
 rows of data. We’ll tackle this problem in a later episode, but for now
 let’s investigate the data that we do have saved locally.</p>
-<div id="challenge-3-handling-nested-jsons" class="callout challenge">
+<div id="challenge-2-find-that-table" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
-<div id="challenge-3-handling-nested-jsons" class="callout-inner">
-<h3 class="callout-title">Challenge 3: handling nested JSONs</h3>
+<div id="challenge-2-find-that-table" class="callout-inner">
+<h3 class="callout-title">Challenge 2: find that table!</h3>
 <div class="callout-content">
 <p>Fill in the blanks in the code below to read in the <code>data</code>
 from the <code>eia923_2022.json</code> file into a Pandas DataFrame.</p>
 <div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="im">import</span> json</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/eia923_2022.json'</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>    eia923_json <span class="op">=</span> ...</span>
 <span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="im">import</span> json</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/eia923_2022.json'</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>    eia923_json <span class="op">=</span> ...</span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>eia923_json_df <span class="op">=</span> pd.json_normalize(eia923_json, record_path <span class="op">=</span> [...])</span></code></pre>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>eia923_json_df <span class="op">=</span> pd.DataFrame(eia923_json[...])</span></code></pre>
 </div>
 </div>
 </div>
 </div>
-<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div id="accordionHint1" class="accordion challenge-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
-  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
+<button class="accordion-button hint-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHint1" aria-expanded="false" aria-controls="collapseHint1">
+  <h4 class="accordion-header" id="headingHint1"> Give me a hint </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseHint1" class="accordion-collapse collapse" aria-labelledby="headingHint1" data-bs-parent="#accordionHint1">
+<div class="accordion-body">
+<p>First, read in the file using <code>open()</code> and
+<code>json.load()</code>. Once you’ve read in the file, you can iterate
+through the <code>.keys()</code> of the dictionary to find the path to
+the <code>data</code> portion of the file.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="accordionSolution2" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
+  <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
+</button>
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1295,27 +1299,9 @@ from the <code>eia923_2022.json</code> file into a Pandas DataFrame.</p>
 <span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/eia923_2022.json'</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
 <span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>    eia923_json <span class="op">=</span> json.load(<span class="bu">file</span>)</span>
 <span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>eia923_json_df <span class="op">=</span> pd.json_normalize(eia923_json, record_path <span class="op">=</span> [<span class="st">'response'</span>, <span class="st">'data'</span>])</span></code></pre>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>eia923_json_df <span class="op">=</span> pd.DataFrame(eia923_json[<span class="st">'response'</span>][<span class="st">'data'</span>])</span></code></pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div id="callout3" class="callout">
-<div class="callout-square">
-<i class="callout-icon" data-feather="bell"></i>
-</div>
-<div class="callout-inner">
-<h3 class="callout-title">Callout</h3>
-<div class="callout-content">
-<p>JSONs can include many levels of nesting, including different levels
-of nesting for similar records or other formatting that doesn’t obey the
-principles of tabular structure (where each row represents a single
-record, and each column represents a single variable).
-<code>pd.json_normalize()</code> provides a set of parameters that can
-used to wrangle more deeply nested JSON data. Call
-<code>help(pd.json_normalize)</code> and look at the provided examples
-to get a better sense of its capabilities.</p>
 </div>
 </div>
 </div>
@@ -1342,15 +1328,16 @@ state:</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>{"note":
-    {"from": "Saul R. Panel",
+<pre class="output" tabindex="0"><code>{
+  "note": {
+    "from": "Saul R. Panel",
     "to": "Dr. Watts",
     "heading": "Note about project",
     "body": "Sorry for leaving the project in an incomplete state!"
-    }
+  }
 }</code></pre>
 </div>
-<p>Like other markup languages (HTML, LaTeX), XML wraps around data,
+<p>Like other markup languages (e.g., HTML), XML wraps around data,
 providing information about the structure, format, and relationships
 between components. Each tag provides metadata about what the piece of
 data it contains represents - for instance <code>&lt;row&gt;</code> will
@@ -1361,112 +1348,27 @@ plant code is 243.</p>
 provide metadata about what the corresponding value <em>is</em> (e.g., a
 note, net generation in watts) - both provide information about nested
 relationships (e.g., the note contains a heading and a body)</p>
-However, unlike JSON, XML tags: - can have additional attributes (e.g.,
-<note date="2008-01-10"><p>), providing a way to share more complex metadata about a given data
-point and to search for tags matching additional filters (e.g., all
-notes written after Jan 01, 2008).</p>
+<p>However, unlike JSON, XML tags: - can have additional attributes
+(e.g.,
+<code>&lt;data type="float" precision=3 variable_name="net-generation-mw"&gt;3.142&lt;/data&gt;</code>),
+providing a way to share more complex metadata about a given data point
+and to search for tags matching additional filters (e.g., all data with
+a particular variable name).</p>
 <p>While XML is harder and slower to read than JSON, it also has more
 capabilities. You might be likely to see an XML file if the data you’re
-looking at: - is old! XML was invented in 1998 and is still widely in
-use in older data distribution methods. - has deeply nested hierarchies
-of relationships, like FERC’s accounting data. - is large and complex!
-For instance, JSON can only handle strings, numbers and booleans, while
-XML can also be used to share images, charts and graphs. - is
-distributed through an RSS feed. For instance, FERC publishes filings on
-a rolling basis using an RSS feed and the XML data format.</p>
-<div id="challenge-4-from-xml-to-pandas" class="callout challenge">
-<div class="callout-square">
-<i class="callout-icon" data-feather="zap"></i>
-</div>
-<div id="challenge-4-from-xml-to-pandas" class="callout-inner">
-<h3 class="callout-title">Challenge 4: From XML to Pandas</h3>
-<div class="callout-content">
-<p>Look at the following XML code.</p>
-<div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>&lt;data&gt;
-    &lt;row&gt;
-        &lt;period&gt;2022-12&lt;/period&gt;
-        &lt;plantCode&gt;59656&lt;/plantCode&gt;
-        &lt;plantName&gt;Comanche Solar&lt;/plantName&gt;
-    &lt;/row&gt;
-    &lt;row&gt;
-        &lt;period&gt;2023-01&lt;/period&gt;
-        &lt;plantCode&gt;59657&lt;/plantCode&gt;
-        &lt;plantName&gt;Comanche&lt;/plantName&gt;
-    &lt;/row&gt;
-&lt;/data&gt;</code></pre>
-</div>
-<p>Which of the following Pandas DataFrames would best represent the
-data in this XML file?</p>
-<ol style="list-style-type: upper-alpha"><li>
-</li></ol>
-<div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>|    data   |       row      |
-|:---------:|:--------------:|
-| period    | 2022-12        |
-| plantCode | 59656          |
-| plantName | Comanche Solar |
-| period    | 2023-01        |
-| plantCode | 59657          |
-| plantName | Comanche       |</code></pre>
-</div>
-<ol start="2" style="list-style-type: upper-alpha"><li>
-</li></ol>
-<div class="codewrapper">
-<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="output" tabindex="0"><code>|    row    |      data      |
-|:---------:|:--------------:|
-| period    | 2022-12        |
-| plantCode | 59656          |
-| plantName | Comanche Solar |
-| period    | 2023-01        |
-| plantCode | 59657          |
-| plantName | Comanche       |</code></pre>
-</div>
-<ol start="3" style="list-style-type: upper-alpha"><li>
-</li></ol>
-<pre><code>|  period | plantCode | plantName      |
-|:-------:|-----------|----------------|
-| 2022-12 | 59656     | Comanche Solar |
-| 2023-01 | 59657     | Comanche       |</code></pre>
-<ol start="4" style="list-style-type: upper-alpha"><li>
-</li></ol>
-<pre><code>| plantName | Comanche Solar | Comanche |
-|:---------:|----------------|----------|
-| period    | 2022-12        | 2023-01  |
-| plantCode | 59656          | 59657    |</code></pre>
-</div>
-</div>
-</div>
-<div id="accordionSolution4" class="accordion challenge-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
-  <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
-</button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
-<div class="accordion-body">
-<p>The solution is C:</p>
-<pre><code>|  period | plantCode | plantName      |
-|:-------:|-----------|----------------|
-| 2022-12 | 59656     | Comanche Solar |
-| 2023-01 | 59657     | Comanche       |</code></pre>
-<p>The <code>&lt;data&gt;</code> is split into two seperate chunks of
-data seperated by <code>&lt;row&gt;</code> tags, which tells us that
-everything between these tags corresponds to a single row of data. Then,
-we know that the <code>&lt;period&gt;</code>,
-<code>&lt;plantCode&gt;</code> and <code>&lt;plantName&gt;</code> tags
-are telling us what variable the values correspond to - or in other
-words, what the column name is that corresponds to each tag.</p>
-</div>
-</div>
-</div>
-</div>
-</note></section><section><h2 class="section-heading" id="using-pd-read_xml">Using <code>pd.read_xml()</code>
+looking at:</p>
+<ul>
+<li>is old! XML was invented in 1998 and is still widely in use in older
+data distribution methods.</li>
+<li>has deeply nested hierarchies of relationships, like FERC’s
+accounting data.</li>
+<li>is large and complex! For instance, JSON can only handle strings,
+numbers and booleans, while XML can also be used to share images, charts
+and graphs.</li>
+<li>is distributed through an RSS feed. For instance, FERC publishes
+filings on a rolling basis using an RSS feed and the XML data
+format.</li>
+</ul></section><section><h2 class="section-heading" id="using-pd-read_xml">Using <code>pd.read_xml()</code>
 <a class="anchor" aria-label="anchor" href="#using-pd-read_xml"></a>
 </h2>
 <hr class="half-width">
@@ -1479,32 +1381,112 @@ table-like format and can be easily extracted to a DataFrame. For more
 on <code>pd.read_xml()</code>, see the <a href="https://pandas.pydata.org/docs/reference/api/pandas.read_xml.html#pandas.read_xml#notes" class="external-link">Pandas
 documentation</a>.</p>
 <p>Let’s try to explore the XML file that the postdoc left behind:</p>
-<div class="codewrapper sourceCode" id="cb25">
+<div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>pd.read_xml(<span class="st">'data/eia923_2022.xml'</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>pd.read_xml(<span class="st">'data/eia923_2022.xml'</span>)</span></code></pre>
 </div>
-<p>Each tag has been assigned as a column name, and the value inside has
-been added as a row. To drill down to the <code>&lt;data&gt;</code> we
-are actually interested in, we can use the <code>xpath</code> parameter,
-which lets you specify where in the XML file to look for a table.</p>
+<p>Hm, that doesn’t look quite right. Each tag has been assigned as a
+column name, and the value inside has been added as a row.</p>
+<p>If we open up the XML file in a text editor or browser, we can see
+that a nested series of tags can help us identify the part of the table
+we want to read in.</p>
+<div class="codewrapper sourceCode" id="cb20">
+<h3 class="code-label">XML<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode xml" tabindex="0"><code class="sourceCode xml"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>&lt;<span class="kw">response</span>&gt;</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>    &lt;<span class="kw">total</span>&gt;96&lt;/<span class="kw">total</span>&gt;</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>    &lt;<span class="kw">dateFormat</span>&gt;YYYY-MM&lt;/<span class="kw">dateFormat</span>&gt;</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>    &lt;<span class="kw">frequency</span>&gt;monthly&lt;/<span class="kw">frequency</span>&gt;</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>    &lt;<span class="kw">warnings</span>&gt;</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>        &lt;<span class="kw">row</span>&gt;</span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>            &lt;<span class="kw">warning</span>&gt;Incomplete return.&lt;/<span class="kw">warning</span>&gt;</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>            &lt;<span class="kw">description</span>&gt;The API can only return 300 rows in XML format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.&lt;/<span class="kw">description</span>&gt;</span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>        &lt;/<span class="kw">row</span>&gt;</span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>        &lt;<span class="kw">row</span>&gt;</span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>            &lt;<span class="kw">warning</span>&gt;Another warning.&lt;/<span class="kw">warning</span>&gt;</span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>            &lt;<span class="kw">description</span>&gt;Hey! Watch out!&lt;/<span class="kw">description</span>&gt;</span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>        &lt;/<span class="kw">row</span>&gt;</span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a>    &lt;/<span class="kw">warnings</span>&gt;</span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a>    ...</span></code></pre>
+</div>
+<p>For example, the same warnings table we were working with before is
+in the <response> tag, then the <warnings> tag. Each row of the data is
+also wrapped in a <row> tag.</row></warnings></response></p>
+<p>To drill down to the section of the file we are actually interested
+in, we can use the <code>xpath</code> parameter, which lets you use tags
+to specify where in the XML file to look for a table.</p>
 <p>The <code>xpath</code> query we’re looking for is formatted as
-follows: - // are used at the beginning to note that we want to select
-all items with the tags specified - Then, like specifying which
-directory we want to access in a terminal, slashes are used to specify
-the path to the desired tag.</p>
-<p>So to get all the <code>&lt;row&gt;</code>s of
-<code>&lt;data&gt;</code>, we call:</p>
-<div class="codewrapper sourceCode" id="cb26">
+follows:</p>
+<ul>
+<li>// are used at the beginning to note that we want to select all
+items with the tags specified</li>
+<li>Then, like specifying which directory we want to access in a
+terminal, slashes are used to specify the path to the desired tag.</li>
+</ul>
+<p>So to get all the <code>&lt;row&gt;</code>s of the
+<code>&lt;warnings&gt;</code> table, we call:</p>
+<div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>pd.read_xml(<span class="st">'data/eia923_2022.xml'</span>, xpath <span class="op">=</span> <span class="st">"//response/data/row"</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>pd.read_xml(<span class="st">'data/eia923_2022.xml'</span>, xpath <span class="op">=</span> <span class="st">"//response/warnings/row"</span>)</span></code></pre>
 </div>
+<div id="challenge-3-reading-in-xml-data" class="callout challenge">
+<div class="callout-square">
+<i class="callout-icon" data-feather="zap"></i>
+</div>
+<div id="challenge-3-reading-in-xml-data" class="callout-inner">
+<h3 class="callout-title">Challenge 3: Reading in XML data</h3>
+<div class="callout-content">
+<p>Read in all the rows of the <code>data</code> table in
+<code>eia923_2022.xml</code> into a Pandas DataFrame, using
+<code>pd.read_xml</code> and the <code>xpath</code> parameter. Store the
+result in a variable called <code>eia923_xml_df</code>.</p>
+</div>
+</div>
+</div>
+<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
+  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
+</button>
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div class="accordion-body">
+<div class="codewrapper sourceCode" id="cb22">
+<h3 class="code-label">PY<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode py" tabindex="0"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>eia923_xml_df <span class="op">=</span> pd.read_xml(<span class="st">'data/eia923_2022.xml'</span>, xpath <span class="op">=</span> <span class="st">"//response/data/row"</span>)</span></code></pre>
+</div>
+<p>The data is found following the following tags:
+<code>&lt;response&gt;&lt;data&gt;&lt;row&gt;</code></p>
+<p>The <code>&lt;data&gt;</code> is split into two seperate chunks of
+data seperated by <code>&lt;row&gt;</code> tags, which tells us that
+everything between these tags corresponds to a single row of data. Then,
+we know that the <code>&lt;period&gt;</code>,
+<code>&lt;plantCode&gt;</code> and <code>&lt;plantName&gt;</code> tags
+are telling us what variable the values correspond to - or in other
+words, what the column name is that corresponds to each tag. We use the
+xpath parameter to grab all <code>&lt;row&gt;</code>’s of data in the
+XML file.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="callout4" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<div class="callout-inner">
+<h3 class="callout-title">Callout</h3>
+<div class="callout-content">
 <p><code>xpath</code> can be used to make more complex queries (e.g.,
 only picking <code>&lt;note&gt;</code>’s written after a certain date),
 but we won’t cover more advanced usage of <code>xpath</code> in this
 tutorial. See this <a href="https://carpentries-incubator.github.io/lc-webscraping/02-xpath/index.html" class="external-link">Library
 Carpentries tutorial</a> for more about <code>xpath</code>.</p>
+</div>
+</div>
+</div>
 </section><section><h2 class="section-heading" id="pd-read_parquet">
 <code>pd.read_parquet()</code><a class="anchor" aria-label="anchor" href="#pd-read_parquet"></a>
 </h2>
@@ -1513,31 +1495,42 @@ Carpentries tutorial</a> for more about <code>xpath</code>.</p>
 postdoc left behind - a Parquet file! You can think of Parquet files as
 spreadsheet storage optimized for computers. Like an Excel file, it’s
 very difficult for a human to read the plain text of the file, as it is
-designed to be read efficiently by software. To get into the technical
-weeds, see the <a href="https://parquet.apache.org/docs/overview/" class="external-link">Parquet
-documentation</a>.</p>
+designed to be read efficiently by software.</p>
 <p>Parquet files: - are designed to efficiently process and store large
 volumes of data, making them about 50x faster than using
-<code>pd.read_csv()</code> on comparable file sizes. - compress data
-efficiently, reducing file size - are saved with data organized into
-chunks (e.g., one chunk per month), making it possible to quickly load
-data from some part of the dataset without loading everything into
-memory. - are supported by many existing tools, including
-<code>Pandas</code>.</p>
+<code>pd.read_csv()</code> on comparable file sizes. - are saved with
+data organized into chunks (e.g., one chunk per month), making it
+possible to quickly load data from some part of the dataset without
+loading everything into memory. - are supported by many existing tools,
+including <code>Pandas</code>.</p>
+<div id="callout5" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<div class="callout-inner">
+<h3 class="callout-title">Callout</h3>
+<div class="callout-content">
+<p>To get into the technical weeds of Parquet files, see the <a href="https://parquet.apache.org/docs/overview/" class="external-link">Parquet
+documentation</a>. For a desktop viewer similar to Excel, we recommend
+checking out <a href="https://www.tadviewer.com/" class="external-link">Tad</a>.</p>
+</div>
+</div>
+</div>
 <p>We can read a Parquet file to a Pandas DataFrame using
-<code>pd.read_parquet()</code>, almost identical to how we read in a
-CSV:</p>
-<div class="codewrapper sourceCode" id="cb27">
+<code>pd.read_parquet()</code>, almost identical to how we would read in
+a CSV:</p>
+<div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">PY<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode py" tabindex="0"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>eia923_parquet <span class="op">=</span> pd.read_parquet(<span class="st">'data/eia923_2022.parquet'</span>)</span></code></pre>
+<pre class="sourceCode py" tabindex="0"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>eia923_parquet_df <span class="op">=</span> pd.read_parquet(<span class="st">'data/eia923_2022.parquet'</span>)</span></code></pre>
 </div>
-<div id="challenge5" class="callout challenge">
+
+<div id="challenge-4-comparing-datasets" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
-<div class="callout-inner">
-<h3 class="callout-title">Challenge</h3>
+<div id="challenge-4-comparing-datasets" class="callout-inner">
+<h3 class="callout-title">Challenge 4: Comparing datasets</h3>
 <div class="callout-content">
 <p>Pick two datasets we’ve just read in, and compare them. How are they
 similar, and how are they different? Share your reflections with a
@@ -1545,12 +1538,12 @@ peer.</p>
 </div>
 </div>
 </div>
-<div id="accordionHint1" class="accordion challenge-accordion accordion-flush">
+<div id="accordionHint2" class="accordion challenge-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button hint-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHint1" aria-expanded="false" aria-controls="collapseHint1">
-  <h4 class="accordion-header" id="headingHint1"> Give me a hint </h4>
+<button class="accordion-button hint-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHint2" aria-expanded="false" aria-controls="collapseHint2">
+  <h4 class="accordion-header" id="headingHint2"> Give me a hint </h4>
 </button>
-<div id="collapseHint1" class="accordion-collapse collapse" data-bs-parent="#accordionHint1" aria-labelledby="headingHint1">
+<div id="collapseHint2" class="accordion-collapse collapse" aria-labelledby="headingHint2" data-bs-parent="#accordionHint2">
 <div class="accordion-body">
 <ul>
 <li>
@@ -1591,9 +1584,6 @@ documentation, providing avenues to resolve problems on import of
 various data types.</li>
 <li>When semi-structured data contains tabular data, we can extract the
 tabular data into a Pandas Dataframe.</li>
-<li>
-<code>pandas</code> accepts both relative and absolute file paths on
-read-in.</li>
 </ul>
 </div>
 </div>
@@ -1732,7 +1722,7 @@ files in the repo - you should be able to find the Excel file here:
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1760,7 +1750,7 @@ data</strong>)?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>Some non-exhaustive ideas:</p>
 <p>Remote data pros:</p>
@@ -1919,7 +1909,7 @@ requests.get.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2122,7 +2112,7 @@ happens?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>You get data all the way until the present day!</p>
 </div>
@@ -2267,7 +2257,7 @@ level, what route should we request next?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
 <div class="accordion-body">
 <p><code>facility-fuel</code>!</p>
 </div>
@@ -2368,7 +2358,7 @@ data?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution6" aria-expanded="false" aria-controls="collapseSolution6">
   <h4 class="accordion-header" id="headingSolution6"> Show me the solution </h4>
 </button>
-<div id="collapseSolution6" class="accordion-collapse collapse" data-bs-parent="#accordionSolution6" aria-labelledby="headingSolution6">
+<div id="collapseSolution6" class="accordion-collapse collapse" aria-labelledby="headingSolution6" data-bs-parent="#accordionSolution6">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2550,7 +2540,7 @@ update the code to do that.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution7" aria-expanded="false" aria-controls="collapseSolution7">
   <h4 class="accordion-header" id="headingSolution7"> Show me the solution </h4>
 </button>
-<div id="collapseSolution7" class="accordion-collapse collapse" data-bs-parent="#accordionSolution7" aria-labelledby="headingSolution7">
+<div id="collapseSolution7" class="accordion-collapse collapse" aria-labelledby="headingSolution7" data-bs-parent="#accordionSolution7">
 <div class="accordion-body">
 <p>First, figure out what the facet is called and find the values for
 it.</p>
@@ -2626,7 +2616,7 @@ below</div>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution8" aria-expanded="false" aria-controls="collapseSolution8">
   <h4 class="accordion-header" id="headingSolution8"> Show me the solution </h4>
 </button>
-<div id="collapseSolution8" class="accordion-collapse collapse" data-bs-parent="#accordionSolution8" aria-labelledby="headingSolution8">
+<div id="collapseSolution8" class="accordion-collapse collapse" aria-labelledby="headingSolution8" data-bs-parent="#accordionSolution8">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb36">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2949,7 +2939,7 @@ tags that refer to the actual 1970-2000 data files.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3033,7 +3023,7 @@ page</a> - start with the (minimal) scaffold below!</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3289,7 +3279,7 @@ in the EIA API.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb33">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
