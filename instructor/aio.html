@@ -1757,7 +1757,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-accessing-remote-data"><p>Content from <a href="accessing-remote-data.html">Accessing remote data</a></p>
 <hr>
-<p>Last updated on 2025-02-27 |
+<p>Last updated on 2025-04-22 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/accessing-remote-data.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 0 minutes</p>
@@ -1800,7 +1800,7 @@ available?</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Prep checklist:</p>
 <ul class="task-list">
@@ -1847,11 +1847,9 @@ documentation.</p>
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/core_eia923__monthly_generation_fuel.parquet"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(<span class="st">"https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/core_eia923__monthly_generation_fuel.parquet"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="bu">print</span>(df.report_date.<span class="bu">max</span>())</span></code></pre>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="bu">print</span>(df.report_date.<span class="bu">max</span>())</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1905,7 +1903,7 @@ files in the repo - you should be able to find the Excel file here:
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1933,7 +1931,7 @@ data</strong>)?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Some non-exhaustive ideas:</p>
 <p>Remote data pros:</p>
@@ -2092,7 +2090,7 @@ requests.get.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2152,11 +2150,9 @@ work, if you become good at using them.</p>
 <div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="im">import</span> requests</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>response <span class="op">=</span> requests.get(<span class="st">"https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&amp;facets[fueltypeid][]=NG&amp;facets[sectorid][]=99&amp;facets[location][]=CO&amp;frequency=annual&amp;start=2020&amp;end=2023&amp;api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>response <span class="op">=</span> requests.get(<span class="st">"https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&amp;facets[fueltypeid][]=NG&amp;facets[sectorid][]=99&amp;facets[location][]=CO&amp;frequency=annual&amp;start=2020&amp;end=2023&amp;api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>response.json()</span></code></pre>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>response.json()</span></code></pre>
 </div>
 <p>Which gives you the amount of natural gas consumed for electricity
 generation in Colorado, across all sectors, in those years:</p>
@@ -2295,7 +2291,7 @@ happens?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>You get data all the way until the present day!</p>
 </div>
@@ -2440,7 +2436,7 @@ level, what route should we request next?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
 <div class="accordion-body">
 <p><code>facility-fuel</code>!</p>
 </div>
@@ -2541,7 +2537,7 @@ data?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution6" aria-expanded="false" aria-controls="collapseSolution6">
   <h4 class="accordion-header" id="headingSolution6"> Show me the solution </h4>
 </button>
-<div id="collapseSolution6" class="accordion-collapse collapse" aria-labelledby="headingSolution6" data-bs-parent="#accordionSolution6">
+<div id="collapseSolution6" class="accordion-collapse collapse" data-bs-parent="#accordionSolution6" aria-labelledby="headingSolution6">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2605,7 +2601,7 @@ in the parameters as a dictionary alongside the request:</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>annual <span class="op">=</span> requests.get(</span>
-<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
 <span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
 <span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
 <span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
@@ -2621,14 +2617,19 @@ the dimensions you can filter on.</p>
 <p>If we go back to our earlier metadata, we can see a list of such
 facets:</p>
 <div class="codewrapper sourceCode" id="cb28">
-<h3 class="code-label">JSON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode json" tabindex="0"><code class="sourceCode json"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="er">...</span></span>
-<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="er">'facets':</span> <span class="ot">[</span><span class="fu">{</span><span class="er">'id'</span><span class="fu">:</span> <span class="er">'plantCode'</span><span class="fu">,</span> <span class="er">'description'</span><span class="fu">:</span> <span class="er">'Plant</span> <span class="er">ID</span> <span class="er">and</span> <span class="er">Name'</span><span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a> <span class="fu">{</span><span class="er">'id'</span><span class="fu">:</span> <span class="er">'fuel2002'</span><span class="fu">,</span> <span class="er">'description'</span><span class="fu">:</span> <span class="er">'Energy</span> <span class="er">Source'</span><span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a> <span class="fu">{</span><span class="er">'id'</span><span class="fu">:</span> <span class="er">'state'</span><span class="fu">,</span> <span class="er">'description'</span><span class="fu">:</span> <span class="er">'State'</span><span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a> <span class="fu">{</span><span class="er">'id'</span><span class="fu">:</span> <span class="er">'primeMover'</span><span class="fu">,</span> <span class="er">'description'</span><span class="fu">:</span> <span class="er">'Prime</span> <span class="er">Mover'</span><span class="fu">}</span><span class="ot">]</span><span class="er">,</span></span>
-<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a><span class="er">...</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>facility_fuel.json()</span></code></pre>
+</div>
+<div class="codewrapper">
+<h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="output" tabindex="0"><code>...
+'facets': [{'id': 'plantCode', 'description': 'Plant ID and Name'},
+ {'id': 'fuel2002', 'description': 'Energy Source'},
+ {'id': 'state', 'description': 'State'},
+ {'id': 'primeMover', 'description': 'Prime Mover'}],
+...</code></pre>
 </div>
 <p>Which shows us that <code>fuel2002</code> corresponds to the energy
 source. To figure out how to properly use this, we need: * what are the
@@ -2646,12 +2647,12 @@ that facet itself Let’s try asking for all available sectors by
 specifying the <code>sectorid</code> facet:</p>
 <p><code>https://api.eia.gov/v2/electricity/retail-sales/facet/sectorid/?api_key=xxxxxx</code></p>
 </blockquote>
-<div class="codewrapper sourceCode" id="cb29">
+<div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>fueltypes <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/facet/fuel2002?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>).json()</span>
-<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a></span>
-<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>fueltypes</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>fueltypes <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/facet/fuel2002?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>).json()</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>fueltypes</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2674,20 +2675,20 @@ Text reproduced below.</div>
 <p><code>http://api.eia.gov/v2/electricity/retail-sales/data/?api_key=xxxxxx&amp;facets[stateid][]=CO&amp;facets[sectorid][]=RES&amp;frequency=monthly</code></p>
 </blockquote>
 <p>Let’s copy this pattern and see if that works:</p>
-<div class="codewrapper sourceCode" id="cb31">
+<div class="codewrapper sourceCode" id="cb32">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>annual_ng <span class="op">=</span> requests.get(</span>
-<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
-<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
-<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
-<span id="cb31-6"><a href="#cb31-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
-<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb31-8"><a href="#cb31-8" tabindex="-1"></a>    },</span>
-<span id="cb31-9"><a href="#cb31-9" tabindex="-1"></a>)</span>
-<span id="cb31-10"><a href="#cb31-10" tabindex="-1"></a></span>
-<span id="cb31-11"><a href="#cb31-11" tabindex="-1"></a>annual_ng.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>annual_ng <span class="op">=</span> requests.get(</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
+<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
+<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
+<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a>    },</span>
+<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a>)</span>
+<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a></span>
+<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a>annual_ng.json()</span></code></pre>
 </div>
 <p>It does seem to filter the outputs to only natural gas data!</p>
 <div id="challenge6" class="callout challenge">
@@ -2700,20 +2701,20 @@ Text reproduced below.</div>
 <p>Now we want to limit this to just the state of Colorado - let’s
 update the code to do that.</p>
 <p>As before, let’s build off the old request.</p>
-<div class="codewrapper sourceCode" id="cb32">
+<div class="codewrapper sourceCode" id="cb33">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>annual_ng <span class="op">=</span> requests.get(</span>
-<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
-<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
-<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
-<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
-<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a>    },</span>
-<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a>)</span>
-<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a></span>
-<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a>annual_ng.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>annual_ng <span class="op">=</span> requests.get(</span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
+<span id="cb33-7"><a href="#cb33-7" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb33-8"><a href="#cb33-8" tabindex="-1"></a>    },</span>
+<span id="cb33-9"><a href="#cb33-9" tabindex="-1"></a>)</span>
+<span id="cb33-10"><a href="#cb33-10" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" tabindex="-1"></a>annual_ng.json()</span></code></pre>
 </div>
 </div>
 </div>
@@ -2723,33 +2724,33 @@ update the code to do that.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution7" aria-expanded="false" aria-controls="collapseSolution7">
   <h4 class="accordion-header" id="headingSolution7"> Show me the solution </h4>
 </button>
-<div id="collapseSolution7" class="accordion-collapse collapse" aria-labelledby="headingSolution7" data-bs-parent="#accordionSolution7">
+<div id="collapseSolution7" class="accordion-collapse collapse" data-bs-parent="#accordionSolution7" aria-labelledby="headingSolution7">
 <div class="accordion-body">
 <p>First, figure out what the facet is called and find the values for
 it.</p>
-<div class="codewrapper sourceCode" id="cb33">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a></span>
-<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>states <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/facet/state?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>).json()</span>
-<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>states</span></code></pre>
-</div>
-<p>Then apply the facet:</p>
 <div class="codewrapper sourceCode" id="cb34">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>annual_ng_co <span class="op">=</span> requests.get(</span>
-<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
-<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
-<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
-<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
-<span id="cb34-7"><a href="#cb34-7" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
-<span id="cb34-8"><a href="#cb34-8" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb34-9"><a href="#cb34-9" tabindex="-1"></a>    },</span>
-<span id="cb34-10"><a href="#cb34-10" tabindex="-1"></a>)</span>
-<span id="cb34-11"><a href="#cb34-11" tabindex="-1"></a></span>
-<span id="cb34-12"><a href="#cb34-12" tabindex="-1"></a>annual_ng_co.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a></span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>states <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/facet/state?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>).json()</span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>states</span></code></pre>
+</div>
+<p>Then apply the facet:</p>
+<div class="codewrapper sourceCode" id="cb35">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>annual_ng_co <span class="op">=</span> requests.get(</span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>    },</span>
+<span id="cb35-10"><a href="#cb35-10" tabindex="-1"></a>)</span>
+<span id="cb35-11"><a href="#cb35-11" tabindex="-1"></a></span>
+<span id="cb35-12"><a href="#cb35-12" tabindex="-1"></a>annual_ng_co.json()</span></code></pre>
 </div>
 </div>
 </div>
@@ -2775,21 +2776,21 @@ below</div>
 <h3 class="callout-title">Challenge</h3>
 <div class="callout-content">
 <p>Limit the results to 2020-2023. Start from your last query:</p>
-<div class="codewrapper sourceCode" id="cb35">
+<div class="codewrapper sourceCode" id="cb36">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>annual_ng_co <span class="op">=</span> requests.get(</span>
-<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
-<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
-<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
-<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
-<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
-<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>    },</span>
-<span id="cb35-10"><a href="#cb35-10" tabindex="-1"></a>)</span>
-<span id="cb35-11"><a href="#cb35-11" tabindex="-1"></a></span>
-<span id="cb35-12"><a href="#cb35-12" tabindex="-1"></a>annual_ng_co.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>annual_ng_co <span class="op">=</span> requests.get(</span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
+<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
+<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
+<span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb36-8"><a href="#cb36-8" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb36-9"><a href="#cb36-9" tabindex="-1"></a>    },</span>
+<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a>)</span>
+<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" tabindex="-1"></a>annual_ng_co.json()</span></code></pre>
 </div>
 </div>
 </div>
@@ -2799,25 +2800,25 @@ below</div>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution8" aria-expanded="false" aria-controls="collapseSolution8">
   <h4 class="accordion-header" id="headingSolution8"> Show me the solution </h4>
 </button>
-<div id="collapseSolution8" class="accordion-collapse collapse" aria-labelledby="headingSolution8" data-bs-parent="#accordionSolution8">
+<div id="collapseSolution8" class="accordion-collapse collapse" data-bs-parent="#accordionSolution8" aria-labelledby="headingSolution8">
 <div class="accordion-body">
-<div class="codewrapper sourceCode" id="cb36">
+<div class="codewrapper sourceCode" id="cb37">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>annual_ng_co_2020_2023 <span class="op">=</span> requests.get(</span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
-<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
-<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
-<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
-<span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
-<span id="cb36-8"><a href="#cb36-8" tabindex="-1"></a>        <span class="st">"start"</span>: <span class="st">"2020-01-01"</span>,</span>
-<span id="cb36-9"><a href="#cb36-9" tabindex="-1"></a>        <span class="st">"end"</span>: <span class="st">"2023-12-31"</span>,</span>
-<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a>    },</span>
-<span id="cb36-12"><a href="#cb36-12" tabindex="-1"></a>)</span>
-<span id="cb36-13"><a href="#cb36-13" tabindex="-1"></a></span>
-<span id="cb36-14"><a href="#cb36-14" tabindex="-1"></a>annual_ng_co_2020_2023.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>annual_ng_co_2020_2023 <span class="op">=</span> requests.get(</span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
+<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
+<span id="cb37-7"><a href="#cb37-7" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb37-8"><a href="#cb37-8" tabindex="-1"></a>        <span class="st">"start"</span>: <span class="st">"2020-01-01"</span>,</span>
+<span id="cb37-9"><a href="#cb37-9" tabindex="-1"></a>        <span class="st">"end"</span>: <span class="st">"2023-12-31"</span>,</span>
+<span id="cb37-10"><a href="#cb37-10" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb37-11"><a href="#cb37-11" tabindex="-1"></a>    },</span>
+<span id="cb37-12"><a href="#cb37-12" tabindex="-1"></a>)</span>
+<span id="cb37-13"><a href="#cb37-13" tabindex="-1"></a></span>
+<span id="cb37-14"><a href="#cb37-14" tabindex="-1"></a>annual_ng_co_2020_2023.json()</span></code></pre>
 </div>
 </div>
 </div>
@@ -2883,7 +2884,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-scraping-data"><p>Content from <a href="scraping-data.html">Scraping Data</a></p>
 <hr>
-<p>Last updated on 2025-04-18 |
+<p>Last updated on 2025-04-22 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/scraping-data.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 0 minutes</p>
@@ -2961,7 +2962,7 @@ links are on.</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="im">import</span> requests</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>eia_923_url <span class="op">=</span> <span class="st">"https://www.eia.gov/electricity/data/eia923/"</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>eia_923_response <span class="op">=</span> requests.get(url)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>eia_923_response <span class="op">=</span> requests.get(eia_923_url)</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>eia_923_response.text</span></code></pre>
 </div>
 <div class="codewrapper">
@@ -2974,11 +2975,11 @@ notice the many angle brackets containing words that seem to be trying
 to tell us something. We can use those <em>tags</em> to understand the
 content of the file, and then filter through it to find what we actually
 need.</p>
-<p>We don’t expect a <em>data table</em> directly in the page, like we
-did last time. We’re more expecting a jumble of links. We need to use a
-different tool to make sense of all this - a library called
-<code>beautifulsoup</code>. For historical reasons it’s imported as
-<code>bs4</code>.</p>
+<p>This is actually a <em>special type</em> of XML called HTML, which is
+what most webpages are described in (see the <code>doctype html</code>
+tag.) We need to use a different tool to make sense of all this - a
+library called <code>beautifulsoup</code>. For historical reasons it’s
+imported as <code>bs4</code>.</p>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -3086,7 +3087,7 @@ ZIP files:</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>eia_923_zip_tags <span class="op">=</span> []</span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> eia_923_a_hrefs:</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>    <span class="cf">if</span> a[<span class="st">"href"</span>].lower().endswith(<span class="st">".zip"</span>) <span class="kw">and</span> <span class="st">"f906"</span> <span class="kw">not</span> <span class="kw">in</span> a[<span class="st">"href"</span>]:</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>    <span class="cf">if</span> a[<span class="st">"href"</span>].lower().endswith(<span class="st">".zip"</span>) <span class="kw">and</span> <span class="st">"f923"</span> <span class="kw">in</span> a[<span class="st">"href"</span>]:</span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>        eia_923_zip_tags.append(a)</span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>eia_923_zip_tags</span></code></pre>
 </div>
@@ -3123,7 +3124,7 @@ tags that refer to the actual 1970-2000 data files.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -3142,38 +3143,42 @@ tags that refer to the actual 1970-2000 data files.</p>
 </div>
 </div>
 </div>
+</div>
+<div class="section level3">
+<h3 id="downloading-the-data">Downloading the data<a class="anchor" aria-label="anchor" href="#downloading-the-data"></a>
+</h3>
 <p>OK, now we have our tags, time to use them to download the data!
 Let’s try it with one tag first:</p>
 <div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>eia_923_one_link <span class="op">=</span> eia_923_zip_tags[<span class="dv">0</span>]</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>eia_923_one_response <span class="op">=</span> requests.get(eia_923_one_link[<span class="st">"href"</span>])</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>eia_906_one_link <span class="op">=</span> eia_906_xls_tags[<span class="dv">0</span>]</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>eia_923_one_response <span class="op">=</span> pd.read_excel(eia_923_one_link[<span class="st">"href"</span>])</span></code></pre>
 </div>
 <p>Oh no! We get an error:</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>MissingSchema: Invalid URL 'xls/f923_2025.zip': No scheme supplied. Perhaps you meant https://xls/f923_2025.zip?</code></pre>
+<pre class="output" tabindex="0"><code>FileNotFoundError: [Errno 2] No such file or directory: '/electricity/data/eia923/archive/xls/utility/f7592000mu.xls'</code></pre>
 </div>
 <p>Looks like the URL in the <code>href</code> is incomplete. It turns
 out that this is a <em>relative path</em> - much like the relative paths
 you had to deal with when loading data on your computer. The full URL we
 want is
-<code>https://www.eia.gov/electricity/data/eia923/xls/f923_2025.zip</code>
+<code>https://www.eia.gov/electricity/data/eia923/archive/xls/utility/f7592000mu.xls</code>
 - which combines the URL of the page we got the link from
-(<code>https://www.eia.gov/electricity/data/eia923</code>) with the
-fragment we got in the <code>href</code>
-(<code>xls/f923_2025.zip</code>).</p>
+(<code>https://www.eia.gov/electricity/data/eia923/eia906u.php</code>)
+with the fragment we got in the <code>href</code>
+(<code>electricity/data/eia923/eia906u.php</code>).</p>
 <p>This is a super common thing to have to do, so there’s a useful bit
 of the Python standard library for this:
 <code>urllib.parse.urljoin</code>:</p>
 <pre><code>from urllib.parse import urljoin
 
-eia_923_one_full_url = urljoin(eia_923_url, eia_923_one_link["href"])
-response = requests.get(eia_923_one_full_url)</code></pre>
+eia_906_one_full_url = urljoin(eia_906_url, eia_906_one_link["href"])
+response = requests.get(eia_906_one_full_url)</code></pre>
 <p>We can also do the string concatenation ourselves with
-<code>eia_923_url + "..."</code>, but there are a surprising amount of
+<code>eia_906_url + "..."</code>, but there are a surprising amount of
 details to get wrong here so it’s nice to just use the function that
 works.</p>
 <div id="challenge-get-the-form-906-file-contents" class="callout challenge">
@@ -3207,14 +3212,14 @@ page</a> - start with the (minimal) scaffold below!</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> eia_906_links:</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="cf">for</span> a <span class="kw">in</span> eia_906_xls_tags:</span>
 <span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>    full_url <span class="op">=</span> urljoin(eia_906_url, a[<span class="st">"href"</span>])</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>    eia_906_dataframes <span class="op">=</span> pandas.read_excel(full_url)</span></code></pre>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>    eia_906_dataframes.append(pd.read_excel(full_url))</span></code></pre>
 </div>
 </div>
 </div>
@@ -3222,7 +3227,8 @@ page</a> - start with the (minimal) scaffold below!</p>
 </div>
 <p>Once we’ve completed the challenge above, we have a list of a bunch
 of dataframes. To bring them all into one dataframe, we can use
-<code>pd.concat</code>:</p>
+<code>pd.concat</code>, which “concatenates” several dataframes
+together:</p>
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -3307,12 +3313,53 @@ programmatically anyways</li>
 </div>
 </div>
 </div>
-<div class="section level3">
-<h3 id="pagination">Pagination<a class="anchor" aria-label="anchor" href="#pagination"></a>
-</h3>
+</section><section><h2 class="section-heading" id="pagination">Pagination<a class="anchor" aria-label="anchor" href="#pagination"></a>
+</h2>
+<hr class="half-width">
 <p>Another time you’ll need lots of URLs is when APIs don’t give you
-everything all at once. For example, the EIA API kept giving us this
-warning:</p>
+everything all at once. Let’s look at an example request to the EIA API
+we saw last time:</p>
+<div class="codewrapper sourceCode" id="cb24">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>eia_api_base_url <span class="op">=</span> <span class="st">"https://api.eia.gov/v2/electricity"</span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>api_key <span class="op">=</span> <span class="st">"3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span></span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>first_page <span class="op">=</span> requests.get(</span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>    params<span class="op">=</span>{</span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a>        <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a>        <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a>        <span class="st">"sort[1][column]"</span>: <span class="st">"plantCode"</span>,</span>
+<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a>        <span class="st">"sort[1][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a>    }</span>
+<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span></code></pre>
+</div>
+<p>There’s a lot of info in here so let’s just look at the keys to
+start.</p>
+<div class="codewrapper sourceCode" id="cb25">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>first_page.keys()</span></code></pre>
+</div>
+<p>The data lives in the <code>"data"</code> key, so let’s take a quick
+look at that:</p>
+<div class="codewrapper sourceCode" id="cb26">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>pd.DataFrame(first_page[<span class="st">"data"</span>])</span></code></pre>
+</div>
+<p>Seems like it’s sensible data, but 5000 rows is a suspiciously round
+(and small) number. Is there anything funny going on?</p>
+<p>Ooh! There’s a warning - what is it?</p>
+<div class="codewrapper sourceCode" id="cb27">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>first_page[<span class="st">"warnings"</span>]</span></code></pre>
+</div>
 <pre><code>The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.</code></pre>
 <p>So if we want a dataset that’s bigger than 5000 rows, we’ll need to
 make multiple requests. Instead of scraping many URLs from a page, we’ll
@@ -3331,95 +3378,72 @@ provide.</p>
 rows (offset=24), which translates into 24 months
 (frequency=monthly).</p>
 </blockquote>
-<p>Let’s try it out - first, let’s make an API request and look at the
-output. Note that we’re sorting by the time period and plant code - this
-lets us have a stable order so that the “next 5000 rows” means something
-well-defined.</p>
-<div class="codewrapper sourceCode" id="cb25">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>eia_api_base_url <span class="op">=</span> <span class="st">"https://api.eia.gov/v2/electricity"</span></span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>api_key <span class="op">=</span> <span class="st">"3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span></span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="co"># remember from last time that the shape is a JSON object with everything in "response"</span></span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>first_page <span class="op">=</span> requests.get(</span>
-<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>  <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
-<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>  params<span class="op">=</span>{</span>
-<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a>    <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a>    <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
-<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a>    <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
-<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a>    <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
-<span id="cb25-12"><a href="#cb25-12" tabindex="-1"></a>    <span class="st">"sort[1][column]"</span>: <span class="st">"plantCode"</span>,</span>
-<span id="cb25-13"><a href="#cb25-13" tabindex="-1"></a>    <span class="st">"sort[1][direction]"</span>: <span class="st">"desc"</span>,</span>
-<span id="cb25-14"><a href="#cb25-14" tabindex="-1"></a>    <span class="st">"api_key"</span>: api_key</span>
-<span id="cb25-15"><a href="#cb25-15" tabindex="-1"></a>  }</span>
-<span id="cb25-16"><a href="#cb25-16" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span>
-<span id="cb25-17"><a href="#cb25-17" tabindex="-1"></a></span>
-<span id="cb25-18"><a href="#cb25-18" tabindex="-1"></a>first_page.keys()</span></code></pre>
-</div>
-<p>Right. The data lives in the <code>"data"</code> key, so let’s take a
-quick look at that:</p>
-<div class="codewrapper sourceCode" id="cb26">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>pd.DataFrame(first_page[<span class="st">"data"</span>])</span></code></pre>
-</div>
-<p>So we have the last several months of data! Let’s grab the next 5000
-rows using that <code>offset</code> parameter:</p>
-<div class="codewrapper sourceCode" id="cb27">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>next_page <span class="op">=</span> requests.get(</span>
-<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>  <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
-<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>  params<span class="op">=</span>{</span>
-<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>    <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>    <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
-<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>    <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
-<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>    <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
-<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a>    <span class="st">"offset"</span>: <span class="dv">5000</span>,</span>
-<span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a>    <span class="st">"api_key"</span>: api_key</span>
-<span id="cb27-10"><a href="#cb27-10" tabindex="-1"></a>  }</span>
-<span id="cb27-11"><a href="#cb27-11" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span></code></pre>
-</div>
-<p>If we look at <em>that</em> we can see that we do indeed get the next
-several months of data:</p>
-<div class="codewrapper sourceCode" id="cb28">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>pd.DataFrame(next_page[<span class="st">"data"</span>])</span></code></pre>
-</div>
-<p>And if we wanted to grab the first 5 pages, we could use a
-<code>for</code> loop combined with the <code>range()</code> function -
-here’s how <code>range</code> works:</p>
+<p>Let’s try using that:</p>
 <div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="cf">for</span> page_num <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Getting page </span><span class="sc">{</span>page_num<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>    <span class="co"># actually get the page here...</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>next_page <span class="op">=</span> requests.get(</span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>  <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>  params<span class="op">=</span>{</span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>    <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a>    <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a>    <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>    <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>    <span class="st">"offset"</span>: <span class="dv">5000</span>,</span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a>    <span class="st">"api_key"</span>: api_key</span>
+<span id="cb29-10"><a href="#cb29-10" tabindex="-1"></a>  }</span>
+<span id="cb29-11"><a href="#cb29-11" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span></code></pre>
 </div>
-<p>Here the <code>range()</code> lets you go through the loop 5
-times.</p>
-<p>When we are looking to get <em>all</em> of the pages, we can use the
-<code>"total"</code> field in the EIA API response to figure out how
-many total rows there are:</p>
+<p>If we look at <em>that</em> we can see that we do indeed get the next
+several months of data:</p>
 <div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>first_page[<span class="st">"total"</span>]</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>pd.DataFrame(next_page[<span class="st">"data"</span>])</span></code></pre>
 </div>
-<p>So there are about 155,000 rows in this dataset.</p>
-<p>To get the number of pages we need we divide the total by the page
-size, and round up using <code>math.ceil</code>:</p>
+<p>And if we wanted to grab the first 5 pages, we could use a
+<code>for</code> loop combined with the <code>range()</code>
+function.</p>
+<p><code>range()</code> is super useful - at its simplest, it just
+produces, well… a range of numbers.</p>
 <div class="codewrapper sourceCode" id="cb31">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="im">import</span> math</span>
-<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a></span>
-<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>total_rows <span class="op">=</span> net_generation[<span class="st">"total"</span>]</span>
-<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>page_size <span class="op">=</span> <span class="dv">5000</span></span>
-<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>num_pages <span class="op">=</span> math.ceil(total_rows <span class="op">/</span> page_size)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>    <span class="bu">print</span>(i)</span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>    <span class="co"># actually get the page here...</span></span></code></pre>
 </div>
+<p>If you want to start at a specific number, you can do something
+like:</p>
+<div class="codewrapper sourceCode" id="cb32">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>, <span class="dv">15</span>):</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>    <span class="bu">print</span>(i)</span></code></pre>
+</div>
+<p>And if you want to count in different increments, you can do:</p>
+<div class="codewrapper sourceCode" id="cb33">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">15</span>, <span class="dv">5</span>):</span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>    <span class="bu">print</span>(i)</span></code></pre>
+</div>
+<p>:::: challenge: <code>range</code></p>
+<p>So, in theory, if you wanted to set a fresh <code>offset</code> for
+every page in a number of rows, how would you do that?</p>
+<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
+  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
+</button>
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div class="accordion-body">
+
+</div>
+</div>
+</div>
+</div>
+<p>::::</p>
 <div id="challenge-pagination" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
@@ -3428,76 +3452,91 @@ size, and round up using <code>math.ceil</code>:</p>
 <h3 class="callout-title">Challenge: pagination</h3>
 <div class="callout-content">
 <p>OK, now let’s put it all together!</p>
-<p>Let’s try to get all of the net generation data in Colorado that is
-in the EIA API.</p>
+<p>Let’s try to get the net generation data in Colorado that is in the
+EIA API.</p>
+<p>Instead of getting all of it, which will take a lot of waiting
+around, let’s just grab the first 12,345 rows.</p>
 <p>Start with the following code and modify it to work:</p>
-<div class="codewrapper sourceCode" id="cb32">
+<div class="codewrapper sourceCode" id="cb34">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
-<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a><span class="cf">for</span> page_num <span class="kw">in</span> <span class="bu">range</span>(num_pages):</span>
-<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Getting page </span><span class="sc">{</span>page_num<span class="sc">}</span><span class="ss">..."</span>)</span>
-<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>    offset <span class="op">=</span> ___</span>
-<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
-<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
-<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>      params<span class="op">=</span>{</span>
-<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
-<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a>        <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
-<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a>        <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
-<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a>        <span class="st">"sort[1][column]"</span>: <span class="st">"plantCode"</span>,</span>
-<span id="cb32-13"><a href="#cb32-13" tabindex="-1"></a>        <span class="st">"sort[1][direction]"</span>: <span class="st">"desc"</span>,</span>
-<span id="cb32-14"><a href="#cb32-14" tabindex="-1"></a>        ___,</span>
-<span id="cb32-15"><a href="#cb32-15" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb32-16"><a href="#cb32-16" tabindex="-1"></a>      }</span>
-<span id="cb32-17"><a href="#cb32-17" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>]</span>
-<span id="cb32-18"><a href="#cb32-18" tabindex="-1"></a>    all_records.append(pd.DataFrame(page[<span class="st">"data"</span>]))</span>
-<span id="cb32-19"><a href="#cb32-19" tabindex="-1"></a></span>
-<span id="cb32-20"><a href="#cb32-20" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a><span class="co"># loop through the necessary pages to get 12,345 rows</span></span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Getting page starting at </span><span class="sc">{</span>offset<span class="sc">}</span><span class="ss">..."</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
+<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a>      params<span class="op">=</span>{</span>
+<span id="cb34-7"><a href="#cb34-7" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb34-8"><a href="#cb34-8" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" tabindex="-1"></a>        <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
+<span id="cb34-10"><a href="#cb34-10" tabindex="-1"></a>        <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb34-11"><a href="#cb34-11" tabindex="-1"></a>        <span class="st">"sort[1][column]"</span>: <span class="st">"plantCode"</span>,</span>
+<span id="cb34-12"><a href="#cb34-12" tabindex="-1"></a>        <span class="st">"sort[1][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb34-13"><a href="#cb34-13" tabindex="-1"></a>        <span class="st">"offset"</span>: <span class="co"># what goes here?</span></span>
+<span id="cb34-14"><a href="#cb34-14" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb34-15"><a href="#cb34-15" tabindex="-1"></a>      }</span>
+<span id="cb34-16"><a href="#cb34-16" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>]</span>
+<span id="cb34-17"><a href="#cb34-17" tabindex="-1"></a>    all_records.append(pd.DataFrame(page[<span class="st">"data"</span>]))</span>
+<span id="cb34-18"><a href="#cb34-18" tabindex="-1"></a></span>
+<span id="cb34-19"><a href="#cb34-19" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records)</span></code></pre>
 </div>
 </div>
 </div>
 </div>
-<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div id="accordionSolution4" class="accordion challenge-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
-  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
+  <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
-<div class="codewrapper sourceCode" id="cb33">
+<div class="codewrapper sourceCode" id="cb35">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
-<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a><span class="cf">for</span> page_num <span class="kw">in</span> <span class="bu">range</span>(num_pages):</span>
-<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Getting page </span><span class="sc">{</span>page_num<span class="sc">}</span><span class="ss">..."</span>)</span>
-<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a>    offset <span class="op">=</span> page_num <span class="op">*</span> page_size</span>
-<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
-<span id="cb33-6"><a href="#cb33-6" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
-<span id="cb33-7"><a href="#cb33-7" tabindex="-1"></a>      params<span class="op">=</span>{</span>
-<span id="cb33-8"><a href="#cb33-8" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb33-9"><a href="#cb33-9" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
-<span id="cb33-10"><a href="#cb33-10" tabindex="-1"></a>        <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
-<span id="cb33-11"><a href="#cb33-11" tabindex="-1"></a>        <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
-<span id="cb33-12"><a href="#cb33-12" tabindex="-1"></a>        <span class="st">"sort[1][column]"</span>: <span class="st">"plantCode"</span>,</span>
-<span id="cb33-13"><a href="#cb33-13" tabindex="-1"></a>        <span class="st">"sort[1][direction]"</span>: <span class="st">"desc"</span>,</span>
-<span id="cb33-14"><a href="#cb33-14" tabindex="-1"></a>        <span class="st">"offset"</span>: offset,</span>
-<span id="cb33-15"><a href="#cb33-15" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb33-16"><a href="#cb33-16" tabindex="-1"></a>      }</span>
-<span id="cb33-17"><a href="#cb33-17" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>]</span>
-<span id="cb33-18"><a href="#cb33-18" tabindex="-1"></a>    all_records.append(pd.DataFrame(page[<span class="st">"data"</span>]))</span>
-<span id="cb33-19"><a href="#cb33-19" tabindex="-1"></a></span>
-<span id="cb33-20"><a href="#cb33-20" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records) <span class="co"># combines all pages into one big dataframe</span></span>
-<span id="cb33-21"><a href="#cb33-21" tabindex="-1"></a><span class="bu">len</span>(df.drop_duplicates())</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a><span class="cf">for</span> page_num <span class="kw">in</span> <span class="bu">range</span>(num_pages):</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Getting page </span><span class="sc">{</span>page_num<span class="sc">}</span><span class="ss">..."</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>    offset <span class="op">=</span> page_num <span class="op">*</span> page_size</span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>      params<span class="op">=</span>{</span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb35-10"><a href="#cb35-10" tabindex="-1"></a>        <span class="st">"sort[0][column]"</span>: <span class="st">"period"</span>,</span>
+<span id="cb35-11"><a href="#cb35-11" tabindex="-1"></a>        <span class="st">"sort[0][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb35-12"><a href="#cb35-12" tabindex="-1"></a>        <span class="st">"sort[1][column]"</span>: <span class="st">"plantCode"</span>,</span>
+<span id="cb35-13"><a href="#cb35-13" tabindex="-1"></a>        <span class="st">"sort[1][direction]"</span>: <span class="st">"desc"</span>,</span>
+<span id="cb35-14"><a href="#cb35-14" tabindex="-1"></a>        <span class="st">"offset"</span>: offset,</span>
+<span id="cb35-15"><a href="#cb35-15" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb35-16"><a href="#cb35-16" tabindex="-1"></a>      }</span>
+<span id="cb35-17"><a href="#cb35-17" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>]</span>
+<span id="cb35-18"><a href="#cb35-18" tabindex="-1"></a>    all_records.append(pd.DataFrame(page[<span class="st">"data"</span>]))</span>
+<span id="cb35-19"><a href="#cb35-19" tabindex="-1"></a></span>
+<span id="cb35-20"><a href="#cb35-20" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records) <span class="co"># combines all pages into one big dataframe</span></span>
+<span id="cb35-21"><a href="#cb35-21" tabindex="-1"></a><span class="bu">len</span>(df.drop_duplicates())</span></code></pre>
 </div>
 </div>
 </div>
 </div>
 </div>
+<p>OK, so what if we were looking to get <em>all</em> of the pages - is
+there something we can use from the API response?</p>
+<div class="codewrapper sourceCode" id="cb36">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>first_page.keys()</span></code></pre>
+</div>
+<p>That “total” field looks pretty suspicious.</p>
+<div class="codewrapper sourceCode" id="cb37">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>first_page[<span class="st">"total"</span>]</span></code></pre>
+</div>
+<p>So there are about 155,000 rows in this dataset. We could plug that
+number in above.</p>
 <p>This is just one common way APIs do pagination. You’ll have to flex
 those API learning skills (play with the data, read the docs, bounce
 back and forth) to learn how each new API handles this.</p>
-</div>
 <div class="section level3">
 <h3 id="further-resources">Further resources<a class="anchor" aria-label="anchor" href="#further-resources"></a>
 </h3>
@@ -3562,11 +3601,11 @@ don’t have a nice text representation.</li>
 <li>Then use the “wb” mode (“write binary”) to write that data to
 disk:</li>
 </ul>
-<div class="codewrapper sourceCode" id="cb34">
+<div class="codewrapper sourceCode" id="cb38">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(some_filename, <span class="st">"wb"</span>) <span class="im">as</span> f:</span>
-<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>    f.write(response.content)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(some_filename, <span class="st">"wb"</span>) <span class="im">as</span> f:</span>
+<span id="cb38-2"><a href="#cb38-2" tabindex="-1"></a>    f.write(response.content)</span></code></pre>
 </div>
 </li>
 </ul>
