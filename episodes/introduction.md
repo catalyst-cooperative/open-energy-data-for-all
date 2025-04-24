@@ -67,16 +67,16 @@ be so hard to work with?
 * **Data can be messy and unpredictable:** Why is this coal plant labelled as retired one
 year and operating the next in this spreadsheet? Data often requires substantial cleaning
 before it is ready for analysis, and it's common that even mid-way through a research
-process a model or analysis will reveal problems that weren't obvious at first. **Researchers need strategies** 
+process a model or analysis will reveal problems that weren't obvious at first. **Researchers need strategies**
 **for checking that the data conforms to expectations throughout the research process.**
 * **Data requires domain context:** Which utilities use the wrong units when they fill
 out the EIA 860 form year after year? *Should* those values be negative? Working with
 data inevitably means learning about the data provider's caveats and assumptions, and then
 generating your own based on your domain expertise. Yet these assumptions are often
 relegated to the appendix of a research paper, if they are shared clearly at all.
-**Researchers need strategies for clearly and effectively communicating their assumptions and learned expertise with data to others.** 
+**Researchers need strategies for clearly and effectively communicating their assumptions and learned expertise with data to others.**
 * **Data can be big:** Interested in analyzing hourly grid operating data for the last
-decade? With more data available each year, **researchers working with 'big data' need** 
+decade? With more data available each year, **researchers working with 'big data' need**
 **strategies for effectively handling data too big to process all at once on a laptop.**
 * **Data changes over time:** A form can change format, and a link you used last week to
 download a spreadsheet can give your colleague a new version of the file without warning.
@@ -85,7 +85,7 @@ download a spreadsheet can give your colleague a new version of the file without
 will mean that other researchers can't reproduce your code or build on your results,
 and can even limit what types of analyses you can do. Some types of open licenses may
 prohibit you from republishing cleaned or adapted versions of the original data.
-**Researchers need to clearly understand the implications of data licenses before proceeding** 
+**Researchers need to clearly understand the implications of data licenses before proceeding**
 **with cleaning or analysis work.**
 
 ### Setting the scene
