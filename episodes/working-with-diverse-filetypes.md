@@ -1,16 +1,16 @@
 ---
 title: "Handling diverse filetypes in Pandas"
-teaching: 45
+teaching: 30
 exercises: 10
 ---
 
 :::: instructor
 In preparation for this lesson:
 
-* In Jupyter Notebooks, open the 2-diverse-filetypes.ipynb notebook
-* In another Jupyter Notebooks tab, open the directory view to make it possible to visualize the xml file
-* Open the `data/eia923_2022.xlsx` file on your computer's spreadsheet software (e.g., Excel)
-* Open the lesson folder in your local file browser, to make it easy to open files in a text editor throughout the lesson.
+* In Jupyter Notebooks, open the instructor copy of the 2-diverse-filetypes.ipynb notebook
+* In another tab, open the json file with pretty-print turned on
+* In another Jupyter Notebooks tab, open the directory view to make it possible to visualize the json and xml files
+* Open the `data/eia923_2022.xlsx` file using your computer's spreadsheet software (e.g., Excel)
 
 ::::
 
@@ -18,12 +18,14 @@ In preparation for this lesson:
 
 - How can I read in different tabular file formats to a familiar data type in Python?
 - What are some common errors that occur when importing data, and how can I troubleshoot them?
+- What are some common ways metadata gets mixed in with tabular data, and how can I pull out just the table?
 
 ::::
 
 :::: objectives
 
-- Import tabular data from Excel, JSON, XML and Parquet formats to pandas dataframes using the `pandas` library
+- Import tabular data from Excel, JSON, and XML formats to pandas dataframes using the `pandas` library.
+- Preview data files in Excel, JSON, and XML to identify how metadata has been placed alongside tabular information.
 - Use `help` and function documentation to select and set parameters in function calls.
 
 ::::
@@ -51,7 +53,7 @@ $ uv run jupyter notebook
 
 from the `open-energy-data-for-all` directory. Then in the Jupyter browser, open `notebooks/2-diverse-filetypes.ipynb`.
 
-## Reading Excel files with Pandas
+## Reading tabular data with Pandas
 
 One of the most popular libraries used to work with tabular data in Python is called the
 [Python Data Analysis Library](https://pandas.pydata.org/) (or simply, Pandas). Pandas
@@ -78,16 +80,42 @@ in the `open-energy-data-for-all` folder, we can either specify:
 - __Relative path__: `data/eia923_2022.json`
 :::
 
-### Handling spreadsheet formatting on read-in
+### Excel format
 
-Of all the files in the `data` folder, you decide to start with the Excel spreadsheet.
+Of all the files in the `data` folder, the Excel file is most familiar, so you decide to start with that.
+
+It is always a good idea to preview a file before starting to write code for it, so that you know what to expect if your code is working correctly. For an Excel spreadsheet, appropriate preview applications include Microsoft Excel (naturally), Apple Numbers, or LibreOffice.
+
+When opening the file in a spreadsheet application, you see that the first few rows look like this:
+
+::: instructor
+Go ahead and open the `eia923_2022.xlsx` file in your local spreadsheet software (e.g., Excel, OpenOffice).
+:::
+
+![The first few rows of the eia923_2022.xlsx file](fig/ep-2-filetypes/xlsx-excel.png){alt="Snapshot of
+the Excel file showing the first 6 rows contain metadata, blank spaces and column
+names, and there are at least 4 sheets available."}
+
+There are three things to note in the preview:
+
+- This file includes multiple sheets (Page 1 Generation and Fuel Data, Page 1 Puerto Rico, Page 1 Energy Storage, etc.). We'll use the first sheet for this example.
+- Once correctly read into pandas, the table from the first sheet will have column names like Plant Id, Nuclear Unit Id, Plant Name, Operator Name, etc.
+- The column headers do not start in the first row of the spreadsheet. Instead, there are a few rows of metadata. We'll need to deal with this if we want the table to read in properly.
+
+Now we can head over to a Python notebook.
+
+#### Reading an Excel file with Pandas
+
 To read in an Excel spreadsheet using `pandas`, you will use the `read_excel()` function:
 
 ```python
 import pandas as pd
 pd.read_excel('data/eia923_2022.xlsx')
 ```
-That took a while! Luckily,`read_excel()` offers built-in functionality to handle various Excel formatting
+
+That took a while! Something our preview didn't tell us was the scale of this dataset. Since we're still prototyping, we don't want to wait that long every time we refine our reading-in code, so let's address that now.
+
+Luckily,`read_excel()` offers built-in functionality to handle various Excel formatting
 challenges. Let's see if there's a way to quickly explore a smaller subset of the data. While we can always look up documentation online, we can also access a function's documentation right in Python. To identify which parameter might be able to help us, we can use the `help()` function to pull up the function documentation:
 
 ```python
@@ -109,18 +137,9 @@ So, if we only want to parse the first 100 rows of the data, we can call:
 pd.read_excel('data/eia923_2022.xlsx', nrows=100)
 ```
 
-That's better. But unfortunately, something doesn't look quite right! When opening the file in a
-spreadsheet software, you see that the first few rows look like this:
-
-::: instructor
-Go ahead and open the `eia923_2022.xlsx` file in your local spreadsheet software (e.g., Excel, OpenOffice).
-:::
-
-![The first few rows of the eia923_2022.xlsx file](fig/excelheader.png){alt="Snapshot of
-the Excel file showing the first 6 rows contain metadata, blank spaces and column
-names."}
-
-To read the spreadsheet in correctly, we want to ignore these first five rows.
+That's much faster.
+But now we can see that that extra metadata in the first few rows is, indeed, messing up how the table is read: the column headers are full of "Unnamed" and the first few rows are full of NaN.
+Row 4 has the column headers we expect, so if we can figure out how to start the table on that row instead, we should be in better shape.
 
 :::::::: challenge
 
@@ -140,54 +159,52 @@ eia923_excel_df = pd.read_excel('data/eia923_2022.xlsx', skiprows=5)
 
 ::::::::
 
-Each row contains monthly generation data for each plant's prime mover. While a subset of plants fill out Form 923 at the boiler and generator, a large proportion of plants only report at this more aggregated level. For more on the nuances of the Form 923 data, see PUDL's [data source page for EIA-923](https://catalystcoop-pudl.readthedocs.io/en/latest/data_sources/eia923.html).
+Now the columns match what we expect: each row contains monthly generation data for each plant's prime mover.
 
-## Reading in JSON files
+
+:::: caution
+
+Data quirk alert!
+
+While a subset of plants fill out Form 923 at the boiler and generator level, a large proportion of plants only report at this more aggregated level. For more on the nuances of the Form 923 data, see PUDL's [data source page for EIA-923](https://catalystcoop-pudl.readthedocs.io/en/latest/data_sources/eia923.html).
+
+::::
+
+### JSON format
 
 JavaScript Object Notation (JSON) is a lightweight file format based on name-value pairs, similar to Python dictionaries. JSON is often used to send data to and from web applications, and is one of the most common formats available when you're accessing data from an Application Programming Interface (API). JSON data can be found saved as either `.json` or `.txt` files.
 
-### Nested content in JSON files
+JSON is an incredibly flexible format, and can be used to store data with arbitrary nested/tree-like structures. Tables in JSON usually take the form of a list of dictionaries or a dictionary of lists.
 
-Pandas `read_*()` methods assume tabular data. When a JSON file represents a table and nothing else, we can use `pd.read_json()` to read it in directly. Most often, we know a JSON file contains a table when we see a list of dictionaries, or a dictionary of lists.
+Pandas has a function called `pd.read_json()` which can handle JSON data, but _only if a table is the only thing in the file_. This is rare -- most often a JSON table has metadata stuck to it, just like we saw in the Excel file.
 
-However, JSON is a flexible format, and JSON files can be organized all kinds of ways. Unlike Excel or CSV spreadsheets, many JSON files don't just contain a table. Instead, most JSONs contain data in a *nested* format.
+Let's take a look at the JSON file in our data directory. Since a JSON file is just text, you can preview it with any application that can read text. A web browser will often give you a "pretty print" option that makes the dictionaries easier to keep track of, so let's try that:
 
-Nested JSON contains multiple levels of data:
+![The first few items of the eia923_2022.json file](fig/ep-2-filetypes/json-chrome.png){alt="Snapshot of
+the JSON file showing the first few keys contain metadata, warings, and generation data."}
 
-```output
-{
-  "response": {
-    "data": [
-      {
-        "period": "2022-12",
-        "plantCode": "6761"
-      },
-      {
-        "period": "2022-12",
-        "plantCode": "54152"
-      }
-    ]
-  }
-}
-```
+There are three things to note in the preview:
 
-To successfully extract tabular data from nested JSON, we need to identify which part of the structure contains the tabular data we're looking for.
-Here, the `response` contains another name-value pair called `data`, and `data`
-contains a list with two records, each of which has two name-value pairs (`period` and `plantCode`).
+- There are multiple levels of nesting in here, so we won't be able to use `pd.read_json()`
+- There are multiple tables in here, in list-of-dictionaries form: a warnings table and a data table.
+- Once correctly read into pandas, the warnings table will have column names `warning` and `description`. The data table will have column names like `period`, `plantCode`, `plantName`, `fuel2002`, etc.
 
-The `data` contained in this JSON file can be represented as a table! In this case,
-each dictionary corresponds to one row of the data, and each name (e.g., "period") corresponds
-to a column name. This is the "list of dictionaries" approach to expressing a table in JSON format that we mentioned above.
+There's another preview tool that makes it easier to see the nesting structure of JSON files, but harder to see the similarity to Python dictionaries and lists. The Jupyter file browser parses JSON into a tree structure:
 
-:::callout
-JSONs can include many levels of nesting, including different levels of nesting for similar records or other formatting that doesn't obey the principles of tabular structure (where each row represents a single record, and each column represents a single variable). We focus on extracting tabular data from these nested JSONs in this lesson, but some JSON files may not contain tabular data at all.
-:::
+![The JSON tree view in the Jupyter file browser](fig/ep-2-filetypes/json-jupyter.png){alt="Snapshot of
+the JSON file showing a hierarchical descent from root, to response, to warnings, to two list items with numeric keys 0 and 1."}
 
-### Reading in JSON files using `json.load()`
+To find the list-of-dictionaries structure for tables in this view, you'll look for "[] _n_ items" to indicate a list, then under each number, only one level of key-value pairs. For the warnings table, `warnings` is the list header, then under 0 we see `warning` and `description` but the only thing inside each of those is text. That makes this a list of dictionaries, and thus we can treat it like a table.
 
-To better visualize our JSON file, let's read it into Python without changing its format. To do this, we use the `json` package, and the `load` method.
+Now we can head over to a Python notebook.
 
-While Pandas handles opening a file in the `read_*()` methods, `json.load()` does not - so, we first need to read the file into Python. To do so, we use the `open()` function.
+#### Reading a JSON file with Pandas
+
+We know from the preview that `pd.read_json()` won't help us. But we _also_ know that a `pd.DataFrame` accepts a list of dictionaries in its constructor, and both tables in our file are formatted as lists of dictionaries -- so let's connect the dots.
+
+The `json` library translates between Python and JSON data. `json.load()` takes JSON-formatted data as input and produces the equivalent Python data structure as output: dictionary to dictionary, and list to list.
+
+Unlike pandas, `json.load()` doesn't know what to do with just a filename; we have to open the file for it first. To do so, we use the `open()` function.
 
 :::instructor
 We recommend skipping the below call-out unless students ask more about what's actually going on or you're ahead on schedule - it's an aside that we don't necessarily need to get into.
@@ -230,19 +247,7 @@ The first part of the result looks like this:
     ...
 ```
 
-By using `json.load()`, we've read our file into a Python dictionary. Now, we can use `.keys()`
-to see a list of all the keys in the first level of the dictionary - this is a quick and
-helpful way to get a sense for what is contained in different parts of the JSON file,
-without having to scroll through the entire output.
-
-To see the value of any particular key, we can call it in square brackets by name:
-
-```python
-eia923_json['response']
-```
-
-This returns yet another dictionary with a list of keys. To look more closely at the
-`warnings` the file contains, we can add another square bracket:
+By using `json.load()`, we've read our file into a Python dictionary. now we just have to extract one of the tables to hand off to the DataFrame constructor. We'll do the warnings table together, then you'll do the data table on your own.
 
 ```python
 eia923_json['response']['warnings']
@@ -254,12 +259,11 @@ eia923_json['response']['warnings']
  {'warning': 'another warning', 'description': 'Hey! Watch out!'}]
 ```
 
-Now that we've found the path to our data table in the JSON file, we can use `pd.DataFrame()` to transform it into a Pandas DataFrame:
+That's the list of dictionaries we expect from tabular data, so the DataFrame constructor should be able to handle the rest:
 
 ```python
 pd.DataFrame(eia923_json['response','warnings'])
 ```
-The function returns a DataFrame that looks like this:
 
 ```output
 |           warning |                                       description |
@@ -268,7 +272,14 @@ The function returns a DataFrame that looks like this:
 |   another warning |                                   Hey! Watch out! |
 ```
 
-The first row of this table is letting us know that when the postdoc queried and saved this data from the API, he only got the first 5,000 rows of data. We'll tackle this problem in a later episode, but for now let's investigate the data that we do have saved locally.
+
+:::: caution
+
+API quirk alert!
+
+The first row of this table is letting us know that when the postdoc queried and saved this data from the API, he only got the first 5,000 rows of data. Many APIs limit the amount of data you can retrieve at once like this, and to get the entire dataset you would need to submit multiple requests in an operation called _paging_. We'll tackle this problem in a later episode, but for now let's investigate the data that we do have saved locally.
+
+::::
 
 :::::::: challenge
 
@@ -283,6 +294,8 @@ with open('data/eia923_2022.json') as file:
 eia923_json_df = pd.DataFrame(eia923_json[...])
 
 ```
+
+Bonus question if you finish early -- how does this table differ structurally from the one we read from the Excel file? Which one would you choose if you wanted to compare monthly generation statistics from two plants over the last 10 years?
 
 :::: hint
 First, read in the file using `open()` and `json.load()`. Once you've read in the file,
@@ -301,8 +314,10 @@ with open('data/eia923_2022.json') as file:
     eia923_json = json.load(file)
 
 eia923_json_df = pd.DataFrame(eia923_json['response']['data'])
-
+eia923_json_df
 ```
+
+In `eia923_excel_df`, each row represents a year of data, with a separate column for each month. In `eia_json_df`, each row represents a month of data. A 10-year timeseries of two plants would be easier to produce from the json df, but if you wanted to compare seasonal trends between years, the excel df might be easier.
 
 ::::
 
@@ -311,42 +326,27 @@ eia923_json_df = pd.DataFrame(eia923_json['response']['data'])
 ## Deciphering XML
 
 eXtensible Markup Language (XML) is a plain text file that uses tags to describe the
-structure and content of the data they contain. For example, the following might be a way
-to represent a note from Saul R. Panel to Dr. Watts apologizing for leaving the project
-in an incomplete state:
+structure and content of the data they contain.
+Like in other markup languages (e.g., HTML), XML tags wrap around data, providing information about the structure, format, and relationships between components.
+For instance, the `<row>` tag will contain a row of data, while `<plantCode>243</plantCode>`  means that the plant code is 243.
 
-```xml
-<note>
-  <from>Saul R. Panel</from>
-  <to>Dr. Watts</to>
-  <heading>Note about project</heading>
-  <body>Sorry for leaving the project in an incomplete state!</body>
-</note>
-```
+Jupyter is a good way to preview XML data, so let's pull up our EIA 9223 file:
 
-In JSON, the equivalent information could be formatted as:
-```output
-{
-  "note": {
-    "from": "Saul R. Panel",
-    "to": "Dr. Watts",
-    "heading": "Note about project",
-    "body": "Sorry for leaving the project in an incomplete state!"
-  }
-}
-```
+![The XML view in the Jupyter file browser](fig/ep-2-filetypes/xml-jupyter.png){alt="Snapshot of
+the XML file showing nested tags from eia-api, to response, to warnings, etc."}
 
-Like other markup languages (e.g., HTML), XML wraps around data, providing information
-about the structure, format, and relationships between components. Each tag provides
-metadata about what the piece of data it contains represents - for instance `<row>` will
-contain a row of data, while `<plantCode>243</plantCode>` will means that the plant code
-is 243.
+We can see some similar structures here as we found in the JSON file. Notably:
 
-Each tag in XML shares similarities with a key in a JSON file:
-- both provide metadata about what the corresponding value _is_ (e.g., a note, net generation in watts)
-- both provide information about nested relationships (e.g., the note contains a heading and a body)
+- There are multiple tables in here: a warnings table and a data table.
+- Once correctly read into pandas, the warnings table will have column names `warning` and `description`. The data table will have column names like `period`, `plantCode`, `plantName`, `fuel2002`, etc.
+
+A tag in XML format shares similarities with a key in JSON format:
+
+- both provide a label for what the value _is_ (e.g., a warning, a plant name)
+- both provide information about nested relationships (e.g., the response contains a warnings table and a data table; each row in the warnings table contains a warning and a description)
 
 However, unlike JSON, XML tags:
+
 - can have additional attributes (e.g., `<data type="float" precision=3 variable_name="net-generation-mw">3.142</data>`),
 providing a way to share more complex metadata about a given data point and to search for tags matching
 additional filters (e.g., all data with a particular variable name).
@@ -364,54 +364,23 @@ basis using an RSS feed and the XML data format.
 
 ## Using `pd.read_xml()`
 
-Like with our other data types, we can use `pd.read_xml()` to parse XML files into Pandas DataFrames. `pd.read_xml()` is designed to ingest tabular data nested in XML files,
-not to coerce highly nested data into a table format. To use this method, we'll need to
-identify where in our XML file the data is structured into a table-like format and can
-be easily extracted to a DataFrame. For more on `pd.read_xml()`, see the [Pandas documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_xml.html#pandas.read_xml#notes).
+Like with our other data types, we can use `pd.read_xml()` to parse XML files into Pandas DataFrames. `pd.read_xml()` is designed to ingest tabular data. In an XML file, this looks like some element which contains a set of rows, each of which contains a set of columns (and nothing else). To use this method, we'll need to
+identify where in our XML file the table we want is located. For more on `pd.read_xml()`, see the [Pandas documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_xml.html#pandas.read_xml#notes).
 
-Let's try to explore the XML file that the postdoc left behind:
+We'll extract the warnings table together, then you'll do the data table on your own. `pd.read_xml()` has some pretty sophisticated arguments available, but we'll try simple first. Let's try reading in the file as-is:
 ```python
 pd.read_xml('data/eia923_2022.xml')
 ```
 
-Hm, that doesn't look quite right. Each tag has been assigned as a column name, and the
-value inside has been added as a row.
+Hm, that doesn't look quite right -- those are not the columns we identified when we were looking at the preview. It seems pandas has attempted to interpret the top level of the XML file as if it were a table, with the `<response>`, `<request>`, and sibling tags as rows, and the next level down as columns.
 
-If we open up the XML file in a text editor or browser, we can see that a nested series
-of tags can help us identify the part of the table we want to read in.
+We want just the warnings table. To tell pandas where to find it, we can use the `xpath` parameter to specify the row tags within our XML file that we want to use for our table.
 
-```xml
-<response>
-    <total>96</total>
-    <dateFormat>YYYY-MM</dateFormat>
-    <frequency>monthly</frequency>
-    <warnings>
-        <row>
-            <warning>Incomplete return.</warning>
-            <description>The API can only return 300 rows in XML format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.</description>
-        </row>
-        <row>
-            <warning>Another warning.</warning>
-            <description>Hey! Watch out!</description>
-        </row>
-    </warnings>
-    ...
-```
-
-For example, the same warnings table we were working with before is in the <response> tag, then
-the <warnings> tag. Each row of the data is also wrapped in a <row> tag.
-
-To drill down to the section of the file we are actually interested in,
-we can use the `xpath` parameter, which lets you use tags to specify where in the XML file to look for a table.
-
-The `xpath` query we're looking for is formatted as follows:
-
-- // are used at the beginning to note that we want to select all items with the tags specified
-- Then, like specifying which directory we want to access in a terminal, slashes are used to specify the path to the desired tag.
+`xpath` queries are quite powerful, but in their simplest form they resemble the same kind of path you would use to specify a directory in a terminal: a sequence of tags, separated by slashes.
 
 So to get all the `<row>`s of the `<warnings>` table, we call:
 ```python
-pd.read_xml('data/eia923_2022.xml', xpath = "//response/warnings/row")
+pd.read_xml('data/eia923_2022.xml', xpath = "response/warnings/row")
 ```
 
 ::: challenge
@@ -420,27 +389,25 @@ pd.read_xml('data/eia923_2022.xml', xpath = "//response/warnings/row")
 Read in all the rows of the `data` table in `eia923_2022.xml` into a Pandas DataFrame, using
 `pd.read_xml` and the `xpath` parameter. Store the result in a variable called `eia923_xml_df`.
 
+Bonus question if you finish early -- how does this table differ in content from the one we read from the JSON file?
+
 ::: solution
 ```py
-eia923_xml_df = pd.read_xml('data/eia923_2022.xml', xpath = "//response/data/row")
+eia923_xml_df = pd.read_xml('data/eia923_2022.xml', xpath = "response/data/row")
 ```
 
-The data is found following the following tags: `<response><data><row>`
+The XML data covers from January to December of 2022, but has only 96 rows. The JSON data only covers July to December, but has 5000 rows.
 
-The `<data>` is split into two seperate chunks of data seperated by `<row>` tags, which
-tells us that everything between these tags corresponds to a single row of data. Then,
-we know that the `<period>`, `<plantCode>` and `<plantName>` tags are telling us what
-variable the values correspond to - or in other words, what the column name is that
-corresponds to each tag. We use the xpath parameter to grab all `<row>`'s of data in the XML file.
 :::
 
 :::
 
 ::: callout
-`xpath` can be used to make more complex queries (e.g., only picking `<note>`'s written
-after a certain date), but we won't cover more advanced usage of `xpath` in this tutorial.
+`xpath` can be used to make more complex queries (e.g., only picking `<row>`s with a certain value for `primeMover`), but we won't cover more advanced usage of `xpath` in this tutorial.
 See this [Library Carpentries tutorial](https://carpentries-incubator.github.io/lc-webscraping/02-xpath/index.html) for more about `xpath`.
 :::
+
+
 
 ## `pd.read_parquet()`
 
@@ -456,17 +423,19 @@ Parquet files:
 to quickly load data from some part of the dataset without loading everything into memory.
 - are supported by many existing tools, including `Pandas`.
 
+We'll be using Parquet files extensively in the rest of this course, but reading them in does not share the same challenges as the other formats we've talked about today.
+We can read a Parquet file to a Pandas DataFrame using `pd.read_parquet()`:
+
+```py
+eia923_parquet_df = pd.read_parquet('data/eia923_2022.parquet')
+```
+
 :::: callout
 To get into the technical weeds of Parquet files, see
 the [Parquet documentation](https://parquet.apache.org/docs/overview/). For a desktop viewer
 similar to Excel, we recommend checking out [Tad](https://www.tadviewer.com/).
 ::::
 
-We can read a Parquet file to a Pandas DataFrame using `pd.read_parquet()`, almost identical to how we would read in a CSV:
-
-```py
-eia923_parquet_df = pd.read_parquet('data/eia923_2022.parquet')
-```
 :::: instructor
 Below is an optional challenge that is likely to get cut for time. It is intended to
 refresh students' data exploration skills, and build intuition around comparing datasets.
@@ -491,13 +460,14 @@ columns available, their data types, the number of non-null values in each colum
 
 ::::::::
 
-
 :::: keypoints
 
-- `pandas` has functionality to read in many data formats (e.g., XML, JSON,
-Parquet) into Pandas DataFrames in Python. We can take advantage of this to
+- `pandas` has functionality to read in many data formats (e.g., XLS, XML, Parquet) into Pandas DataFrames in Python. We can take advantage of this to
 transform many kinds of structured and semi-structured data into similarly formatted data.
 - The `help` function can be used to access function documentation, providing avenues to resolve problems on import of various data types.
-- When semi-structured data contains tabular data, we can extract the tabular data into a Pandas Dataframe.
+- Preview tools can help you:
+  - Know what to look for in your DataFrame in order to determine if you have read it in correctly
+  - Understand what has gone wrong if your DataFrame looks all messed up
+  - Formulate arguments which tell pandas what parts of a file to extract as a table and what parts to ignore
 
 ::::
