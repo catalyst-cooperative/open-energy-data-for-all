@@ -19,6 +19,14 @@ exercises: 12
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+:::: instructor
+
+Intro exercise: As people trickle in:
+* online: in the chat, write your name and one thing you're excited to learn about in the course.
+* in person: if small enough, ask one by one. If bigger, do the same thing on a sticky note.
+
+::::
+
 ### Greetings
 
 Welcome to Open Energy Data for All!
@@ -39,7 +47,7 @@ That's all normal. There's a lot to the research process that doesn't get covere
 
 Logistics:
 
-* My name is $name and I come from $background. Your other instructors will be $list; they'll introduce themselves in their own sections.
+* My name is $name and I come from $background. Your other instructors will be $list (ask them for quick intro).
 * We will be discussing problems, solutions, and strategies at the intersection of research, data science, and collaborative software development. [if a subset, describe here]
 * Most sessions are structured as sets of short explanations or demonstrations, interspersed with exercises. Be prepared to alternate listening-mode with thinking-mode and doing-mode.
 * Ask questions by using the "raise hand" indicator or typing into chat.
@@ -137,7 +145,7 @@ roadblocks, in support of building a more robust and open energy research commun
 
 :::: instructor
 
-- modify for whatever subset is being presented
+Modify for whatever subset is being presented.
 
 ::::
 
@@ -145,27 +153,27 @@ This course is focused on practical solutions to roadblocks you may encounter in
 
 Roadblocks to data acquisition:
 
-- My data is in a format I've never worked before
-- The data I want to work with is published through an Application Programming Interface
+* My data is in a format I've never worked before
+* The data I want to work with is published through an Application Programming Interface
 (API), and I don't know how to download it
 
 Roadblocks to data cleaning & processing:
 
-- There's something unexpected about my input data, but I'm not sure what
-- The code runs on some of my data, but errors on other input data
-- When I re-run my code I get different results, and I'm not sure why
-- I have no idea which part of my code is causing a particular problem
-- My data changes format or content over time
-- My data is too big to work with on a desktop computer
+* There's something unexpected about my input data, but I'm not sure what
+* The code runs on some of my data, but errors on other input data
+* When I re-run my code I get different results, and I'm not sure why
+* I have no idea which part of my code is causing a particular problem
+* My data changes format or content over time
+* My data is too big to work with on a desktop computer
 
 Roadblocks to collaboration:
 
-- I'm not sure how to make it simple for collaborators to run and contribute to my code
-- I need to publish my code and/or data for a paper I'm submitting to, but I'm not sure
+* I'm not sure how to make it simple for collaborators to run and contribute to my code
+* I need to publish my code and/or data for a paper I'm submitting to, but I'm not sure
 how best to do so
-- A colleague wants to build on my existing code, but I'm not sure how to clearly document
+* A colleague wants to build on my existing code, but I'm not sure how to clearly document
 what I've done to make it possible for them to adapt it
-- I wrote this code myself six months ago, and I do not recognize it, nor can I remember what I was trying to do
+* I wrote this code myself six months ago, and I do not recognize it, nor can I remember what I was trying to do
 
 The next episode will discuss reading data in unexpected file formats.
 
