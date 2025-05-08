@@ -6,21 +6,26 @@ exercises: 12
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-* My coursework makes sense. What makes research so much harder?
-* This sucks. How can I make sure no one else has to suffer this misery?
-* What can I do to feel like part of a research community?
-* What can I do to help my work have lasting impact?
 * What do I need to think about so that my project doesn't fall apart halfway to the finish line?
+* Working with data sucks. How can I make sure no one else has to suffer this misery?
+* What can I do to help my work have lasting impact?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-* Summarize the phases of a data-centric research project.
 * Discuss the benefits of open data principles.
-* Briefly describe the modules covered in this course.
+* Identify key challenges to using data in research
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::: instructor
+
+Intro exercise: As people trickle in:
+* online: in the chat, write your name and one thing you're excited to learn about in the course.
+* in person: if small enough, ask one by one. If bigger, do the same thing on a sticky note.
+
+::::
 
 ### Greetings
 
@@ -42,7 +47,7 @@ That's all normal. There's a lot to the research process that doesn't get covere
 
 Logistics:
 
-* My name is $name and I come from $background. Your other instructors will be $list; they'll introduce themselves in their own sections.
+* My name is $name and I come from $background. Your other instructors will be $list (ask them for quick intro).
 * We will be discussing problems, solutions, and strategies at the intersection of research, data science, and collaborative software development. [if a subset, describe here]
 * Most sessions are structured as sets of short explanations or demonstrations, interspersed with exercises. Be prepared to alternate listening-mode with thinking-mode and doing-mode.
 * Ask questions by using the "raise hand" indicator or typing into chat.
@@ -53,7 +58,40 @@ Any other questions on what to expect or how to participate?
 ::::
 
 
+### The role of data in the research cycle
+
+Working with data can be hard and frustrating. Data problems can wreck a research
+project before it starts, or crop up unexpectedly near the finish line. Why is data
+be so hard to work with?
+
+* **Data can be messy and unpredictable:** Why is this coal plant labelled as retired one
+year and operating the next in this spreadsheet? Data often requires substantial cleaning
+before it is ready for analysis, and it's common that even mid-way through a research
+process a model or analysis will reveal problems that weren't obvious at first. **Researchers need strategies**
+**for checking that the data conforms to expectations throughout the research process.**
+* **Data requires domain context:** Which utilities use the wrong units when they fill
+out the EIA 860 form year after year? *Should* those values be negative? Working with
+data inevitably means learning about the data provider's caveats and assumptions, and then
+generating your own based on your domain expertise. Yet these assumptions are often
+relegated to the appendix of a research paper, if they are shared clearly at all.
+**Researchers need strategies for clearly and effectively communicating their assumptions and learned expertise with data to others.**
+* **Data can be big:** Interested in analyzing hourly grid operating data for the last
+decade? With more data available each year, **researchers working with 'big data' need**
+**strategies for effectively handling data too big to process all at once on a laptop.**
+* **Data changes over time:** A form can change format, and a link you used last week to
+download a spreadsheet can give your colleague a new version of the file without warning.
+**Researchers need to be able to easily access and share access to stable versions of their data inputs.**
+* **Data choices can impose legal restrictions on your research outputs:** Using proprietary data
+will mean that other researchers can't reproduce your code or build on your results,
+and can even limit what types of analyses you can do. Some types of open licenses may
+prohibit you from republishing cleaned or adapted versions of the original data.
+**Researchers need to clearly understand the implications of data licenses before proceeding**
+**with cleaning or analysis work.**
+
 ### Setting the scene
+
+To illustrate the centrality of these problems, let's imagine the
+following scenario:
 
 You're poking around your research lab's collaborative drive when you find a folder
 containing data, code and some notes from a former postdoctoral researcher. They were
@@ -68,14 +106,6 @@ able to respond to further questions - the documents in the drive will be your o
 source of information going forward.
 
 You are a little alarmed. The data has only hints of where it came from, the code barely has any comments, and the notes are mostly about open TODOs. There are no instructions for running anything. You have your work cut out for you.
-
-:::::::: challenge
-
-#### Introspection: replication
-
-Think of a time you've had to replicate someone else's research results, either as a class assignment or by inheriting a project someone else (maybe past-you) started. What was hard about it? What was easy? What changes could the original author have made to ease your way?
-
-::::::::
 
 This is not a resilient way to work on a research project. Many common events
 can cause big challenges:
@@ -105,75 +135,17 @@ results. Maybe you end up getting a new job, leaving someone else in the lab to
 keep the project going. In your new role, you might find that you yourself want
 to build on all your old work.
 
-These principles form the foundation for the material in this course.
-When we talk about building up data and software skills, it is in the context of building a more robust and open research community.
-
-### The research life cycle
-
-Research is cyclic by nature: we ask questions about the world, and as we investigate them, we make hypotheses, test those hypotheses, and reveal more questions along with our conclusions.
-You may have seen a diagram like this in a research methods class or as part of orientation for your library or research institute.
-If not, that's okay!
-You don't need to know it by heart to succeed in this course.
-
-![Life cycle of a research project.](./fig/ep1-data-project-lifecycle.png){alt="Project life cycle diagram. Main sequence in yellow shows research stages, from choosing a topic to publication and archiving. Central to the yellow cycle is sharing work-in-progress, with components for ensuring source data is accessible, making data preparation methods available, distributing tools, and making results replicable. Data sequence in grey includes finding, fetching, cleaning, debugging, and fixing problems, with a looming backdrop of dealing with scale. Scattered grey bubbles indicate connections to data processes throughout the research and collaboration components."}
-
-What you may not have seen before are the data components.
-Data has its own mini-cycle.
-When you identify a new data need, you first need to locate an appropriate source for that data.
-Then, will need to figure out how to access it, and load it into whatever software you're using for models and analysis.
-Data can be messy for many reasons, and most projects include part of the code that cleans it and prepares it for further analysis.
-Sometimes the data cycle ends there, but it's more common to find that one of your models or experiments reveal problems that weren't obvious at first.
-You will need to develop strategies for checking that your code has done the right thing, and ways to inspect the data at different points in your pipeline when something has gone wrong.
-Fixing small data problems manually may seem like the easiest path in the moment, but as soon as you need to update your results with fresh data, or pass your work on to someone else, those problems will come back. Ensuring your fixes are durable and repeatable will wind up saving you time.
-Underlying all of that, if your project requires large quantities of data, sufficiently large that your computer cannot load it all into memory at once, you will need to use techniques and tools that are built to handle data at scale.
-
-While the data cycle is most central/obvious/intense at the beginning of a project, it often repeats in parts along the way.
-You may find while planning your experiments that you need an additional dataset to complete one of your model components -- so you have to find an appropriate source for it.
-Model development often shakes out a whole pile of data problems, especially missingness and data entry typos -- so you have to revise your data cleaning code.
-Maybe you try running your experiment, but your computer runs out of memory -- (it is often true that data cleaning is less memory-intensive than running models) so you have to restructure your approach to work at scale. <!-- work in batches or run in a cluster environment. -->
-
-Once your data is clean, your models run smoothly, your experiments are done, and you've analysed your results, publication is a great way to share what you have learned with others, and learn from others in turn.
-However,
-
-- False starts and wrong turns are not often included in research papers, even if a conference or journal would accept negative results.
-- When page limits are tight, details about the data processing and code are usually cut before details about the model and results.
-- While preprint venues can offer a way to collect feedback in advance of full peer review, that feedback is almost always more focused on assumptions and approach than on debugging a broken data pipeline.
-- While many publication venues require code and data to be published alongside each paper, not all do, which can make replicating another lab's results difficult or even impossible.
-
-Introducing collaboration earlier in the research process can help with all of these problems.
-If you start your project with code sharing in mind, there will be less cleanup to do at publication time, and it will be easier to ask for advice from other researchers when you run into trouble.
-Most people are more willing to look at a nicely-organized and documented GitHub repository than wade into a 5,000-line Python notebook. It is also significantly easier to extract a minimum example of a problem if your code is already organized in functions.
-If you select source data that is publicly available, it is more likely that others will have seen and solved the same problems that you will encounter.
-There may even be existing tools to clean and process the data you are interested in -- or if not, publishing your cleaning and processing code independently of your research results can pay off on multiple axes.
-Other researchers will be able to replicate your results more easily if they can rely on a common starting point, you will help increase activity and accelerate development in your research area by reducing toil and duplicated effort, and your tooling can be a source of citations you may not have considered before.
-
-:::::::: challenge
-
-#### Introspection: durability
-
-Think of one of the well-established ideas or techniques in your field of research, something many people have built upon since it was first published. What do you think made that idea so useful? What helped it take hold? What helped it spread? For the more experienced -- what about the opposite? Are there ideas that looked brilliant on paper, but which never took off?
-
-::::::::
-
-:::: instructor
-
-- An idea simple enough that many people could get it to work
-- Does it have to be simple, or could it be complex but well-explained?
-- Well-supported with open tooling?
-- Possible to play with it, without expensive custom hardware or proprietary data?
-
-::::
-
-The parts of the research project life cycle that typically receive explicit attention in coursework include selecting a research question, analysis techniques (e.g., selecting the appropriate statistical method), and publication.
-Training in the remaining portions is often assumed to happen naturally through research experience, but this is not always effective in practice.
-Gaps in these areas can create roadblocks to conducting effective, reproducible and open research, even for experienced researchers.
-This course aims to address some of those roadblocks.
+Often, we assume that the skills needed to actually enact these principles are learned
+naturally through research experience, but this is not always effective in practice.
+Gaps in these areas can create roadblocks to conducting effective, reproducible and open
+research, even for experienced researchers. This course aims to address some of those
+roadblocks, in support of building a more robust and open energy research community.
 
 #### What we will cover
 
 :::: instructor
 
-- modify for whatever subset is being presented
+Modify for whatever subset is being presented.
 
 ::::
 
@@ -181,48 +153,49 @@ This course is focused on practical solutions to roadblocks you may encounter in
 
 Roadblocks to data acquisition:
 
-- My data is in a format I've never worked before
-- The data I want to work with is published through an Application Programming Interface
+* My data is in a format I've never worked before
+* The data I want to work with is published through an Application Programming Interface
 (API), and I don't know how to download it
 
 Roadblocks to data cleaning & processing:
 
-- There's something unexpected about my input data, but I'm not sure what
-- The code runs on some of my data, but errors on other input data
-- When I re-run my code I get different results, and I'm not sure why
-- I have no idea which part of my code is causing a particular problem
-- My data changes format or content over time
-- My data is too big to work with on a desktop computer
+* There's something unexpected about my input data, but I'm not sure what
+* The code runs on some of my data, but errors on other input data
+* When I re-run my code I get different results, and I'm not sure why
+* I have no idea which part of my code is causing a particular problem
+* My data changes format or content over time
+* My data is too big to work with on a desktop computer
 
 Roadblocks to collaboration:
 
-- I'm not sure how to make it simple for collaborators to run and contribute to my code
-- I need to publish my code and/or data for a paper I'm submitting to, but I'm not sure
+* I'm not sure how to make it simple for collaborators to run and contribute to my code
+* I need to publish my code and/or data for a paper I'm submitting to, but I'm not sure
 how best to do so
-- A colleague wants to build on my existing code, but I'm not sure how to clearly document
+* A colleague wants to build on my existing code, but I'm not sure how to clearly document
 what I've done to make it possible for them to adapt it
-- I wrote this code myself six months ago, and I do not recognize it, nor can I remember what I was trying to do
+* I wrote this code myself six months ago, and I do not recognize it, nor can I remember what I was trying to do
 
 The next episode will discuss reading data in unexpected file formats.
 
+:::: keypoints
+
+* Working with data presents unique challenges and requires specific skills and strategies. (**HELP**)
+* Open data principles such as reproducibility, transparency, and collaboration make it easier to share, interpret, and build upon research projects.
+
+::::
+
 :::::::: instructor
 
-The remaining section is useful, but not central, and can be cut for time if necessary. If cut, direct students to the course website for tips on locating and identifying appropriate datasets for open research projects.
+Don't cover this, unless you have a lot of extra time or this is high priority for your students.
+Instead, direct students to the course website for tips on locating and identifying appropriate datasets for open research projects.
 
 ::::::::
 
-But first, we have to locate some data that will help with our research goals.
+Strategies for finding the 'right' data are highly dependent on your specific research
+field, so we don't delve into this in the course. However, below you'll find some
+resources and aspects of data that are important to consider as you progress
 
-### Strategies for finding appropriate research data
-
-:::::::: challenge
-
-#### Discussion: struggles in finding data
-
-Think of a time you tried to find a dataset for an energy research project. What was
-one unexpected difficulty that came up? If finding your own research data isn't something you've done yet, think about where you would start. How would you decide whether or not a particular dataset was appropriate for your research question? Share with a peer.
-
-::::::::
+### Additional resources: strategies for finding appropriate research data
 
 In conducting open research, it is best to start right at the beginning, with how we choose our datasets.
 This is not something we'll cover in detail anywhere else, but we can give some rough guidelines here.
@@ -246,8 +219,7 @@ processing to use than data contained in spreadsheets or computer-optimized data
 such as Parquet. If you require multiple years of data for your research, look out for
 changes in data formats over time.
 
-This lesson will use a few key open energy data sets to illustrate the arc of data
-analysis. We also have several recommendations to give you a start finding appropriate data for your own research project, depending on your area of interest:
+We also have several recommendations to give you a start finding appropriate data for your own research project, depending on your area of interest:
 
 - For national-scale research, federal agencies such as the EIA, EPA and FERC all publish
 free and regularly-updated data.
@@ -257,11 +229,3 @@ regularly-updated operational data (e.g., [CAISO's hourly data](https://www.cais
 - For analysis-ready data: projects such as the [Public Utility Data Liberation (PUDL) project](https://catalystcoop-pudl.readthedocs.io/en/latest/index.html),
 [PowerGenome](https://github.com/PowerGenome/PowerGenome?tab=readme-ov-file), Gridstatus, and others publish pre-processed data that addresses many
 of the common foundational challenges that make federal energy data hard to work with.
-
-:::: keypoints
-
-* Open data principles such as reproducibility, transparency, and collaboration make it easier to share, interpret, and build upon research projects.
-* Data tasks such as gathering, loading, cleaning, and debugging are guaranteed at the beginning of a research project, and may recur throughout as new data needs arise and problems are revealed. Collaborate early & collaborate often to avoid pitfalls and more easily climb out of the ones you do fall into.
-* This course will discuss data acquisition, cleaning & processing, and collaboration.
-
-::::
