@@ -28,6 +28,34 @@ In preparation for this lesson:
 
 ::::
 
+### Setting the scene
+
+To illustrate the centrality of these problems, let's imagine the
+following scenario:
+
+You're poking around your research lab's collaborative drive when you find a folder
+containing data, code and some notes from a former postdoctoral researcher. They were
+investigating patterns in the emissions intensity of electricity production
+in Colorado as exploratory work for a potential research project, but wound up pursuing
+another idea instead.
+
+As you prepare for your qualifying exams, you're interested in picking up on their
+work and developing it further. While they give you the go-ahead over email, they let
+you know that they're traveling for field work for the next six months and won't be
+able to respond to further questions - the documents in the drive will be your only
+source of information going forward.
+
+You are a little alarmed. The data has only hints of where it came from, the code barely has any comments, and the notes are mostly about open TODOs. There are no instructions for running anything. You have your work cut out for you.
+
+This is not a resilient way to work on a research project. Many common events
+can cause big challenges:
+
+* someone leaves the project, temporarily or permanently
+* the project gets put on pause for a while
+* someone new wants to join the project and help out
+* someone wants to build new work on top of the project
+
+
 ## Untangling a data pile
 While poking around in your lab's computer, you find the folder that the postdoc was
 using to store data inputs to his model. Inside the `data` folder, however, is a bit of

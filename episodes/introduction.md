@@ -38,18 +38,21 @@ Deliver this as if you are in an infomercial, and as if everyone is on board wit
 ::::
 
 * Have you ever struggled with all the weird little auxiliary bits of writing research software?
-* Does it ever seem like those weird little auxiliary bits are, like, all of the work you do, and the actual interesting analysis stuff falls by the wayside?
+* Does it ever seem like those weird little auxiliary bits are, like, all of the work you do,
+and the actual interesting energy analysis you want to do falls by the wayside?
 * Do you ever feel like there must be a better way to do your research?
 
-That's all normal. There's a lot to the research process that doesn't get covered in class, and people are usually left to learn through personal struggle. We won't be able to cover all of that material, but we've chosen a few areas to cover in our time together to help close that gap.
+That's all normal. There's a lot to working with data that doesn't get covered in class,
+and people are usually left to learn through personal struggle. Drawing on our experiences
+working with real-world energy data, we'll focus on a few practical skills that can help close that gap.
 
 :::: instructor
 
 Logistics:
 
 * My name is $name and I come from $background. Your other instructors will be $list (ask them for quick intro).
-* We will be discussing problems, solutions, and strategies at the intersection of research, data science, and collaborative software development. [if a subset, describe here]
-* Most sessions are structured as sets of short explanations or demonstrations, interspersed with exercises. Be prepared to alternate listening-mode with thinking-mode and doing-mode.
+* We will be discussing [TODO: OBJECTIVES!. By the end of this lesson, you will [OBJECTIVES!!]]
+* Most sessions are structured as sets of short explanations or demonstrations, interspersed with exercises. Be prepared to alternate listening-mode with thinking-mode and doing-mode. [TODO: mention setup - how to handle!]
 * Ask questions by using the "raise hand" indicator or typing into chat.
 * Follow along on the website and/or use it to catch up if you need to space out or step out: https://docs.catalyst.coop/open-energy-data-for-all/
 
@@ -58,7 +61,7 @@ Any other questions on what to expect or how to participate?
 ::::
 
 
-### The role of data in the research cycle
+### The energy data landscape
 
 Working with data can be hard and frustrating. Data problems can wreck a research
 project before it starts, or crop up unexpectedly near the finish line. Why is data
@@ -75,45 +78,18 @@ data inevitably means learning about the data provider's caveats and assumptions
 generating your own based on your domain expertise. Yet these assumptions are often
 relegated to the appendix of a research paper, if they are shared clearly at all.
 **Researchers need strategies for clearly and effectively communicating their assumptions and learned expertise with data to others.**
-* **Data can be big:** Interested in analyzing hourly grid operating data for the last
-decade? With more data available each year, **researchers working with 'big data' need**
-**strategies for effectively handling data too big to process all at once on a laptop.**
-* **Data changes over time:** A form can change format, and a link you used last week to
-download a spreadsheet can give your colleague a new version of the file without warning.
-**Researchers need to be able to easily access and share access to stable versions of their data inputs.**
-* **Data choices can impose legal restrictions on your research outputs:** Using proprietary data
-will mean that other researchers can't reproduce your code or build on your results,
-and can even limit what types of analyses you can do. Some types of open licenses may
-prohibit you from republishing cleaned or adapted versions of the original data.
-**Researchers need to clearly understand the implications of data licenses before proceeding**
-**with cleaning or analysis work.**
 
-### Setting the scene
+Energy data landscape:
+* messy: requires processing to make sense of. either you do this, or you have to trust someone else to do it. domain context is key here, assumptions aren't clear cut or always well communicated.
+* hard to access: formats, changing files, 
+* 
 
-To illustrate the centrality of these problems, let's imagine the
-following scenario:
+* problems pop up throughout the research cycle
+* specifics about energy data here: energy data is messy, overlapping, hard to access, and we need more open/transparent research
 
-You're poking around your research lab's collaborative drive when you find a folder
-containing data, code and some notes from a former postdoctoral researcher. They were
-investigating patterns in the emissions intensity of electricity production
-in Colorado as exploratory work for a potential research project, but wound up pursuing
-another idea instead.
+* move the scenario in shorter format to lesson 2
 
-As you prepare for your qualifying exams, you're interested in picking up on their
-work and developing it further. While they give you the go-ahead over email, they let
-you know that they're traveling for field work for the next six months and won't be
-able to respond to further questions - the documents in the drive will be your only
-source of information going forward.
-
-You are a little alarmed. The data has only hints of where it came from, the code barely has any comments, and the notes are mostly about open TODOs. There are no instructions for running anything. You have your work cut out for you.
-
-This is not a resilient way to work on a research project. Many common events
-can cause big challenges:
-
-* someone leaves the project, temporarily or permanently
-* the project gets put on pause for a while
-* someone new wants to join the project and help out
-* someone wants to build new work on top of the project
+### A new way...
 
 As you are left to puzzle everything out on your own, you daydream about a
 project where these events are much less disruptive.
