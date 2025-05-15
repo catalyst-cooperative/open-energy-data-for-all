@@ -63,6 +63,13 @@ $ uv run jupyter notebook
 
 from the `open-energy-data-for-all` directory. Then in the Jupyter browser, open `notebooks/2-diverse-filetypes.ipynb`.
 
+:::: instructor
+Remind people of the setup instructions: https://docs.catalyst.coop/open-energy-data-for-all/#setup
+Ask for a green sticky or check mark when everyone has completed this step. If after a few
+minutes people are still having trouble, ask them to message one of the helpers for support.
+Give them the option to debug in a seperate room if needed, or follow along without coding.
+::::
+
 ## Reading Excel files with Pandas
 
 One of the most popular libraries used to work with tabular data in Python is called the

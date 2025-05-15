@@ -50,8 +50,7 @@ working with real-world energy data, we'll focus on a few practical skills that 
 Logistics:
 
 * My name is $name and I come from $background. Your other instructors will be $list (ask them for quick intro).
-* We will be discussing [TODO: OBJECTIVES!. By the end of this lesson, you will [OBJECTIVES!!]]
-* Most sessions are structured as sets of short explanations or demonstrations, interspersed with exercises. Be prepared to alternate listening-mode with thinking-mode and doing-mode. [TODO: mention setup - how to handle!]
+* Most sessions are structured as sets of short explanations or demonstrations, interspersed with exercises. Be prepared to alternate listening-mode with thinking-mode and doing-mode.
 * Ask questions by using the "raise hand" indicator or typing into chat.
 * Follow along on the website and/or use it to catch up if you need to space out or step out: https://docs.catalyst.coop/open-energy-data-for-all/
 
