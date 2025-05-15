@@ -66,6 +66,7 @@ Once you've installed `uv`, you can use it to install the Python libraries into 
 
 2. Install the libraries:
    ```bash
+   courses/open-energy-data-for-all/ % uv python install
    courses/open-energy-data-for-all/ % uv sync
    ```
 
