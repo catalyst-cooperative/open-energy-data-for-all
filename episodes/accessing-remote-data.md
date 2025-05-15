@@ -143,7 +143,7 @@ Let's import it, and set up a URL:
 ```python
 import requests
 
-json_example_url = 
+json_example_url =
 "https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.json"
 ```
 
