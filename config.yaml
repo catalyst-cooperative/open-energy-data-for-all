@@ -55,6 +55,7 @@ episodes:
 - working-with-diverse-filetypes.md
 - accessing-remote-data.md
 - scraping-data.md
+- coming-soon.md
 # chapter 2. visualization/reusability
 #- plotting.md # pick a few transforms and do them - dropping nulls, adding dtypes, stacking, unit conversion
 #- data-validation.md
