@@ -29,9 +29,21 @@ In preparation for this lesson:
 ::::
 
 ## Untangling a data pile
-While poking around in your lab's computer, you find the folder that the postdoc was
-using to store data inputs to his model. Inside the `data` folder, however, is a bit of
-a mess! Every file in the folder has the same name ("eia923_2022") but a different file
+
+To illustrate the centrality of these problems, let's imagine the
+following scenario:
+
+You're poking around your research lab's collaborative drive when you find a folder
+containing data, code and some notes from a former postdoctoral researcher. They were
+investigating patterns in the emissions intensity of electricity production
+in Colorado as exploratory work for a potential research project, but wound up pursuing
+another idea instead.
+
+As you prepare for your qualifying exams, you're interested in picking up on their
+work and developing it further. You find the `data` folder that the postdoc was
+using to store data inputs to his model. It's a bit of a mess!
+
+Every file in the folder has the same name ("eia923_2022") but a different file
 extension. To make sense of this undocumented pile of files, we'll need to read in each
 file and compare them.
 
@@ -50,6 +62,13 @@ $ uv run jupyter notebook
 ```
 
 from the `open-energy-data-for-all` directory. Then in the Jupyter browser, open `notebooks/2-diverse-filetypes.ipynb`.
+
+:::: instructor
+Remind people of the setup instructions: https://docs.catalyst.coop/open-energy-data-for-all/#setup
+Ask for a green sticky or check mark when everyone has completed this step. If after a few
+minutes people are still having trouble, ask them to message one of the helpers for support.
+Give them the option to debug in a seperate room if needed, or follow along without coding.
+::::
 
 ## Reading Excel files with Pandas
 
