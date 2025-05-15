@@ -257,105 +257,6 @@
   </div><!--/div.accordion-item-->
 </div><!--/div.accordion-flush-->
 
-<div class="accordion accordion-flush" id="accordionFlush6">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading6">
-        <a href="plotting.html">5. Plotting</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush7">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading7">
-        <a href="data-validation.html">6. Data validation</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush8">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading8">
-        <a href="modularization.html">7. Modularization</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush9">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading9">
-        <a href="automated-testing.html">8. Automated Testing</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush10">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading10">
-        <a href="debugging.html">9. Debugging</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush11">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading11">
-        <a href="big-data.html">10. Strategies for working with big data</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush12">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading12">
-        <a href="other-options.html">11. Other options when your data gets big</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush13">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading13">
-        <a href="python-environments.html">12. Managing Python environments</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush14">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading14">
-        <a href="data-environments.html">13. Managing your data environment</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush15">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading15">
-        <a href="documentation.html">14. Documentation best practices</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
-<div class="accordion accordion-flush" id="accordionFlush16">
-  <div class="accordion-item">
-    <div class="accordion-header" id="flush-heading16">
-        <a href="hot-takes.html">15. Hot takes about collaboration</a>
-    </div><!--/div.accordion-header-->
-
-  </div><!--/div.accordion-item-->
-</div><!--/div.accordion-flush-->
-
                 </div>
               </div>
             </div>
@@ -414,7 +315,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Handling diverse filetypes in Pandas</h1>
-        <p>Last updated on 2025-04-22 |
+        <p>Last updated on 2025-05-15 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/working-with-diverse-filetypes.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -455,12 +356,21 @@ parameters in function calls.</li>
 </div>
 </div>
 <section><h2 class="section-heading" id="untangling-a-data-pile">Untangling a data pile<a class="anchor" aria-label="anchor" href="#untangling-a-data-pile"></a></h2>
-<hr class="half-width"><p>While poking around in your lab’s computer, you find the folder that
-the postdoc was using to store data inputs to his model. Inside the
-<code>data</code> folder, however, is a bit of a mess! Every file in the
-folder has the same name (“eia923_2022”) but a different file extension.
-To make sense of this undocumented pile of files, we’ll need to read in
-each file and compare them.</p>
+<hr class="half-width"><p>To illustrate the centrality of these problems, let’s imagine the
+following scenario:</p>
+<p>You’re poking around your research lab’s collaborative drive when you
+find a folder containing data, code and some notes from a former
+postdoctoral researcher. They were investigating patterns in the
+emissions intensity of electricity production in Colorado as exploratory
+work for a potential research project, but wound up pursuing another
+idea instead.</p>
+<p>As you prepare for your qualifying exams, you’re interested in
+picking up on their work and developing it further. You find the
+<code>data</code> folder that the postdoc was using to store data inputs
+to his model. It’s a bit of a mess!</p>
+<p>Every file in the folder has the same name (“eia923_2022”) but a
+different file extension. To make sense of this undocumented pile of
+files, we’ll need to read in each file and compare them.</p>
 </section><section><h2 class="section-heading" id="eia-923-data">EIA 923 data<a class="anchor" aria-label="anchor" href="#eia-923-data"></a></h2>
 <hr class="half-width"><p>The Energy Information Administration (EIA)’s <a href="https://www.eia.gov/electricity/data/eia923" class="external-link">Form 923</a> is known
 as the Power Plant Operations Report. The data include electric power
@@ -486,6 +396,7 @@ exploration.</p>
 <p>from the <code>open-energy-data-for-all</code> directory. Then in the
 Jupyter browser, open
 <code>notebooks/2-diverse-filetypes.ipynb</code>.</p>
+
 </section><section><h2 class="section-heading" id="reading-excel-files-with-pandas">Reading Excel files with Pandas<a class="anchor" aria-label="anchor" href="#reading-excel-files-with-pandas"></a></h2>
 <hr class="half-width"><p>One of the most popular libraries used to work with tabular data in
 Python is called the <a href="https://pandas.pydata.org/" class="external-link">Python Data
@@ -601,7 +512,7 @@ called <code>eia923_excel_df</code>.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -819,7 +730,7 @@ from the <code>eia923_2022.json</code> file into a Pandas DataFrame.</p>
 <button class="accordion-button hint-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHint1" aria-expanded="false" aria-controls="collapseHint1">
   <h4 class="accordion-header" id="headingHint1"> Give me a hint </h4>
 </button>
-<div id="collapseHint1" class="accordion-collapse collapse" aria-labelledby="headingHint1" data-bs-parent="#accordionHint1">
+<div id="collapseHint1" class="accordion-collapse collapse" data-bs-parent="#accordionHint1" aria-labelledby="headingHint1">
 <div class="accordion-body">
 <p>First, read in the file using <code>open()</code> and
 <code>json.load()</code>. Once you’ve read in the file, you can iterate
@@ -834,7 +745,7 @@ the <code>data</code> portion of the file.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -990,7 +901,7 @@ result in a variable called <code>eia923_xml_df</code>.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb22">
 <h3 class="code-label">PY<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1080,7 +991,7 @@ peer.</p>
 <button class="accordion-button hint-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHint2" aria-expanded="false" aria-controls="collapseHint2">
   <h4 class="accordion-header" id="headingHint2"> Give me a hint </h4>
 </button>
-<div id="collapseHint2" class="accordion-collapse collapse" aria-labelledby="headingHint2" data-bs-parent="#accordionHint2">
+<div id="collapseHint2" class="accordion-collapse collapse" data-bs-parent="#accordionHint2" aria-labelledby="headingHint2">
 <div class="accordion-body">
 <ul><li>
 <code>df.info()</code> provides a high level summary of the data,
@@ -1183,8 +1094,8 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/working-with-diverse-filetypes.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/working-with-diverse-filetypes.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2025-04-22",
-  "datePublished": "2025-05-13"
+  "dateModified": "2025-05-15",
+  "datePublished": "2025-05-15"
 }
 
   </script><script>
