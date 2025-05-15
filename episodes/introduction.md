@@ -6,7 +6,6 @@ exercises: 12
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-* What do I need to think about so that my project doesn't fall apart halfway to the finish line?
 * Working with data sucks. How can I make sure no one else has to suffer this misery?
 * What can I do to help my work have lasting impact?
 
@@ -63,61 +62,54 @@ Any other questions on what to expect or how to participate?
 
 ### The energy data landscape
 
-Working with data can be hard and frustrating. Data problems can wreck a research
-project before it starts, or crop up unexpectedly near the finish line. Why is data
+Working with energy data can be hard and frustrating. Data problems can wreck a research
+project before it starts, or crop up unexpectedly near the finish line. Why is energy data
 be so hard to work with?
 
-* **Data can be messy and unpredictable:** Why is this coal plant labelled as retired one
-year and operating the next in this spreadsheet? Data often requires substantial cleaning
+* **Energy data can be hard to access:** When three federal agencies, state agencies, and
+Independent System Operators (ISOs) all publish overlapping data about boilers, generators,
+smokestacks, plants and so on, it can be hard to know where to start. Changes in data
+structure and format, the large variety of file types, and the sheer size of some datasets
+all pose challenges. Where data is regularly updated, it can be tricky to keep your
+workflow up to date, and make sure that your collaborators are working with the same
+version of the data you're using.
+* **Energy data can be messy and unpredictable:** Why is this coal plant labelled as retired one
+year and operating the next? Energy data often requires substantial cleaning
 before it is ready for analysis, and it's common that even mid-way through a research
-process a model or analysis will reveal problems that weren't obvious at first. **Researchers need strategies**
-**for checking that the data conforms to expectations throughout the research process.**
-* **Data requires domain context:** Which utilities use the wrong units when they fill
-out the EIA 860 form year after year? *Should* those values be negative? Working with
-data inevitably means learning about the data provider's caveats and assumptions, and then
-generating your own based on your domain expertise. Yet these assumptions are often
-relegated to the appendix of a research paper, if they are shared clearly at all.
-**Researchers need strategies for clearly and effectively communicating their assumptions and learned expertise with data to others.**
-
-Energy data landscape:
-* messy: requires processing to make sense of. either you do this, or you have to trust someone else to do it. domain context is key here, assumptions aren't clear cut or always well communicated.
-* hard to access: formats, changing files, 
-* 
-
-* problems pop up throughout the research cycle
-* specifics about energy data here: energy data is messy, overlapping, hard to access, and we need more open/transparent research
-
-* move the scenario in shorter format to lesson 2
+process a model or analysis will reveal problems that weren't obvious at first. Commercial
+data promises to be analysis-ready, but hides assumptions and transformations in a black
+box, and imposes restrictions on the reproducibility and openness of your research - if
+you can afford it!
 
 ### A new way...
 
-As you are left to puzzle everything out on your own, you daydream about a
-project where these events are much less disruptive.
+What if instead of each one of us reproducing the same frustrating data wrangling tasks
+on our own, we found a different way? What would a collaborative, open, and reproducible
+energy research ecosystem look like?
 
-You'd want to be able to **collaborate** with other people starting early on in
-the project - it'd be nice if your other team members could review your work,
+**Collaborative:** How can you bring in other people starting early on in
+the project? It'd be nice if your other team members could review your work,
 provide feedback, and contribute to parts of the analysis. Then if you have to
 disappear for a while, other people can carry the project forward.
 
-You'd want to be **open and transparent** about the data - what the inputs are,
-what the outputs are, and how you got from A to B. When you're talking to a
-potential collaborator, a new teammate, or just getting back into the project
-after a break, being able to see the core data flows can save you a lot of
-pain.
+**Open and transparent:** What are the inputs, what are the outputs, and how did you get
+from A to B? When you're talking to a potential collaborator, a new teammate, or
+just getting back into the project after a break, being able to see all the steps and
+assumptions you've made along the way can save you a lot of pain. Whether to meet
+publishing requirements or to contribute to open-source science, you want to be able
+to share your code and data without hesitation.
 
-You'd also want the project outcomes to be **reproducible**, so researchers in
-other labs can build on the work that you're about to do, and confirm your
-results. Maybe you end up getting a new job, leaving someone else in the lab to
-keep the project going. In your new role, you might find that you yourself want
-to build on all your old work.
+**Reproducible:** How can researchers in other labs can build on the work that you're
+about to do, and confirm your results? Maybe you end up getting a new job, leaving
+someone else in the lab to keep the project going. In your new role, you might find that
+you yourself want to build on all your old work.
+
+#### What we will cover
 
 Often, we assume that the skills needed to actually enact these principles are learned
 naturally through research experience, but this is not always effective in practice.
 Gaps in these areas can create roadblocks to conducting effective, reproducible and open
-research, even for experienced researchers. This course aims to address some of those
-roadblocks, in support of building a more robust and open energy research community.
-
-#### What we will cover
+research, even for experienced researchers.
 
 :::: instructor
 
@@ -125,7 +117,9 @@ Modify for whatever subset is being presented.
 
 ::::
 
-This course is focused on practical solutions to roadblocks you may encounter in dealing with data, code, and collaboration. We will be following the arc of an open data analysis project in Python, structuring the course into three sections:
+This course is focused on practical solutions to roadblocks you may encounter in dealing
+with data, code, and collaboration. We will be following the arc of an open data analysis
+project in Python, structuring the course into three sections:
 
 Roadblocks to data acquisition:
 
@@ -155,8 +149,8 @@ The next episode will discuss reading data in unexpected file formats.
 
 :::: keypoints
 
-* Working with data presents unique challenges and requires specific skills and strategies. (**HELP**)
 * Open data principles such as reproducibility, transparency, and collaboration make it easier to share, interpret, and build upon research projects.
+* Enacting these values doesn't 'just happen' - it requires specific skills and strategies.
 
 ::::
 
