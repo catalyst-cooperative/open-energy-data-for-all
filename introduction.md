@@ -105,10 +105,10 @@ you yourself want to build on all your old work.
 
 #### What we will cover
 
-Often, we assume that the skills needed to actually enact these principles are learned
-naturally through research experience, but this is not always effective in practice.
-Gaps in these areas can create roadblocks to conducting effective, reproducible and open
-research, even for experienced researchers.
+How do we get there? Often, we assume that the skills needed to actually enact these
+principles are learned naturally through research experience, but this is not always
+effective in practice. Gaps in these areas can create roadblocks to conducting effective,
+reproducible and open research, even for experienced researchers.
 
 :::: instructor
 
