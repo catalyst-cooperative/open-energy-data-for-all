@@ -143,7 +143,7 @@ Let's import it, and set up a URL:
 ```python
 import requests
 
-json_example_url = 
+json_example_url =
 "https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.json"
 ```
 
@@ -637,7 +637,7 @@ We can read the documentation a bit more, and find [this section](https://www.ei
 > Facets enable us to filter the data of concern to us, shrinking the size of the returns to a more manageable size.
 >
 > For example, our retail sales of electricity has the location and sector facets. If we query the route (without specifying /data), the API will tell us the facets that are relevant to that route.
- 
+
 So we learn two things:
 
 1. "facets" is a word associated with filtering your data.
