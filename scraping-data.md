@@ -41,6 +41,7 @@ You can imagine how this would be annoying if you needed to download, say, a hun
 
 ### Example: EIA 923/906
 
+TODO: introduce bs4 and requests at the top when we're importing.
 To get the links, first we need to actually get the webpage that the links are on.
 
 ```python
@@ -322,6 +323,8 @@ Why might you choose to do all this instead of just manually collecting links?
 
 Another time you'll need lots of URLs is when APIs don't give you everything all at once. Let's look at an example request to the EIA API we saw last time:
 
+TODO: pull the params that stick around into their own variable so it's easier to type.
+
 ```python
 eia_api_base_url = "https://api.eia.gov/v2/electricity"
 api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
@@ -430,6 +433,14 @@ for i in range(0, 15, 5):
 So, in theory, if you wanted to set a fresh `offset` for every page in a number of rows, how would you do that?
 
 :::::::: solution
+
+```python
+total_rows = 1234
+page_size = 100
+
+for offset in range(0, total_rows, page_size):
+  print(offset)
+```
 ::::::::
 
 ::::
@@ -472,8 +483,8 @@ df = pd.concat(all_records)
 
 ```python
 all_records = []
-for page_num in range(num_pages):
-    print(f"Getting page {page_num}...")
+for offset in range(0, 12_345, 5000):
+    print(f"Getting page starting at {offset}...")
     offset = page_num * page_size
     page = requests.get(
       f"{eia_api_base_url}/facility-fuel/data",
