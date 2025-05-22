@@ -485,7 +485,6 @@ df = pd.concat(all_records)
 all_records = []
 for offset in range(0, 12_345, 5000):
     print(f"Getting page starting at {offset}...")
-    offset = page_num * page_size
     page = requests.get(
       f"{eia_api_base_url}/facility-fuel/data",
       params={
@@ -502,9 +501,7 @@ for offset in range(0, 12_345, 5000):
     all_records.append(pd.DataFrame(page["data"]))
 
 df = pd.concat(all_records) # combines all pages into one big dataframe
-len(df.drop_duplicates())
 ```
-
 ::::::::
 
 ::::
