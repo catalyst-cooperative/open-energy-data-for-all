@@ -24,7 +24,7 @@ exercises: 0
 
 Prep checklist:
 
-- [ ] make a sticky note that includes the research question: "What was the net electricity generation from natural gas, plant-by-plant, in Colorado from 2020-2023?"
+- [ ] make a sticky note that includes the research question: "What was the net electricity generation from natural gas, plant-by-plant, in Puerto Rico from 2020-2023?"
 - [ ] pull up the [PUDL viewer with the right table already in search](https://viewer.catalyst.coop/search?q=eia923%20monthly%20generation%20fuel)
 
 ::::
@@ -191,30 +191,30 @@ eia923_2022_json["response"]["data"]
 This seems to follow the format we saw last time.
 
 ```output
-[{'period': '2022-12',
-  'plantCode': '6761',
-  'plantName': 'Rawhide',
+[{'period': '2020-11',
+  'plantCode': '61034',
+  'plantName': 'EcoElectrica',
   'fuel2002': 'ALL',
   'fuelTypeDescription': 'Total',
-  'state': 'CO',
-  'stateDescription': 'Colorado',
+  'state': 'PR',
+  'stateDescription': None,
   'primeMover': 'ALL',
-  'generation': '188961',
-  'gross-generation': '203283',
+  'generation': '299985',
+  'gross-generation': '314449',
   'generation-units': 'megawatthours',
   'gross-generation-units': 'megawatthours'},
- {'period': '2022-12',
-  'plantCode': '54142',
-  'plantName': 'Hillcrest Pump Station',
-  'fuel2002': 'WAT',
-  'fuelTypeDescription': 'Hydroelectric Conventional',
-  'state': 'CO',
-  'stateDescription': 'Colorado',
-  'primeMover': 'HY',
-  'generation': '342.43',
-  'gross-generation': '358.27',
+ {'period': '2020-11',
+  'plantCode': '61034',
+  'plantName': 'EcoElectrica',
+  'fuel2002': 'NG',
+  'fuelTypeDescription': 'Natural Gas',
+  'state': 'PR',
+  'stateDescription': None,
+  'primeMover': 'ALL',
+  'generation': '299985',
+  'gross-generation': '314449',
   'generation-units': 'megawatthours',
-  'gross-generation-units': 'megawatthours'}]
+  'gross-generation-units': 'megawatthours'},
 ```
 
 :::::::: challenge
@@ -258,7 +258,7 @@ eia923_json_df_remote = pd.DataFrame(eia923_json_remote["response"]["data"])
 
 ### APIs as fancy URLs
 
-Suppose someone asks you, "how much natural gas was consumed for electricity generation, totalled across all sectors, in Colorado, for each year between 2020 and 2023?"
+Suppose someone asks you, "how much natural gas was consumed for electricity generation, totalled across all sectors, in Puerto Rico, for each year between 2020 and 2023?"
 
 You *could* go find the EIA 923 spreadsheets for 2020-2023, download the individual files, do a bunch of filtering and reshaping of the data, and get an answer.
 
@@ -269,7 +269,7 @@ For example, to answer that question, you can request this URL:
 
 ```python
 
-response = requests.get("https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&facets[fueltypeid][]=NG&facets[sectorid][]=99&facets[location][]=CO&frequency=annual&start=2020&end=2023&api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
+response = requests.get("https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&facets[fueltypeid][]=NG&facets[sectorid][]=99&facets[location][]=PR&frequency=annual&start=2020&end=2023&api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
 response = requests.get(example_api_url)
 
 response.json()
@@ -282,45 +282,45 @@ Which gives you:
   'dateFormat': 'YYYY',
   'frequency': 'annual',
   'data': [{'period': '2020',
-    'location': 'CO',
-    'stateDescription': 'Colorado',
+    'location': 'PR',
+    'stateDescription': 'Puerto Rico',
     'sectorid': '99',
     'sectorDescription': 'All Sectors',
     'fueltypeid': 'NG',
     'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '141498.781',
+    'consumption-for-eg': '47834.384',
     'consumption-for-eg-units': 'thousand Mcf'},
    {'period': '2021',
-    'location': 'CO',
-    'stateDescription': 'Colorado',
+    'location': 'PR',
+    'stateDescription': 'Puerto Rico',
     'sectorid': '99',
     'sectorDescription': 'All Sectors',
     'fueltypeid': 'NG',
     'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '117512.901',
-    'consumption-for-eg-units': 'thousand Mcf'},
-   {'period': '2023',
-    'location': 'CO',
-    'stateDescription': 'Colorado',
-    'sectorid': '99',
-    'sectorDescription': 'All Sectors',
-    'fueltypeid': 'NG',
-    'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '134798.975',
+    'consumption-for-eg': '70999.964',
     'consumption-for-eg-units': 'thousand Mcf'},
    {'period': '2022',
-    'location': 'CO',
-    'stateDescription': 'Colorado',
+    'location': 'PR',
+    'stateDescription': 'Puerto Rico',
     'sectorid': '99',
     'sectorDescription': 'All Sectors',
     'fueltypeid': 'NG',
     'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '127967.696',
+    'consumption-for-eg': '50696.82',
+    'consumption-for-eg-units': 'thousand Mcf'},
+   {'period': '2023',
+    'location': 'PR',
+    'stateDescription': 'Puerto Rico',
+    'sectorid': '99',
+    'sectorDescription': 'All Sectors',
+    'fueltypeid': 'NG',
+    'fuelTypeDescription': 'natural gas',
+    'consumption-for-eg': '66022.717',
     'consumption-for-eg-units': 'thousand Mcf'}],
   'description': 'Monthly and annual electric power operations by state, sector, and energy source.\n    Source: Form EIA-923'},
  'request': {'command': '/v2/electricity/electric-power-operational-data/data/',
   'params': {'data': ['consumption-for-eg'],
-   'facets': {'fueltypeid': ['NG'], 'sectorid': ['99'], 'location': ['CO']},
+   'facets': {'fueltypeid': ['NG'], 'sectorid': ['99'], 'location': ['PR']},
    'frequency': 'annual',
    'start': '2020',
    'end': '2023',
@@ -344,7 +344,7 @@ example_api_url = (
     "&"
     "facets[sectorid][]=99" # total across all sectors
     "&"
-    "facets[location][]=CO" # in Colorado
+    "facets[location][]=PR" # in Puerto Rico
     "&"
     "frequency=annual" # per year
     "&"
@@ -364,10 +364,38 @@ Many other APIs will not have a public key, so you'll have to register in one wa
 
 :::: challenge
 
-Try editing the following code to request data for Pennsylvania instead of Colorado.
+Try editing the following code to request data for Colorado instead of Puerto Rico.
 
 ```python
-pennsylvania_api_url = (
+colorado_api_url = (
+    "https://api.eia.gov" # "host": the high-level name of the API you're accessing
+    "/v2/electricity/electric-power-operational-data/data" # "route": the specific aspect of the API you're accessing
+    "?" # separator that indicates "everything after this will be a name-value pair"
+    "data[]=consumption-for-eg" # name: data[], value: consumption-for-eg ("consumption for electricity generation")
+    "&" # separator between each pair
+    "facets[fueltypeid][]=NG" # only natural gas data
+    "&"
+    "facets[sectorid][]=99" # total across all sectors
+    "&"
+    "facets[location][]=PR" # in Puerto Rico
+    "&"
+    "frequency=annual" # per year
+    "&"
+    "start=2020" # starting in 2020
+    "&"
+    "end=2023" # ending in 2023
+    "&"
+    "api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8" # a password to prove you have access to the API
+)
+
+requests.get(colorado_api_url).json()
+```
+
+:::::::: solution
+
+
+```python
+colorado_api_url = (
     "https://api.eia.gov" # "host": the high-level name of the API you're accessing
     "/v2/electricity/electric-power-operational-data/data" # "route": the specific aspect of the API you're accessing
     "?" # separator that indicates "everything after this will be a name-value pair"
@@ -388,35 +416,7 @@ pennsylvania_api_url = (
     "api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8" # a password to prove you have access to the API
 )
 
-requests.get(pennsylvania_api_url).json()
-```
-
-:::::::: solution
-
-
-```python
-pennsylvania_api_url = (
-    "https://api.eia.gov" # "host": the high-level name of the API you're accessing
-    "/v2/electricity/electric-power-operational-data/data" # "route": the specific aspect of the API you're accessing
-    "?" # separator that indicates "everything after this will be a name-value pair"
-    "data[]=consumption-for-eg" # name: data[], value: consumption-for-eg ("consumption for electricity generation")
-    "&" # separator between each pair
-    "facets[fueltypeid][]=NG" # only natural gas data
-    "&"
-    "facets[sectorid][]=99" # total across all sectors
-    "&"
-    "facets[location][]=PA" # in Pennsylvania
-    "&"
-    "frequency=annual" # per year
-    "&"
-    "start=2020" # starting in 2020
-    "&"
-    "end=2023" # ending in 2023
-    "&"
-    "api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8" # a password to prove you have access to the API
-)
-
-requests.get(pennsylvania_api_url).json()
+requests.get(colorado_api_url).json()
 ```
 
 ::::::::
@@ -448,7 +448,7 @@ Unfortunately, the EIA API documentation is confusingly formatted and *particula
 
 Let's focus on a slightly different question than we had before - now that we know the aggregated information, we want to drill down.
 
-**"What was the net electricity generation from natural gas, plant-by-plant, in Colorado from 2020-2023?"**
+**"What was the net electricity generation from natural gas, plant-by-plant, in Puerto Rico from 2020-2023?"**
 
 
 ### Trying out an API request
@@ -751,26 +751,26 @@ Once we're all done we can come back and make the full API request together.
 
 :::::::: solution
 ```python
-annual_ng_co_2020_2023 = requests.get(
+annual_ng_pr_2020_2023 = requests.get(
     "{base_url}/facility-fuel/data",
     params={
         "data[]": "generation",
         "frequency": "annual",
         "facets[fuel2002][]": "NG",
-        "facets[state][]": "CO",
+        "facets[state][]": "PR",
         "start": "2020-01-01",
         "end": "2023-12-31",
         "api_key": api_key
     },
 )
 
-annual_ng_co_2020_2023.json()
+annual_ng_pr_2020_2023.json()
 ```
 ::::::::
 
 ::::
 
-Now you've worked through the documentation, played with an API, and built up a complicated API query from scratch! And you've answered your earlier question of **"what was the net generation from natural gas, plant-by-plant, in Colorado from 2020-2023?"**
+Now you've worked through the documentation, played with an API, and built up a complicated API query from scratch! And you've answered your earlier question of **"what was the net generation from natural gas, plant-by-plant, in Puerto Rico from 2020-2023?"**
 
 That was a lot of work, but now you're equipped to answer other similar questions using this API.
 
