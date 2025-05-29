@@ -333,7 +333,7 @@ first_page = requests.get(
     f"{eia_api_base_url}/facility-fuel/data",
     params={
         "data[]": "generation",
-        "facets[state][]": "CO",
+        "facets[state][]": "PR",
         "sort[0][column]": "period",
         "sort[0][direction]": "desc",
         "sort[1][column]": "plantCode",
@@ -388,7 +388,7 @@ next_page = requests.get(
   f"{base_url}/facility-fuel/data",
   params={
     "data[]": "generation",
-    "facets[state][]": "CO",
+    "facets[state][]": "PR",
     "sort[0][column]": "period",
     "sort[0][direction]": "desc",
     "offset": 5000,
@@ -451,7 +451,7 @@ for offset in range(0, total_rows, page_size):
 
 OK, now let's put it all together!
 
-Let's try to get the net generation data in Colorado that is in the EIA API.
+Let's try to get the net generation data in Puerto Rico that is in the EIA API.
 
 Instead of getting all of it, which will take a lot of waiting around, let's just grab the first 12,345 rows.
 
@@ -465,7 +465,7 @@ all_records = []
       f"{eia_api_base_url}/facility-fuel/data",
       params={
         "data[]": "generation",
-        "facets[state][]": "CO",
+        "facets[state][]": "PR",
         "sort[0][column]": "period",
         "sort[0][direction]": "desc",
         "sort[1][column]": "plantCode",
@@ -489,7 +489,7 @@ for offset in range(0, 12_345, 5000):
       f"{eia_api_base_url}/facility-fuel/data",
       params={
         "data[]": "generation",
-        "facets[state][]": "CO",
+        "facets[state][]": "PR",
         "sort[0][column]": "period",
         "sort[0][direction]": "desc",
         "sort[1][column]": "plantCode",
@@ -517,7 +517,7 @@ That "total" field looks pretty suspicious.
 first_page["total"]
 ```
 
-So there are about 155,000 rows in this dataset. We could plug that number in above.
+So there are about 8,000 rows in this dataset. We could plug that number in above.
 
 This is just one common way APIs do pagination. You'll have to flex those API learning skills (play with the data, read the docs, bounce back and forth) to learn how each new API handles this.
 
