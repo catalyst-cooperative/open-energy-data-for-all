@@ -36,7 +36,7 @@ following scenario:
 You're poking around your research lab's collaborative drive when you find a folder
 containing data, code and some notes from a former postdoctoral researcher. They were
 investigating patterns in the emissions intensity of electricity production
-in Colorado as exploratory work for a potential research project, but wound up pursuing
+in Puerto Rico as exploratory work for a potential research project, but wound up pursuing
 another idea instead.
 
 As you prepare for your qualifying exams, you're interested in picking up on their
@@ -230,20 +230,21 @@ The first part of the result looks like this:
 
 ```output
 {'response': {'warnings': [{'warning': 'incomplete return',
-    'description': 'The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.'}],
-  'total': '10426',
+    'description': 'The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.'},
+   {'warning': 'another warning', 'description': 'Hey! Watch out!'}],
+  'total': '6949',
   'dateFormat': 'YYYY-MM',
   'frequency': 'monthly',
-  'data': [{'period': '2022-12',
-    'plantCode': '6761',
-    'plantName': 'Rawhide',
+  'data': [{'period': '2020-11',
+    'plantCode': '61034',
+    'plantName': 'EcoElectrica',
     'fuel2002': 'ALL',
     'fuelTypeDescription': 'Total',
-    'state': 'CO',
-    'stateDescription': 'Colorado',
+    'state': 'PR',
+    'stateDescription': None,
     'primeMover': 'ALL',
-    'generation': '188961',
-    'gross-generation': '203283',
+    'generation': '299985',
+    'gross-generation': '314449',
     'generation-units': 'megawatthours',
     'gross-generation-units': 'megawatthours'},
     ...
@@ -401,19 +402,19 @@ of tags can help us identify the part of the table we want to read in.
 
 ```xml
 <response>
-    <total>96</total>
-    <dateFormat>YYYY-MM</dateFormat>
-    <frequency>monthly</frequency>
     <warnings>
         <row>
-            <warning>Incomplete return.</warning>
+            <warning>incomplete return</warning>
             <description>The API can only return 300 rows in XML format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.</description>
         </row>
         <row>
-            <warning>Another warning.</warning>
+            <warning>another warning</warning>
             <description>Hey! Watch out!</description>
         </row>
     </warnings>
+    <total>6949</total>
+    <dateFormat>YYYY-MM</dateFormat>
+    <frequency>monthly</frequency>
     ...
 ```
 
