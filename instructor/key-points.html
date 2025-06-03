@@ -369,9 +369,8 @@ tabular data into a Pandas Dataframe.</li>
 <hr class="half-width">
 <ul>
 <li>
-<code>requests</code> is useful when you need to reformat the data
-before shoving it into <code>pandas</code>
-</li>
+<code>requests</code> is useful when you need to access remote
+data</li>
 <li>
 <code>response.status_code</code> tells you if the request succeeded
 or why it failed.</li>
@@ -388,18 +387,14 @@ is handy</li>
 make requests to URLs, you can figure them out</li>
 </ul>
 <ul>
-<li>Many functions in the <code>pandas.read_*</code> family can read
-tabular data from remote servers &amp; cloud storage as if it was on
-your local computer</li>
 <li>
-<code>requests</code> can get data that’s not in the right shape for
-<code>pandas.read_*</code>; you’ll have to do the translation from their
-response format into <code>pandas.DataFrame</code> yourself</li>
+<code>requests</code> is a swiss-army knife for accessing remote
+data</li>
 <li>web APIs are just collections of fancy URLs, which you can interact
 with via <code>requests</code>
 </li>
-<li>to learn an API, you need to be able to read the documentation and
-experiment with the API to see how it responds.</li>
+<li>to learn an API, you need to read the documentation and experiment
+with the API to see how it responds</li>
 </ul></section><section id="scraping-data"><h2 class="section-heading"><a href="scraping-data.html">Scraping Data</a></h2>
 <hr class="half-width">
 <ul>

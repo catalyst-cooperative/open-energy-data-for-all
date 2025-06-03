@@ -235,7 +235,7 @@
     <div id="flush-collapsecurrent" class="accordion-collapse collapse show" aria-labelledby="flush-headingcurrent" data-bs-parent="#accordionFlushcurrent">
       <div class="accordion-body">
         <ul><li><a href="#introduction-to-remote-data">Introduction to remote data</a></li>
-<li><a href="#reading-remote">Reading remote</a></li>
+<li><a href="#reading-remote-files">Reading remote files</a></li>
 <li><a href="#intro-to-web-apis">Intro to web APIs</a></li>
 <li><a href="#case-study-eia-api">Case study: EIA API</a></li>
         </ul></div><!--/div.accordion-body-->
@@ -311,7 +311,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Accessing remote data</h1>
-        <p>Last updated on 2025-05-21 |
+        <p>Last updated on 2025-06-03 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/accessing-remote-data.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -348,28 +348,30 @@ available?</li>
 </div>
 </div>
 <section><h2 class="section-heading" id="introduction-to-remote-data">Introduction to remote data<a class="anchor" aria-label="anchor" href="#introduction-to-remote-data"></a></h2>
-<hr class="half-width"><p>We learned last time about opening the EIA 923 data in a variety of
-formats. That data was stored directly on your hard drive because you
-cloned the lesson respository in setup - we call that <strong>local
-data</strong>.</p>
-<p>We can also read in data that’s stored somewhere else, or
-<strong>remote data</strong>. That’s accessed through a URL, instead of
-a path on your hard drive.</p>
-</section><section><h2 class="section-heading" id="reading-remote">Reading remote<a class="anchor" aria-label="anchor" href="#reading-remote"></a></h2>
+<hr class="half-width"><p>Often times you will want to read data that’s not already on your
+computer. Whether that’s data that’s stored in a cloud bucket like
+Amazon S3, data that’s behind a Web API, or just data that’s on the EIA
+website, we can use a common suite of tools to access this
+<strong>remote data</strong>. We’ll show you how.</p>
+</section><section><h2 class="section-heading" id="reading-remote-files">Reading remote files<a class="anchor" aria-label="anchor" href="#reading-remote-files"></a></h2>
 <hr class="half-width"><div class="section level3">
 <h3 id="using-pandas-read_">Using <code>pandas.read_*</code>
 <a class="anchor" aria-label="anchor" href="#using-pandas-read_"></a></h3>
-<p>You asked around about the <code>eia923_2022.parquet</code> file and
-found out that it came from the <a href="https://catalyst.coop/pudl/" class="external-link">Public Utility Data Liberation
-project</a> which updates regularly! You want to get your hands on the
-newer data, so you go check that out.</p>
-<p>Skipping a few ‘look at the webpage’ steps, you find their <a href="https://viewer.catalyst.coop/search?q=eia923%20monthly%20generation%20fuel" class="external-link">data
-listings</a> and find a link to where you can download a Parquet file:
+
+<p>One such tool is our trusty <code>pandas</code> library. It includes
+many <code>read_*</code> functions that read in files of various formats
+- and many of those can be used to access remote data.</p>
+<p>For example, <code>read_parquet</code> is designed to read Parquet
+files - a format that’s optimized for computers to read and store
+tabular data. Sort of like a CSV that is more compact. We can use it to
+download a Parquet file - for our example, we’re using a file which
+includes monthly generation data &amp; is updated quarterly:
 <code>https://s3.us-west-2.amazonaws.com/pudl.catalyst.coop/nightly/core_eia923__monthly_generation_fuel.parquet</code>.</p>
-<p>You <em>could</em> download this file, then point
-<code>read_parquet</code> at it. But, since it gets updated sometimes,
-downloading a new version, checking if it’s different from the old one,
-and managing all the versions on your hard drive seems like a pain.</p>
+<p>You <em>could</em> point your browser at that link, download the
+file, then point <code>read_parquet</code> at it. But, since it gets
+updated sometimes, downloading a new version, checking if it’s different
+from the old one, and managing all the versions on your hard drive seems
+like a pain.</p>
 <p>So let’s download the newest version every time you run the code!</p>
 <p>First, let’s get some imports &amp; constants out of the way:</p>
 <div class="codewrapper sourceCode" id="cb1">
@@ -432,7 +434,7 @@ the whole file.</p>
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>pandas.read_excel(excel_url, skiprows<span class="op">=</span><span class="dv">5</span>, nrows<span class="op">=</span><span class="dv">100</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>pd.read_excel(excel_url, skiprows<span class="op">=</span><span class="dv">5</span>, nrows<span class="op">=</span><span class="dv">100</span>)</span></code></pre>
 </div>
 </div>
 </div>
@@ -450,68 +452,23 @@ the whole file.</p>
 </div>
 </div>
 </div>
-<div id="discussion2" class="callout discussion">
-<div class="callout-square">
-<i class="callout-icon" data-feather="message-circle"></i>
-</div>
-<div class="callout-inner">
-<h3 class="callout-title">Discussion</h3>
-<div class="callout-content">
-<p>What are some advantages and disadvantages you can imagine for using
-remote data vs. saving the data to your hard drive (aka <strong>local
-data</strong>)?</p>
-<div id="accordionSolution2" class="accordion challenge-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
-  <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
-</button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
-<div class="accordion-body">
-<p>Some non-exhaustive ideas:</p>
-<p>Remote data pros:</p>
-<ul><li>if someone else updates the data, you always have the most recent
-version</li>
-<li>you don’t need to manage multiple versions of the same data on your
-hard drive</li>
-<li>if you send your code to someone else, you don’t also have to
-package the data with it</li>
-</ul><p>Local data pros:</p>
-<ul><li>you can keep track of different versions of the same data, even if
-the publisher doesn’t</li>
-<li>you only need to download the data once, and then you can read from
-your disk in the future, which is faster</li>
-<li>if someone else updates the data, your data doesn’t change until you
-actively download a new version</li>
-<li>you can access this without internet!</li>
-</ul></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
 </div>
 <div class="section level3">
 <h3 id="using-requests">Using <code>requests</code>
 <a class="anchor" aria-label="anchor" href="#using-requests"></a></h3>
-<p>It’s nice to use functions in the <code>pd.read_*()</code> family
-with a URL, but sometimes you need to do a little bit of reshaping of
-the data before you can actually use <code>pd.read_*()</code>. With
-semi-structured data like JSON, we often have to extract the tabular
-data within a non-tabular shape before passing that into
-<code>pandas</code>.</p>
-<p>In those cases, you can still use remote data!</p>
+
 <p>The <a href="https://requests.readthedocs.io/en/latest/user/quickstart/" class="external-link"><code>requests</code>
-library</a> is the general way of working with remote files, and we’ll
-use that to deal with data that <code>pandas</code> can’t handle on its
-own.</p>
-<p>Let’s import it, and set up a URL:</p>
+library</a> is the general way of working with remote data within
+Python. It lets us download files from URLs, and also will be a
+fundamental piece of how we work with Web APIs. Let’s import it, and set
+up a URL to work with a JSON file. This file includes a bunch of data
+from EIA 923 in JSON format.</p>
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="im">import</span> requests</span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>json_example_url <span class="op">=</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>json_example_url <span class="op">=</span> </span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">"https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.json"</span></span></code></pre>
 </div>
 <p>To read a URL we use the <a href="https://requests.readthedocs.io/en/latest/api/#requests.get" class="external-link"><code>requests.get()</code>
@@ -570,7 +527,8 @@ might as well just use the built-in functionality of
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>eia923_2022_json <span class="op">=</span> response.json()</span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>eia923_2022_json[<span class="st">"response"</span>][<span class="st">"data"</span>]</span></code></pre>
 </div>
-<p>This seems to follow the format we saw last time.</p>
+<p>This seems to be a list of records, with “period”, “plantCode”,
+“plantName”, etc. as columns.</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -606,36 +564,28 @@ might as well just use the built-in functionality of
 <div class="callout-inner">
 <h3 class="callout-title">Challenge</h3>
 <div class="callout-content">
-<p>Adapt the JSON reading code from last episode to use
-requests.get.</p>
+<p>Can you take the raw XML data at the following URL and turn it into a
+string in python?</p>
 <div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="im">import</span> json</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/eia923_2022.json'</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>    eia923_json <span class="op">=</span> json.load(<span class="bu">file</span>)</span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a></span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>eia923_json_df <span class="op">=</span> pd.DataFrame(eia923_json[<span class="st">"response"</span>][<span class="st">"data"</span>])</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>xml_url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.xml"</span></span></code></pre>
 </div>
 </div>
 </div>
 </div>
-<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div id="accordionSolution2" class="accordion challenge-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
-  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
+  <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>response <span class="op">=</span> requests.get(json_example_url)</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>eia923_json_remote <span class="op">=</span> response.json()</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>eia923_json_df_remote <span class="op">=</span> pd.DataFrame(eia923_json_remote[<span class="st">"response"</span>][<span class="st">"data"</span>])</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>response <span class="op">=</span> requests.get(xml_url)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>raw_xml <span class="op">=</span> response.text</span></code></pre>
 </div>
 </div>
 </div>
@@ -649,9 +599,8 @@ requests.get.</p>
 <h3 class="callout-title">Key Points</h3>
 <div class="callout-content">
 <ul><li>
-<code>requests</code> is useful when you need to reformat the data
-before shoving it into <code>pandas</code>
-</li>
+<code>requests</code> is useful when you need to access remote
+data</li>
 <li>
 <code>response.status_code</code> tells you if the request succeeded
 or why it failed.</li>
@@ -664,9 +613,59 @@ is handy</li>
 </ul></div>
 </div>
 </div>
+<div id="discussion2" class="callout discussion">
+<div class="callout-square">
+<i class="callout-icon" data-feather="message-circle"></i>
+</div>
+<div class="callout-inner">
+<h3 class="callout-title">Discussion</h3>
+<div class="callout-content">
+<p>What are some advantages and disadvantages you can imagine for using
+remote data vs. saving the data to your hard drive (aka <strong>local
+data</strong>)?</p>
+</div>
+</div>
+</div>
+<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
+  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
+</button>
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div class="accordion-body">
+<p>Some non-exhaustive ideas:</p>
+<p>Remote data pros:</p>
+<ul><li>if someone else updates the data, you always have the most recent
+version</li>
+<li>you don’t need to manage multiple versions of the same data on your
+hard drive</li>
+<li>if you send your code to someone else, you don’t also have to
+package the data with it</li>
+</ul><p>Local data pros:</p>
+<ul><li>you can keep track of different versions of the same data, even if
+the publisher doesn’t</li>
+<li>you only need to download the data once, and then you can read from
+your disk in the future, which is faster</li>
+<li>if someone else updates the data, your data doesn’t change until you
+actively download a new version</li>
+<li>you can access this without internet!</li>
+</ul></div>
+</div>
+</div>
+</div>
 </div>
 </section><section><h2 class="section-heading" id="intro-to-web-apis">Intro to web APIs<a class="anchor" aria-label="anchor" href="#intro-to-web-apis"></a></h2>
-<hr class="half-width"><div class="section level3">
+<hr class="half-width"><p>Web APIs - lots of data is locked up behind them, and they can save
+you a bunch of work if you know how to use them. Unfortunately, they can
+be intimidating to work with and the topic is often shrouded in
+mystery.</p>
+<p>Fortunately, you already have the basic skills you need to handle
+APIs:</p>
+<ul><li>documentation reading</li>
+<li>using <code>requests</code> to interact with URLs</li>
+</ul><p>This is because every web API is just a fancy bundle of URLs. Here’s
+an example.</p>
+<div class="section level3">
 <h3 id="apis-as-fancy-urls">APIs as fancy URLs<a class="anchor" aria-label="anchor" href="#apis-as-fancy-urls"></a></h3>
 <p>Suppose someone asks you, “how much natural gas was consumed for
 electricity generation, totalled across all sectors, in Colorado, for
@@ -787,83 +786,8 @@ register in one way or another to get one.</p>
 </div>
 </div>
 </div>
-<div id="challenge2" class="callout challenge">
-<div class="callout-square">
-<i class="callout-icon" data-feather="zap"></i>
-</div>
-<div class="callout-inner">
-<h3 class="callout-title">Challenge</h3>
-<div class="callout-content">
-<p>Try editing the following code to request data for Pennsylvania
-instead of Colorado.</p>
-<div class="codewrapper sourceCode" id="cb20">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>pennsylvania_api_url <span class="op">=</span> (</span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>    <span class="st">"https://api.eia.gov"</span> <span class="co"># "host": the high-level name of the API you're accessing</span></span>
-<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>    <span class="st">"/v2/electricity/electric-power-operational-data/data"</span> <span class="co"># "route": the specific aspect of the API you're accessing</span></span>
-<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>    <span class="st">"?"</span> <span class="co"># separator that indicates "everything after this will be a name-value pair"</span></span>
-<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>    <span class="st">"data[]=consumption-for-eg"</span> <span class="co"># name: data[], value: consumption-for-eg ("consumption for electricity generation")</span></span>
-<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>    <span class="st">"&amp;"</span> <span class="co"># separator between each pair</span></span>
-<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>    <span class="st">"facets[fueltypeid][]=NG"</span> <span class="co"># only natural gas data</span></span>
-<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>    <span class="st">"facets[sectorid][]=99"</span> <span class="co"># total across all sectors</span></span>
-<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>    <span class="st">"facets[location][]=CO"</span> <span class="co"># in Colorado</span></span>
-<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>    <span class="st">"frequency=annual"</span> <span class="co"># per year</span></span>
-<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a>    <span class="st">"start=2020"</span> <span class="co"># starting in 2020</span></span>
-<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a>    <span class="st">"end=2023"</span> <span class="co"># ending in 2023</span></span>
-<span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb20-19"><a href="#cb20-19" tabindex="-1"></a>    <span class="st">"api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span> <span class="co"># a password to prove you have access to the API</span></span>
-<span id="cb20-20"><a href="#cb20-20" tabindex="-1"></a>)</span>
-<span id="cb20-21"><a href="#cb20-21" tabindex="-1"></a></span>
-<span id="cb20-22"><a href="#cb20-22" tabindex="-1"></a>requests.get(pennsylvania_api_url).json()</span></code></pre>
-</div>
-</div>
-</div>
-</div>
-<div id="accordionSolution4" class="accordion challenge-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
-  <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
-</button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
-<div class="accordion-body">
-<div class="codewrapper sourceCode" id="cb21">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>pennsylvania_api_url <span class="op">=</span> (</span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>    <span class="st">"https://api.eia.gov"</span> <span class="co"># "host": the high-level name of the API you're accessing</span></span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>    <span class="st">"/v2/electricity/electric-power-operational-data/data"</span> <span class="co"># "route": the specific aspect of the API you're accessing</span></span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>    <span class="st">"?"</span> <span class="co"># separator that indicates "everything after this will be a name-value pair"</span></span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>    <span class="st">"data[]=consumption-for-eg"</span> <span class="co"># name: data[], value: consumption-for-eg ("consumption for electricity generation")</span></span>
-<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>    <span class="st">"&amp;"</span> <span class="co"># separator between each pair</span></span>
-<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>    <span class="st">"facets[fueltypeid][]=NG"</span> <span class="co"># only natural gas data</span></span>
-<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>    <span class="st">"facets[sectorid][]=99"</span> <span class="co"># total across all sectors</span></span>
-<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a>    <span class="st">"facets[location][]=PA"</span> <span class="co"># in Pennsylvania</span></span>
-<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a>    <span class="st">"frequency=annual"</span> <span class="co"># per year</span></span>
-<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a>    <span class="st">"start=2020"</span> <span class="co"># starting in 2020</span></span>
-<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a>    <span class="st">"end=2023"</span> <span class="co"># ending in 2023</span></span>
-<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb21-19"><a href="#cb21-19" tabindex="-1"></a>    <span class="st">"api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span> <span class="co"># a password to prove you have access to the API</span></span>
-<span id="cb21-20"><a href="#cb21-20" tabindex="-1"></a>)</span>
-<span id="cb21-21"><a href="#cb21-21" tabindex="-1"></a></span>
-<span id="cb21-22"><a href="#cb21-22" tabindex="-1"></a>requests.get(pennsylvania_api_url).json()</span></code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<p>Every web API behaves differently, but you only need to be able to do
-two things to figure any API out:</p>
+<p><strong>Every web API behaves differently, but you only need to be
+able to do two things to figure any API out:</strong></p>
 <ul><li>read their documentation</li>
 <li>make requests to the API &amp; interpret responses</li>
 </ul><p>You can read, and you can use <code>requests</code> to make requests.
@@ -885,7 +809,9 @@ make requests to URLs, you can figure them out</li>
 </div>
 </section><section><h2 class="section-heading" id="case-study-eia-api">Case study: EIA API<a class="anchor" aria-label="anchor" href="#case-study-eia-api"></a></h2>
 <hr class="half-width"><p>Let’s take a deeper dive into the EIA API! You can find the <a href="https://www.eia.gov/opendata/documentation.php" class="external-link">API documentation
-here</a>.</p>
+here</a>. We’ll be flipping back and forth between reading the
+documentation (to get ideas for what to try) and making actual API
+requests (to understand the actual behavior of the API).</p>
 <div id="caution1" class="callout caution">
 <div class="callout-square">
 <i class="callout-icon" data-feather="alert-triangle"></i>
@@ -908,7 +834,7 @@ plant-by-plant, in Colorado from 2020-2023?”</strong></p>
 <p>Our first goal is to figure out how to start interacting with the
 API, and how to map any examples in the documentation to real Python
 code.</p>
-<p>When scrolling through the documentation, we notice a bunch of
+<p>When scrolling through the documentation, we’ll notice a bunch of
 example URLs. Let’s pick a fairly simple one to get started,
 <code>https://api.eia.gov/v2/electricity&amp;api_key=xxxxxx</code>:</p>
 <p>We’ll need the API key in a lot of places, so we store that in a
@@ -920,28 +846,25 @@ variable, and then put it into the URL using an “f-string.”</p>
 <div class="callout-inner">
 <h3 class="callout-title">Callout</h3>
 <div class="callout-content">
-<p>F-strings are a compact way to put variables inside strings - all of
-these make the same string:</p>
-<div class="codewrapper sourceCode" id="cb22">
+<p>F-strings are a compact way to put variables inside strings - the
+following string would output <code>hello world!</code>:</p>
+<div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>variable <span class="op">=</span> <span class="st">"world"</span></span>
-<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>hardcoded <span class="op">=</span> <span class="st">"hello world!"</span></span>
-<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>plus_operator <span class="op">=</span> <span class="st">"hello "</span> <span class="op">+</span> variable <span class="op">+</span> <span class="st">"!"</span></span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>format_method <span class="op">=</span> <span class="st">"hello </span><span class="sc">{}</span><span class="st">!"</span>.<span class="bu">format</span>(variable)</span>
-<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a>fstring <span class="op">=</span> <span class="ss">f"hello </span><span class="sc">{</span>variable<span class="sc">}</span><span class="ss">!"</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>variable <span class="op">=</span> <span class="st">"world"</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>fstring <span class="op">=</span> <span class="ss">f"hello </span><span class="sc">{</span>variable<span class="sc">}</span><span class="ss">!"</span></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="bu">print</span>(fstring)</span></code></pre>
 </div>
 </div>
 </div>
 </div>
-<div class="codewrapper sourceCode" id="cb23">
+<div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>api_key <span class="op">=</span> <span class="st">"3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span></span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>electricity_response <span class="op">=</span> requests.get(<span class="ss">f"https://api.eia.gov/v2/electricity?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>electricity_response.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>api_key <span class="op">=</span> <span class="st">"3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>electricity_response <span class="op">=</span> requests.get(<span class="ss">f"https://api.eia.gov/v2/electricity?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>electricity_response.json()</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -972,9 +895,9 @@ these make the same string:</p>
  'apiVersion': '2.1.8',
  'ExcelAddInVersion': '2.1.0'}</code></pre>
 </div>
-<p>It looks like there’s no actual data here. Let’s take a look at the
-docs.</p>
-<div id="challenge3" class="callout challenge">
+<p>It looks like there’s no actual data here… what’s going on? Let’s
+take a look at the docs.</p>
+<div id="challenge2" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
@@ -992,24 +915,25 @@ node. The API will respond with the child datasets (routes) for the path
 we’ve requested.</p>
 </blockquote>
 <p>If we’re looking for yearly data about fuel consumption at the plant
-level, what route should we request next?</p>
+level, what route should we request next? Please request it using
+<code>requests.get</code> below.</p>
 </div>
 </div>
 </div>
-<div id="accordionSolution5" class="accordion challenge-accordion accordion-flush">
+<div id="accordionSolution4" class="accordion challenge-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
-  <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
+  <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p><code>facility-fuel</code>!</p>
-<div class="codewrapper sourceCode" id="cb25">
+<div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>facility_fuel <span class="op">=</span> requests.get(<span class="ss">f"https://api.eia.gov/v2/electricity/facility-fuel?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>).json()</span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a></span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>facility_fuel</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>facility_fuel <span class="op">=</span> requests.get(<span class="ss">f"https://api.eia.gov/v2/electricity/facility-fuel?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>).json()</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>facility_fuel</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1081,14 +1005,14 @@ parameter, we must also specify /data as the last node in the route:</p>
 data:</p>
 <p>First, let’s see what data is available using that ‘data’ key they
 mentioned:</p>
-<div class="codewrapper sourceCode" id="cb27">
+<div class="codewrapper sourceCode" id="cb25">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>base_url <span class="op">=</span> <span class="st">"https://api.eia.gov/v2/electricity"</span></span>
-<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a></span>
-<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>facility_fuels_metadata <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a></span>
-<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>facility_fuels_metadata.json()[<span class="st">"response"</span>][<span class="st">"data"</span>]</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>base_url <span class="op">=</span> <span class="st">"https://api.eia.gov/v2/electricity"</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>facility_fuels_metadata <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>facility_fuels_metadata.json()[<span class="st">"response"</span>][<span class="st">"data"</span>]</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1105,12 +1029,12 @@ mentioned:</p>
 </div>
 <p><code>"generation"</code> looks like what we want - let’s try using
 it!</p>
-<div class="codewrapper sourceCode" id="cb29">
+<div class="codewrapper sourceCode" id="cb27">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>net_generation <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data?data[]=generation&amp;api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a></span>
-<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>net_generation.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>net_generation <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data?data[]=generation&amp;api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>net_generation.json()</span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -1135,10 +1059,10 @@ will tell us the facets that are relevant to that route.</p>
 <ol style="list-style-type: decimal"><li>“facets” is a word associated with filtering your data.</li>
 <li>let’s check out that metadata to figure out what facets are
 available!</li>
-</ol><div class="codewrapper sourceCode" id="cb30">
+</ol><div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>facility_fuels_metadata.json()[<span class="st">"response"</span>]</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>facility_fuels_metadata.json()[<span class="st">"response"</span>]</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1157,25 +1081,33 @@ will give us this example:</p>
 <p><code>http://api.eia.gov/v2/electricity/retail-sales/data/?api_key=xxxxxx&amp;facets[stateid][]=CO&amp;facets[sectorid][]=RES&amp;frequency=monthly</code></p>
 </blockquote>
 <p>Let’s try copying this pattern.</p>
+<div class="codewrapper sourceCode" id="cb30">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>gas_only <span class="op">=</span> requests.get(</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data?data[]=generation&amp;facets[fuel2002][]=gas&amp;api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>)</span></code></pre>
+</div>
 <p>As we accumulate more and more parameters, this starts to get pretty
 unwieldy to read - fortunately, <code>requests</code> allows us to pass
 in the parameters as a dictionary alongside the request:</p>
-<div class="codewrapper sourceCode" id="cb32">
+<div class="codewrapper sourceCode" id="cb31">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>gas_only <span class="op">=</span> requests.get(</span>
-<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
-<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
-<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"gas"</span>,</span>
-<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>    },</span>
-<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a>)</span>
-<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a></span>
-<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a>gas_only.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>gas_only <span class="op">=</span> requests.get(</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
+<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"gas"</span>,</span>
+<span id="cb31-6"><a href="#cb31-6" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a>    },</span>
+<span id="cb31-8"><a href="#cb31-8" tabindex="-1"></a>)</span>
+<span id="cb31-9"><a href="#cb31-9" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" tabindex="-1"></a>gas_only.json()</span></code></pre>
 </div>
 <p>It returns this un-helpful empty result, though… maybe “gas” isn’t
-the right value to pass in.</p>
+the right value to pass in. We’ve reached the limits of guessing again,
+time to look at the documentation!</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1200,12 +1132,12 @@ that facet itself Let’s try asking for all available sectors by
 specifying the <code>sectorid</code> facet:</p>
 <p><code>https://api.eia.gov/v2/electricity/retail-sales/facet/sectorid/?api_key=xxxxxx</code></p>
 </blockquote>
-<div class="codewrapper sourceCode" id="cb34">
+<div class="codewrapper sourceCode" id="cb33">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>fueltypes <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/facet/fuel2002?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>).json()</span>
-<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a></span>
-<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>fueltypes</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>fueltypes <span class="op">=</span> requests.get(<span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/facet/fuel2002?api_key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">"</span>).json()</span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>fueltypes</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1219,22 +1151,22 @@ specifying the <code>sectorid</code> facet:</p>
 </div>
 <p>So we can see that the <code>NG</code> value corresponds to “Natural
 Gas”. Let’s try again with that:</p>
-<div class="codewrapper sourceCode" id="cb36">
+<div class="codewrapper sourceCode" id="cb35">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>gas_only <span class="op">=</span> requests.get(</span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
-<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
-<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
-<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a>    },</span>
-<span id="cb36-8"><a href="#cb36-8" tabindex="-1"></a>)</span>
-<span id="cb36-9"><a href="#cb36-9" tabindex="-1"></a></span>
-<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a>gas_only.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>gas_only <span class="op">=</span> requests.get(</span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>    },</span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>)</span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" tabindex="-1"></a>gas_only.json()</span></code></pre>
 </div>
 <p>It does seem to filter the outputs to only natural gas data!</p>
-<div id="challenge4" class="callout challenge">
+<div id="challenge3" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
@@ -1243,10 +1175,11 @@ Gas”. Let’s try again with that:</p>
 <div class="callout-content">
 <p>So we’ve handled the fuel type - let’s split into breakout groups to
 handle the other issues with the data:</p>
-<ul><li>it includes all states</li>
-<li>it includes all years</li>
-<li>it’s monthly, not yearly</li>
-</ul><p>We should follow the following steps:</p>
+<ul><li>we would like to filter this to Colorado data only</li>
+<li>we would like to filter this to data for 2020, 2021, 2022, and
+2023</li>
+<li>we would like the data to be reported yearly, not monthly</li>
+</ul><p>For each group, pick one of those bullets and follow these steps:</p>
 <ol style="list-style-type: decimal"><li>Look at the metadata. See what parameters might help you get the
 right data back.</li>
 <li>Figure out what values you want to pass in.</li>
@@ -1256,30 +1189,30 @@ together.</p>
 </div>
 </div>
 </div>
-<div id="accordionSolution6" class="accordion challenge-accordion accordion-flush">
+<div id="accordionSolution5" class="accordion challenge-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution6" aria-expanded="false" aria-controls="collapseSolution6">
-  <h4 class="accordion-header" id="headingSolution6"> Show me the solution </h4>
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
+  <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution6" class="accordion-collapse collapse" aria-labelledby="headingSolution6" data-bs-parent="#accordionSolution6">
+<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
 <div class="accordion-body">
-<div class="codewrapper sourceCode" id="cb37">
+<div class="codewrapper sourceCode" id="cb36">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>annual_ng_co_2020_2023 <span class="op">=</span> requests.get(</span>
-<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
-<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
-<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
-<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
-<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
-<span id="cb37-7"><a href="#cb37-7" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
-<span id="cb37-8"><a href="#cb37-8" tabindex="-1"></a>        <span class="st">"start"</span>: <span class="st">"2020-01-01"</span>,</span>
-<span id="cb37-9"><a href="#cb37-9" tabindex="-1"></a>        <span class="st">"end"</span>: <span class="st">"2023-12-31"</span>,</span>
-<span id="cb37-10"><a href="#cb37-10" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
-<span id="cb37-11"><a href="#cb37-11" tabindex="-1"></a>    },</span>
-<span id="cb37-12"><a href="#cb37-12" tabindex="-1"></a>)</span>
-<span id="cb37-13"><a href="#cb37-13" tabindex="-1"></a></span>
-<span id="cb37-14"><a href="#cb37-14" tabindex="-1"></a>annual_ng_co_2020_2023.json()</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>annual_ng_co_2020_2023 <span class="op">=</span> requests.get(</span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>    <span class="st">"</span><span class="sc">{base_url}</span><span class="st">/facility-fuel/data"</span>,</span>
+<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a>    params<span class="op">=</span>{</span>
+<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a>        <span class="st">"data[]"</span>: <span class="st">"generation"</span>,</span>
+<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a>        <span class="st">"frequency"</span>: <span class="st">"annual"</span>,</span>
+<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a>        <span class="st">"facets[fuel2002][]"</span>: <span class="st">"NG"</span>,</span>
+<span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a>        <span class="st">"facets[state][]"</span>: <span class="st">"CO"</span>,</span>
+<span id="cb36-8"><a href="#cb36-8" tabindex="-1"></a>        <span class="st">"start"</span>: <span class="st">"2020-01-01"</span>,</span>
+<span id="cb36-9"><a href="#cb36-9" tabindex="-1"></a>        <span class="st">"end"</span>: <span class="st">"2023-12-31"</span>,</span>
+<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a>        <span class="st">"api_key"</span>: api_key</span>
+<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a>    },</span>
+<span id="cb36-12"><a href="#cb36-12" tabindex="-1"></a>)</span>
+<span id="cb36-13"><a href="#cb36-13" tabindex="-1"></a></span>
+<span id="cb36-14"><a href="#cb36-14" tabindex="-1"></a>annual_ng_co_2020_2023.json()</span></code></pre>
 </div>
 </div>
 </div>
@@ -1289,32 +1222,8 @@ together.</p>
 built up a complicated API query from scratch! And you’ve answered your
 earlier question of <strong>“what was the net generation from natural
 gas, plant-by-plant, in Colorado from 2020-2023?”</strong></p>
-<p>That was a lot of work, but now you’re equipped to answer other
-similar questions using this API.</p>
-<div id="discussion3" class="callout discussion">
-<div class="callout-square">
-<i class="callout-icon" data-feather="message-circle"></i>
-</div>
-<div class="callout-inner">
-<h3 class="callout-title">Discussion</h3>
-<div class="callout-content">
-<p>Think back to the metadata you saw - what are some questions can you
-answer with the <code>facility-fuel</code> endpoint?</p>
-</div>
-</div>
-</div>
-<div id="bonus-challenge" class="callout discussion">
-<div class="callout-square">
-<i class="callout-icon" data-feather="message-circle"></i>
-</div>
-<div id="bonus-challenge" class="callout-inner">
-<h3 class="callout-title">Bonus challenge</h3>
-<div class="callout-content">
-<p>Choose one of those questions from the discussion, and use the EIA
-API to answer it!</p>
-</div>
-</div>
-</div>
+<p>That was a lot of work, but now you’ve gained some experience in the
+general skill of API learning which should serve you well.</p>
 <div id="keypoints3" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
@@ -1322,18 +1231,14 @@ API to answer it!</p>
 <div class="callout-inner">
 <h3 class="callout-title">Key Points</h3>
 <div class="callout-content">
-<ul><li>Many functions in the <code>pandas.read_*</code> family can read
-tabular data from remote servers &amp; cloud storage as if it was on
-your local computer</li>
-<li>
-<code>requests</code> can get data that’s not in the right shape for
-<code>pandas.read_*</code>; you’ll have to do the translation from their
-response format into <code>pandas.DataFrame</code> yourself</li>
+<ul><li>
+<code>requests</code> is a swiss-army knife for accessing remote
+data</li>
 <li>web APIs are just collections of fancy URLs, which you can interact
 with via <code>requests</code>
 </li>
-<li>to learn an API, you need to be able to read the documentation and
-experiment with the API to see how it responds.</li>
+<li>to learn an API, you need to read the documentation and experiment
+with the API to see how it responds</li>
 </ul></div>
 </div>
 </div>
@@ -1400,7 +1305,7 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/accessing-remote-data.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/accessing-remote-data.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2025-05-21",
+  "dateModified": "2025-06-03",
   "datePublished": "2025-06-03"
 }
 
