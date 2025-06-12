@@ -236,7 +236,7 @@ import pandas as pd
 eia_906_one_df = pd.read_excel(eia_906_one_response.content)
 ```
 
-Note that we use `.content` here instead of `.text` - this is because an Excel file is not designed to be read directly as text. 
+Note that we use `.content` here instead of `.text` - this is because an Excel file is not designed to be read directly as text.
 
 You can bypass this manual download-then-read process, actually, with `pd.read_excel` - it can handle reading directly from a URL:
 ```python
