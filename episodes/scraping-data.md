@@ -35,19 +35,23 @@ For all the benefits of the API, some of the EIA 923 data is only available thro
 
 ![Screenshot of the EIA 923 data page. A listing of each year's files is in the right sidebar.](./fig/ep-4/eia-923-spreadsheets.png){alt="Screenshot of the EIA 923 data page. A listing of each year's files is in the right sidebar."}
 
-There's only a couple dozen, so we could probably get away with just downloading the files by clicking.
-
-You can imagine how this would be annoying if you needed to download, say, a hundred files instead. To keep things simple we'll use the EIA data as an example.
+There's only a couple dozen, so we could probably get away with just downloading the files by clicking the links. But, you can imagine how it could quickly get out of hand with multiple pages or many more links. We'll keep it simple for now and just stick with the EIA 923 page as an example.
 
 ### Example: EIA 923/906
 
-TODO: introduce bs4 and requests at the top when we're importing.
-To get the links, first we need to actually get the webpage that the links are on.
+First, let's import the libraries we'll need to use. Of course we'll use our workhorse `requests`. We'll also need a library called "Beautiful Soup" that helps us work with *website data* in particular. It's imported as `bs4`.
 
 ```python
+import bs4
 import requests
 
+# while we're doing the imports, might as well store the URL in a variable.
 eia_923_url = "https://www.eia.gov/electricity/data/eia923/"
+```
+
+To get the links, first we need to get the webpage itself - that's where the links are. Let's see what the webpage looks like!
+
+```python
 eia_923_response = requests.get(eia_923_url)
 eia_923_response.text
 ```
@@ -58,11 +62,9 @@ eia_923_response.text
 
 OK, so that looks like some XML, which we saw a couple episodes ago - notice the many angle brackets containing words that seem to be trying to tell us something. We can use those *tags* to understand the content of the file, and then filter through it to find what we actually need.
 
-This is actually a *special type* of XML called HTML, which is what most webpages are described in (see the `doctype html` tag.) We need to use a different tool to make sense of all this - a library called `beautifulsoup`. For historical reasons it's imported as `bs4`.
+This is actually a *special type* of XML called HTML, which is what most webpages are described in (see the `doctype html` tag). HTML is a vast and chaotic world, with exceptions to every rule. Fortunately, `bs4` is here to help tame the chaos a bit. The core of the library is the `BeautifulSoup` class, which takes in a website's HTML and adds some useful functionality to it:
 
 ```python
-import bs4
-
 eia_923_soup = bs4.BeautifulSoup(eia_923_response.text)
 
 eia_923_soup
@@ -106,7 +108,7 @@ eia_923_all_a_tags = eia_923_soup.find_all("a")
  ...
 ```
 
-OK, so we see a big list of tags, some of which appear to be links to form 923 ZIP files. The URLs for those are included in an `href` attribute. The world of HTML is vast and chaotic, but almost every URL you'll want to use will live in one of these `href` attributes.
+OK, so we see a big list of tags, some of which appear to be links to form 923 ZIP files. The URLs for those are included in an `href` attribute. Almost every URL you'll want to use will live in one of these `href` attributes.
 
 We can filter based on attributes like this:
 
@@ -178,6 +180,8 @@ eia_906_url = "https://www.eia.gov/electricity/data/eia923/eia906u.php"
 # get the page contents
 # turn it into a collection of tags
 # filter them down to the tags that contain the links to XLS data - for all years 1970-2000
+
+eia_906_xls_tags = []
 ```
 :::::::: solution
 
@@ -201,13 +205,13 @@ OK, now we have our tags, time to use them to download the data! Let's try it wi
 
 ```python
 eia_906_one_link = eia_906_xls_tags[0]
-eia_923_one_response = pd.read_excel(eia_923_one_link["href"])
+eia_923_one_response = requests.get(eia_923_one_link["href"])
 ```
 
 Oh no! We get an error:
 
 ```output
-FileNotFoundError: [Errno 2] No such file or directory: '/electricity/data/eia923/archive/xls/utility/f7592000mu.xls'
+MissingSchema: Invalid URL '/electricity/data/eia923/archive/xls/utility/f7592000mu.xls': No scheme supplied. Perhaps you meant https:///electricity/data/eia923/archive/xls/utility/f7592000mu.xls?
 ```
 
 Looks like the URL in the `href` is incomplete. It turns out that this is a *relative path* - much like the relative paths you had to deal with when loading data on your computer. The full URL we want is
@@ -219,10 +223,25 @@ This is a super common thing to have to do, so there's a useful bit of the Pytho
 from urllib.parse import urljoin
 
 eia_906_one_full_url = urljoin(eia_906_url, eia_906_one_link["href"])
-response = requests.get(eia_906_one_full_url)
+eia_906_one_response = requests.get(eia_906_one_full_url)
 ```
 
 We can also do the string concatenation ourselves with `eia_906_url + "..."`, but there are a surprising amount of details to get wrong here so it's nice to just use the function that works.
+
+Finally, we can take a look at the actual dataframe using `pandas`:
+
+```python
+import pandas as pd
+
+eia_906_one_df = pd.read_excel(eia_906_one_response.content)
+```
+
+Note that we use `.content` here instead of `.text` - this is because an Excel file is not designed to be read directly as text. 
+
+You can bypass this manual download-then-read process, actually, with `pd.read_excel` - it can handle reading directly from a URL:
+```python
+eia_906_one_df = pd.read_excel(eia_906_one_full_url)
+```
 
 :::: challenge
 
@@ -323,8 +342,6 @@ Why might you choose to do all this instead of just manually collecting links?
 
 Another time you'll need lots of URLs is when APIs don't give you everything all at once. Let's look at an example request to the EIA API we saw last time:
 
-TODO: pull the params that stick around into their own variable so it's easier to type.
-
 ```python
 eia_api_base_url = "https://api.eia.gov/v2/electricity"
 api_key = "3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"
@@ -381,19 +398,20 @@ We'll go to the [docs](https://www.eia.gov/opendata/documentation.php) to look a
 >
 > In the above example, the API will skip over the first 24 eligible rows (offset=24), which translates into 24 months (frequency=monthly).
 
-Let's try using that:
+Let's try using that. First, let's pull the common parameters into a variable so it's a little easier to work with:
 
 ```python
-next_page = requests.get(
-  f"{base_url}/facility-fuel/data",
-  params={
+common_params = {
     "data[]": "generation",
     "facets[state][]": "PR",
     "sort[0][column]": "period",
     "sort[0][direction]": "desc",
-    "offset": 5000,
+    "sort[1][column]": "plantCode",
+    "sort[1][direction]": "desc",
     "api_key": api_key
-  }
+}
+next_page = requests.get(
+  f"{base_url}/facility-fuel/data", params=common_params | {"offset": 5000}
 ).json()["response"]
 ```
 
@@ -430,13 +448,13 @@ for i in range(0, 15, 5):
 
 :::: challenge: `range`
 
-So, in theory, if you wanted to set a fresh `offset` for every page in a number of rows, how would you do that?
+If you wanted to set a fresh `offset` for every page in a number of rows, how would you do that? Imagine there are 23,456 rows and each page must be 5000 rows long.
 
 :::::::: solution
 
 ```python
-total_rows = 1234
-page_size = 100
+total_rows = 23_456
+page_size = 5000
 
 for offset in range(0, total_rows, page_size):
   print(offset)
@@ -464,14 +482,7 @@ all_records = []
     page = requests.get(
       f"{eia_api_base_url}/facility-fuel/data",
       params={
-        "data[]": "generation",
-        "facets[state][]": "PR",
-        "sort[0][column]": "period",
-        "sort[0][direction]": "desc",
-        "sort[1][column]": "plantCode",
-        "sort[1][direction]": "desc",
-        "offset": # what goes here?
-        "api_key": api_key
+        # what goes here?
       }
     ).json()["response"]
     all_records.append(pd.DataFrame(page["data"]))
@@ -487,16 +498,7 @@ for offset in range(0, 12_345, 5000):
     print(f"Getting page starting at {offset}...")
     page = requests.get(
       f"{eia_api_base_url}/facility-fuel/data",
-      params={
-        "data[]": "generation",
-        "facets[state][]": "PR",
-        "sort[0][column]": "period",
-        "sort[0][direction]": "desc",
-        "sort[1][column]": "plantCode",
-        "sort[1][direction]": "desc",
-        "offset": offset,
-        "api_key": api_key
-      }
+      params=common_params | {"offset": offset}
     ).json()["response"]
     all_records.append(pd.DataFrame(page["data"]))
 
