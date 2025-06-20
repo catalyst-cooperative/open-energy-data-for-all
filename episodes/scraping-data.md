@@ -410,6 +410,7 @@ common_params = {
     "sort[1][direction]": "desc",
     "api_key": api_key
 }
+
 next_page = requests.get(
   f"{base_url}/facility-fuel/data", params=common_params | {"offset": 5000}
 ).json()["response"]
@@ -463,6 +464,36 @@ for offset in range(0, total_rows, page_size):
 
 ::::
 
+### How many rows to get?
+
+Now that we know how to get multiple pages, we need to know when to stop getting more pages.
+
+Broadly, there are two strategies:
+
+* figure out the total number of results ahead of time, and do some math to figure out how many pages to request
+* keep getting more pages until you run out of results
+
+Both work, and each has its own downsides:
+
+* the first method only works for APIs that tell you how many results there are.
+* the second method can lead to infinite loops if you mess up.
+
+Since the EIA API tells you how many results there are, let's work with the first option.
+
+Let's look at the API response again.
+
+```python
+first_page.keys()
+```
+That "total" field looks pretty suspicious.
+
+```python
+first_page["total"]
+```
+
+So there are about 8,000 rows in this dataset. That's the last piece you need to be able to do this challenge!
+
+
 :::: challenge
 
 #### Challenge: pagination
@@ -471,13 +502,11 @@ OK, now let's put it all together!
 
 Let's try to get the net generation data in Puerto Rico that is in the EIA API.
 
-Instead of getting all of it, which will take a lot of waiting around, let's just grab the first 12,345 rows.
-
 Start with the following code and modify it to work:
 
 ```python
 all_records = []
-# loop through the necessary pages to get 12,345 rows
+# loop through the necessary pages
     print(f"Getting page starting at {offset}...")
     page = requests.get(
       f"{eia_api_base_url}/facility-fuel/data",
@@ -508,20 +537,6 @@ df = pd.concat(all_records) # combines all pages into one big dataframe
 
 ::::
 
-OK, so what if we were looking to get *all* of the pages - is there something we can use from the API response?
-
-```python
-first_page.keys()
-```
-That "total" field looks pretty suspicious.
-
-```python
-first_page["total"]
-```
-
-So there are about 8,000 rows in this dataset. We could plug that number in above.
-
-This is just one common way APIs do pagination. You'll have to flex those API learning skills (play with the data, read the docs, bounce back and forth) to learn how each new API handles this.
 
 ### Further resources
 
