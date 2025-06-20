@@ -205,7 +205,7 @@ OK, now we have our tags, time to use them to download the data! Let's try it wi
 
 ```python
 eia_906_one_link = eia_906_xls_tags[0]
-eia_923_one_response = requests.get(eia_923_one_link["href"])
+eia_906_one_response = requests.get(eia_906_one_link["href"])
 ```
 
 Oh no! We get an error:
@@ -215,7 +215,7 @@ MissingSchema: Invalid URL '/electricity/data/eia923/archive/xls/utility/f759200
 ```
 
 Looks like the URL in the `href` is incomplete. It turns out that this is a *relative path* - much like the relative paths you had to deal with when loading data on your computer. The full URL we want is
-`https://www.eia.gov/electricity/data/eia923/archive/xls/utility/f7592000mu.xls` - which combines the URL of the page we got the link from (`https://www.eia.gov/electricity/data/eia923/eia906u.php`) with the fragment we got in the `href` (`electricity/data/eia923/eia906u.php`).
+`https://www.eia.gov/electricity/data/eia923/archive/xls/utility/f7592000mu.xls` - which combines the URL of the page we got the link from (`https://www.eia.gov/electricity/data/eia923/eia906u.php`) with the fragment we got in the `href` (`/electricity/data/eia923/archive/xls/utility/f7592000mu.xls`).
 
 This is a super common thing to have to do, so there's a useful bit of the Python standard library for this: `urllib.parse.urljoin`:
 
