@@ -310,7 +310,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Scraping Data</h1>
-        <p>Last updated on 2025-06-12 |
+        <p>Last updated on 2025-06-25 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/scraping-data.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -584,7 +584,7 @@ Let’s try it with one tag first:</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>eia_906_one_link <span class="op">=</span> eia_906_xls_tags[<span class="dv">0</span>]</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>eia_923_one_response <span class="op">=</span> requests.get(eia_923_one_link[<span class="st">"href"</span>])</span></code></pre>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>eia_906_one_response <span class="op">=</span> requests.get(eia_906_one_link[<span class="st">"href"</span>])</span></code></pre>
 </div>
 <p>Oh no! We get an error:</p>
 <div class="codewrapper">
@@ -600,7 +600,7 @@ want is
 - which combines the URL of the page we got the link from
 (<code>https://www.eia.gov/electricity/data/eia923/eia906u.php</code>)
 with the fragment we got in the <code>href</code>
-(<code>electricity/data/eia923/eia906u.php</code>).</p>
+(<code>/electricity/data/eia923/archive/xls/utility/f7592000mu.xls</code>).</p>
 <p>This is a super common thing to have to do, so there’s a useful bit
 of the Python standard library for this:
 <code>urllib.parse.urljoin</code>:</p>
@@ -839,9 +839,10 @@ variable so it’s a little easier to work with:</p>
 <span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>    <span class="st">"sort[1][direction]"</span>: <span class="st">"desc"</span>,</span>
 <span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a>    <span class="st">"api_key"</span>: api_key</span>
 <span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a>}</span>
-<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a>next_page <span class="op">=</span> requests.get(</span>
-<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a>  <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>, params<span class="op">=</span>common_params <span class="op">|</span> {<span class="st">"offset"</span>: <span class="dv">5000</span>}</span>
-<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span></code></pre>
+<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a></span>
+<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a>next_page <span class="op">=</span> requests.get(</span>
+<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a>  <span class="ss">f"</span><span class="sc">{</span>base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>, params<span class="op">=</span>common_params <span class="op">|</span> {<span class="st">"offset"</span>: <span class="dv">5000</span>}</span>
+<span id="cb32-13"><a href="#cb32-13" tabindex="-1"></a>).json()[<span class="st">"response"</span>]</span></code></pre>
 </div>
 <p>If we look at <em>that</em> we can see that we do indeed get the next
 several months of data:</p>
@@ -902,6 +903,34 @@ each page must be 5000 rows long.</p>
 </div>
 </div>
 <p>::::</p>
+<div class="section level3">
+<h3 id="how-many-rows-to-get">How many rows to get?<a class="anchor" aria-label="anchor" href="#how-many-rows-to-get"></a></h3>
+<p>Now that we know how to get multiple pages, we need to know when to
+stop getting more pages.</p>
+<p>Broadly, there are two strategies:</p>
+<ul><li>figure out the total number of results ahead of time, and do some
+math to figure out how many pages to request</li>
+<li>keep getting more pages until you run out of results</li>
+</ul><p>Both work, and each has its own downsides:</p>
+<ul><li>the first method only works for APIs that tell you how many results
+there are.</li>
+<li>the second method can lead to infinite loops if you mess up.</li>
+</ul><p>Since the EIA API tells you how many results there are, let’s work
+with the first option.</p>
+<p>Let’s look at the API response again.</p>
+<div class="codewrapper sourceCode" id="cb38">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a>first_page.keys()</span></code></pre>
+</div>
+<p>That “total” field looks pretty suspicious.</p>
+<div class="codewrapper sourceCode" id="cb39">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>first_page[<span class="st">"total"</span>]</span></code></pre>
+</div>
+<p>So there are about 8,000 rows in this dataset. That’s the last piece
+you need to be able to do this challenge!</p>
 <div id="challenge-pagination" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
@@ -912,24 +941,22 @@ each page must be 5000 rows long.</p>
 <p>OK, now let’s put it all together!</p>
 <p>Let’s try to get the net generation data in Puerto Rico that is in
 the EIA API.</p>
-<p>Instead of getting all of it, which will take a lot of waiting
-around, let’s just grab the first 12,345 rows.</p>
 <p>Start with the following code and modify it to work:</p>
-<div class="codewrapper sourceCode" id="cb38">
+<div class="codewrapper sourceCode" id="cb40">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
-<span id="cb38-2"><a href="#cb38-2" tabindex="-1"></a><span class="co"># loop through the necessary pages to get 12,345 rows</span></span>
-<span id="cb38-3"><a href="#cb38-3" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Getting page starting at </span><span class="sc">{</span>offset<span class="sc">}</span><span class="ss">..."</span>)</span>
-<span id="cb38-4"><a href="#cb38-4" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
-<span id="cb38-5"><a href="#cb38-5" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
-<span id="cb38-6"><a href="#cb38-6" tabindex="-1"></a>      params<span class="op">=</span>{</span>
-<span id="cb38-7"><a href="#cb38-7" tabindex="-1"></a>        <span class="co"># what goes here?</span></span>
-<span id="cb38-8"><a href="#cb38-8" tabindex="-1"></a>      }</span>
-<span id="cb38-9"><a href="#cb38-9" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>]</span>
-<span id="cb38-10"><a href="#cb38-10" tabindex="-1"></a>    all_records.append(pd.DataFrame(page[<span class="st">"data"</span>]))</span>
-<span id="cb38-11"><a href="#cb38-11" tabindex="-1"></a></span>
-<span id="cb38-12"><a href="#cb38-12" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
+<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a><span class="co"># loop through the necessary pages</span></span>
+<span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Getting page starting at </span><span class="sc">{</span>offset<span class="sc">}</span><span class="ss">..."</span>)</span>
+<span id="cb40-4"><a href="#cb40-4" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
+<span id="cb40-5"><a href="#cb40-5" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb40-6"><a href="#cb40-6" tabindex="-1"></a>      params<span class="op">=</span>{</span>
+<span id="cb40-7"><a href="#cb40-7" tabindex="-1"></a>        <span class="co"># what goes here?</span></span>
+<span id="cb40-8"><a href="#cb40-8" tabindex="-1"></a>      }</span>
+<span id="cb40-9"><a href="#cb40-9" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>]</span>
+<span id="cb40-10"><a href="#cb40-10" tabindex="-1"></a>    all_records.append(pd.DataFrame(page[<span class="st">"data"</span>]))</span>
+<span id="cb40-11"><a href="#cb40-11" tabindex="-1"></a></span>
+<span id="cb40-12"><a href="#cb40-12" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records)</span></code></pre>
 </div>
 </div>
 </div>
@@ -941,42 +968,25 @@ around, let’s just grab the first 12,345 rows.</p>
 </button>
 <div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
-<div class="codewrapper sourceCode" id="cb39">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
-<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a><span class="cf">for</span> offset <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">12_345</span>, <span class="dv">5000</span>):</span>
-<span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Getting page starting at </span><span class="sc">{</span>offset<span class="sc">}</span><span class="ss">..."</span>)</span>
-<span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
-<span id="cb39-5"><a href="#cb39-5" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
-<span id="cb39-6"><a href="#cb39-6" tabindex="-1"></a>      params<span class="op">=</span>common_params <span class="op">|</span> {<span class="st">"offset"</span>: offset}</span>
-<span id="cb39-7"><a href="#cb39-7" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>]</span>
-<span id="cb39-8"><a href="#cb39-8" tabindex="-1"></a>    all_records.append(pd.DataFrame(page[<span class="st">"data"</span>]))</span>
-<span id="cb39-9"><a href="#cb39-9" tabindex="-1"></a></span>
-<span id="cb39-10"><a href="#cb39-10" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records) <span class="co"># combines all pages into one big dataframe</span></span></code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<p>OK, so what if we were looking to get <em>all</em> of the pages - is
-there something we can use from the API response?</p>
-<div class="codewrapper sourceCode" id="cb40">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>first_page.keys()</span></code></pre>
-</div>
-<p>That “total” field looks pretty suspicious.</p>
 <div class="codewrapper sourceCode" id="cb41">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>first_page[<span class="st">"total"</span>]</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>all_records <span class="op">=</span> []</span>
+<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="cf">for</span> offset <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">12_345</span>, <span class="dv">5000</span>):</span>
+<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Getting page starting at </span><span class="sc">{</span>offset<span class="sc">}</span><span class="ss">..."</span>)</span>
+<span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a>    page <span class="op">=</span> requests.get(</span>
+<span id="cb41-5"><a href="#cb41-5" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>eia_api_base_url<span class="sc">}</span><span class="ss">/facility-fuel/data"</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" tabindex="-1"></a>      params<span class="op">=</span>common_params <span class="op">|</span> {<span class="st">"offset"</span>: offset}</span>
+<span id="cb41-7"><a href="#cb41-7" tabindex="-1"></a>    ).json()[<span class="st">"response"</span>]</span>
+<span id="cb41-8"><a href="#cb41-8" tabindex="-1"></a>    all_records.append(pd.DataFrame(page[<span class="st">"data"</span>]))</span>
+<span id="cb41-9"><a href="#cb41-9" tabindex="-1"></a></span>
+<span id="cb41-10"><a href="#cb41-10" tabindex="-1"></a>df <span class="op">=</span> pd.concat(all_records) <span class="co"># combines all pages into one big dataframe</span></span></code></pre>
 </div>
-<p>So there are about 8,000 rows in this dataset. We could plug that
-number in above.</p>
-<p>This is just one common way APIs do pagination. You’ll have to flex
-those API learning skills (play with the data, read the docs, bounce
-back and forth) to learn how each new API handles this.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div class="section level3">
 <h3 id="further-resources">Further resources<a class="anchor" aria-label="anchor" href="#further-resources"></a></h3>
 <p>We’ve only just scratched the surface of programmatically getting
@@ -1114,8 +1124,8 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/scraping-data.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/scraping-data.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2025-06-12",
-  "datePublished": "2025-06-24"
+  "dateModified": "2025-06-25",
+  "datePublished": "2025-06-25"
 }
 
   </script><script>
