@@ -27,7 +27,7 @@ why plain english?
 - there are many ways to do most tasks. helps us assess whether different options of doing the same thing will meet our goals better.
 - helps us pay attention to the desired outcome, rather than the method.
 - when data changes, keeps us attuned to what we actually care about.
-- 
+-
 
 :::::::: challenge
 
@@ -89,7 +89,7 @@ def transform_pr_gen_fuel(raw_pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
     Returns:
         A dataframe of cleaned Puerto Rico generation fuel data.
     """
-    
+
     return pr_gen_fuel_final
 ```
 
@@ -119,7 +119,7 @@ def terrible_function_name(pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
     """ This function does some stuff
 
     The transformations include:
-    * 
+    *
 
     Args:
         pr_gen_fuel: The raw Puerto Rico generation fuel dataframe.
@@ -127,7 +127,7 @@ def terrible_function_name(pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
     Returns:
         A dataframe of cleaned Puerto Rico generation fuel data.
     """
-    
+
     return pr_gen_fuel_final
 ```
 
