@@ -19,12 +19,21 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+- cover 'plain english' code descriptions
+- this gives us tools to think about the code in parts and make improvements
+
+why plain english?
+- helps us assess whether the code does what we think it should do
+- there are many ways to do most tasks. helps us assess whether different options of doing the same thing will meet our goals better.
+- helps us pay attention to the desired outcome, rather than the method.
+- when data changes, keeps us attuned to what we actually care about.
+- 
 
 :::::::: challenge
 
 ### Challenge 1: breaking down code
 
-Look at the following code. Which of these best describes what it does?
+Look at the following code. Which of these best describes what it does in plain English?
 
 #### TODO: figure out which actual bad value I need to drop here, pre-column rotation.
 
@@ -33,26 +42,18 @@ pr_gen_fuel = pr_gen_fuel.replace(to_replace = ".", value = pd.NA).convert_dtype
 pr_gen_fuel_final = pr_gen_fuel.loc[~((pr_gen_fuel.plant_id_eia == 62410) & (pr_gen_fuel.date.dt.year == 2020) & (pr_gen_fuel.value.isnull()))]
 ```
 
-A. Replace all non-standard EIA null values with Pandas null values, automatically convert data types to the best possible choice, and then subset the data to only include plant ID 62410 in 2020.
-B. Replace all "." values with null values, convert the data to strings, and then drop any null data for plant ID 62410 in 2020.
-C. Replace all "." values with null values, automatically convert data types to the best possible choice, and then drop a single row for plant ID 62410 in 2020.
-D. Replace all "." values with null values, automatically convert data types to the best possible choice, and then drop any null data for plant ID 62410 in 2020.
-
-::::hint
-- Remember, using `help()` on a function can give you insight into what it does!
-- The `~` here means "not" - give me any row that doesn't meet this condition.
-::::
+A. Clean up non-standard nulls, convert dtypes, and drop a bad value.
+B. Clean up the data.
+C. Replace all "." values with null values, automatically convert data types to the best possible choice, and then drop any null data for plant ID 62410 in 2020.
+D. TODO.
 
 :::: solution
-D. is the correct answer.
-
-- `.replace(to_replace = ".", value = pd.NA)` replaces any "." value in the dataframe with an NA.
-- `.convert_dtypes()` automatically converts the data type of each column to the best possible choice.
-- `pr_gen_fuel.loc[~((pr_gen_fuel.plant_id_eia == 62410) & (pr_gen_fuel.date.dt.year == 2020) & (pr_gen_fuel.value.isnull()))]` selects all rows that *aren't* null data reported for plant ID 62410 in 2020. In effect, this drops null data for plant ID 62410 in the year 2020.
-
+Fix!
 ::::
 
 ::::::::
+
+* having a high-level understanding of what code does gives us tools to respond to data changes
 
 * review - what is a function
 * what makes a good function (brief, callback to the last challenge)
@@ -64,6 +65,33 @@ https://carpentries-lab.github.io/good-enough-practices/03-software.html#give-fu
 
 Here or below??, mention:
 * function should have data type specified
+
+To cover briefly?:
+* some other best practices for functions - demo naming, text. No exercises needed.
+Do this at the end to make it a seperate skill than the structural stuff
+
+* function should have clear name
+* inputs should have clear names
+* docstring should explain what the function does
+
+```python
+def transform_pr_gen_fuel(raw_pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
+    """ This function cleans raw Puerto Rico generation fuel data from EIA 923.
+
+    The transformations include:
+    * replace EIA "." NAs with nulls
+    * conversion of datatypes
+    * dropping known bad values for plants
+
+    Args:
+        raw_pr_gen_fuel: The raw Puerto Rico generation fuel dataframe.
+
+    Returns:
+        A dataframe of cleaned Puerto Rico generation fuel data.
+    """
+    
+    return pr_gen_fuel_final
+```
 
 :::::::: challenge
 
@@ -85,11 +113,26 @@ don't want to drop *all* null values here, only a few known 'bad' values.
 * What does the function do with these inputs?
 * What is the output?
 
-Some things to consider as you design your function:
-* TODOs ---- general vs specific, avoiding edge cases. e.g., we don't want a function
-that just drops all nulls here.
-* What happens if you're transforming a subset of your data (e.g., one year), and not
-all of the expected bad values are found there?
+TODO: Write me one of these
+```python
+def terrible_function_name(pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
+    """ This function does some stuff
+
+    The transformations include:
+    * 
+
+    Args:
+        pr_gen_fuel: The raw Puerto Rico generation fuel dataframe.
+
+    Returns:
+        A dataframe of cleaned Puerto Rico generation fuel data.
+    """
+    
+    return pr_gen_fuel_final
+```
+
+Consider:
+* What situations does this function cover? What kinds of situations does it *not* cover?
 
 ::: solution
 There are many good answers here. Here are but a few examples:
@@ -118,6 +161,8 @@ To cover: what makes a piece of code a *good* candidate for modularization?
 - something you do often
 - something that you might want to reuse in other contexts (on other columns, on other datasets)
 - a complex and discrete task (e.g., an involved multi-line transformation)
+- something you want to test?????
+- it's difficult to read
 
 What makes something a piece of code a *bad* candidate for modularization?
 - in plain english, it's actually more than one step (e.g., converting data types *and* dropping rows)
@@ -139,39 +184,12 @@ transformation function and see if it works. Debug as needed.
 
 problems:
 * right now we only have one good candidate for the revamp - the known bad plants.
+* how do we see if it works.... foreshadow the next lesson hehehe
+* what if it fails? transition to next lesson hahaha.
 
 ::::::::
 
-To cover briefly?:
-* some other best practices for functions - demo naming, text. No exercises needed.
-Do this at the end to make it a seperate skill than the structural stuff
 
-* function should have clear name
-* inputs should have clear names
-* docstring should explain what the function does
-
-```python
-def transform_pr_gen_fuel(raw_pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
-    """ This function cleans raw Puerto Rico generation fuel data from EIA 923.
-
-    The transformations include:
-    * replace EIA "." NAs with nulls
-    * conversion of datatypes
-    * dropping known bad values for plants
-
-    Args:
-        raw_pr_gen_fuel: The raw Puerto Rico generation fuel dataframe.
-
-    Returns:
-        A dataframe of cleaned Puerto Rico generation fuel data.
-    """
-    # TODO: Add some docstrings
-    pr_gen_fuel = raw_pr_gen_fuel.replace(to_replace = ".", value = pd.NA).convert_dtypes()
-    # Drop some baddies
-    pr_gen_fuel_final = pr_gen_fuel.loc[~((pr_gen_fuel.plant_id_eia == 62410) & (pr_gen_fuel.date.dt.year == 2020) & (pr_gen_fuel.value.isnull()))]
-    ### some other stuff here that will be super helpful to my lesson development
-    return pr_gen_fuel_final
-```
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
