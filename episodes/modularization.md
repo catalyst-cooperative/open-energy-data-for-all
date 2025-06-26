@@ -161,7 +161,7 @@ def transform_pr_gen_fuel(raw_pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
 
     Args:
         raw_pr_gen_fuel: The raw Puerto Rico generation fuel dataframe.
-    
+
     Returns:
         A dataframe of cleaned Puerto Rico generation fuel data.
     """
