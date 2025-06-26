@@ -34,9 +34,9 @@ pr_gen_fuel_final = pr_gen_fuel.loc[~((pr_gen_fuel.plant_id_eia == 62410) & (pr_
 ```
 
 A. Replace all non-standard EIA null values with Pandas null values, automatically convert data types to the best possible choice, and then subset the data to only include plant ID 62410 in 2020.
-B. Replace all "." in the data with null values, convert the data to strings, and then drop any null data for plant ID 62410 in 2020.
+B. Replace all "." values with null values, convert the data to strings, and then drop any null data for plant ID 62410 in 2020.
 C. Replace all "." values with null values, automatically convert data types to the best possible choice, and then drop a single row for plant ID 62410 in 2020.
-D. Replace all "." in the data with null values, automatically convert data types to the best possible choice, and then drop any null data for plant ID 62410 in 2020.
+D. Replace all "." values with null values, automatically convert data types to the best possible choice, and then drop any null data for plant ID 62410 in 2020.
 
 ::::hint
 - Remember, using `help()` on a function can give you insight into what it does!
@@ -56,18 +56,14 @@ D. is the correct answer.
 
 * review - what is a function
 * what makes a good function (brief, callback to the last challenge)
-* some functions we borrow are already modularized for us
-* why should we make our functions reusable?
+* why should we make our functions reusable and modularized?
 
 TODO: In setting this up, borrow heavily from:
 https://carpentries-lab.github.io/good-enough-practices/03-software.html#decompose-programs-into-functions
 https://carpentries-lab.github.io/good-enough-practices/03-software.html#give-functions-and-variables-meaningful-names
 
-Here or below, mention:
+Here or below??, mention:
 * function should have data type specified
-* function should have clear name
-* inputs should have clear names
-* docstring should explain what the function does
 
 :::::::: challenge
 
@@ -85,7 +81,7 @@ In words (not code!), describe a function that could be used to reproducibly dro
 data in `pr_gen_fuel_elec` for a known list of plants in particular years. You
 don't want to drop *all* null values here, only a few known 'bad' values.
 
-* What are the inputs (e.g., a list of plant IDs)? What data type is each input, and what is it named?
+* What are the inputs (e.g., a list of plant IDs)? What data type is each input?
 * What does the function do with these inputs?
 * What is the output?
 
@@ -148,7 +144,11 @@ problems:
 
 To cover briefly?:
 * some other best practices for functions - demo naming, text. No exercises needed.
-TODO: Where in the lesson makes most sense to do this?
+Do this at the end to make it a seperate skill than the structural stuff
+
+* function should have clear name
+* inputs should have clear names
+* docstring should explain what the function does
 
 ```python
 def transform_pr_gen_fuel(raw_pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
@@ -178,17 +178,3 @@ def transform_pr_gen_fuel(raw_pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
 - placeholder
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
-
-Objectives:
-
-Exercises (unweeded):
-Look at this long function. What are some ways we can split it up?
-Look at this long function. What the hell is it doing?
-Look at this long function. We’ve split it up in multiple ways… which one does the best on the plain English test?
-Look at this long function. We’ve split it up in multiple ways. Now we need to fix something/change something… how would you do it in each one?
-What are the inputs and outputs of this function? (in English?) (write this down in your docstring or something!!)
-What does this code do? in one sentence
-What are the data frames we needed to look at more closely in the last episode?
-What did we do over and over again?
-What are you tired of having to look up every time?
-What prerequisites / inputs are needed for this code? is there a way we can reduce that?
