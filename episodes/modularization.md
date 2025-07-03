@@ -184,19 +184,22 @@ Give your students five minutes to work on this. Then, put them in breakout room
 
 ::::::::
 
-To cover: what makes a piece of code a *good* candidate for modularization?
-- in plain english, it makes sense as a discrete step
-- something you do often
-- something that you might want to reuse in other contexts (on other columns, on other datasets)
-- a complex and discrete task (e.g., an involved multi-line transformation)
-- something you want to test?????
-- it's difficult to read
+As you can see, this takes some time! Being strategic about when and where to pull
+code out for this kind of treatment takes some practice, but can save a lot of time and
+pain in the long run.
 
-What makes something a piece of code a *bad* candidate for modularization?
-- in plain english, it's actually more than one step (e.g., converting data types *and* dropping rows)
-- you never anticipate reusing it (e.g., a completely bespoke transformation step)
-- it's already a modularized function. For example, Pandas' .replace() method can already
-take multiple values flexibly, so there's no need to reproduce work here.
+When is code a good candidate for modularization?
+* In plain language, it's a discrete step
+* You find yourself copy-pasting the same lines of code over and over again.
+* You want to do pretty much the same thing in many different contexts (e.g., on other columns, on other datasets).
+* It's a complex task (e.g., an involved multi-line transformation) that requires some extra explanation
+* You want to be able to test it (we'll cover this shortly)
+
+When is code a *bad* candidate for modularization?
+* In plain language, it's actually more than one step (e.g., converting data types *and* dropping rows)
+* You never anticipate reusing it (e.g., a completely bespoke transformation step)
+- It's already a modularized function. For example, Pandas' .replace() method can already
+take multiple input values flexibly, so there's no need to reproduce someone else's work here.
 
 :::: discussion
 Which other parts of this code are good candidates for modularization?
@@ -206,17 +209,38 @@ Which other parts of this code are good candidates for modularization?
 
 ### Challenge 3: putting it all together!
 
-Ideally..... take a bunch of tasks from the discussion above, split up into teams,
-write a function for each section. Meet back up, try to put it all together into one
-transformation function and see if it works. Debug as needed.
+In a group, take one part of the code we discussed as being a good candidate for
+modularization. In plain language, identify what you want the function you're writing
+to accomplish. Then, write a generalizeable function that accomplishes that step.
 
+```python
+def my_cool_function(input: Type) -> Type:
+    """ This function does something.
+
+    Any more notes can go here.
+
+    Args:
+        input: What the input is
+
+    Returns:
+        Something useful.
+    """
+    # your code here
+    return output
+```
+
+::::::::
+
+### TODO:
 problems:
 * right now we only have one good candidate for the revamp - the known bad plants.
 * how do we see if it works.... foreshadow the next lesson hehehe
 * what if it fails? transition to next lesson hahaha.
 
-::::::::
-
+:::: instructor
+Ask each team to paste their function into the codi. Try to put it all together into one
+transformation function, then visualize the results.
+::::
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
