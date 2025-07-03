@@ -1,6 +1,6 @@
 ---
 title: "Modularization"
-teaching: 0
+teaching: 30
 exercises: 0
 ---
 
@@ -13,73 +13,92 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
+- Use a "plain language" strategy to help decide how best to design your functions
 - Structure code to isolate discrete, inspectable steps
 - Design code modules for clarity and reuse
-- Use a "plain english" strategy to help decide how best to design your functions
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-- cover 'plain english' code descriptions
+- cover 'plain language' code descriptions
 - this gives us tools to think about the code in parts and make improvements
 
-why plain english?
+why plain language?
+- gives us important context about the *why*
 - helps us assess whether the code does what we think it should do
 - there are many ways to do most tasks. helps us assess whether different options of doing the same thing will meet our goals better.
-- helps us pay attention to the desired outcome, rather than the method.
+- helps us pay attention to the desired outcome, rather than the specific method.
 - when data changes, keeps us attuned to what we actually care about.
-- 
+- helps us to understand the discrete steps involved in a method.
+- helps us communicate what our code does to others 
 
 :::::::: challenge
 
 ### Challenge 1: breaking down code
 
-Look at the following code. Which of these best describes what it does in plain English?
-
-#### TODO: figure out which actual bad value I need to drop here, pre-column rotation.
+Look at the following code. Which of these best describes what it does in plain language?
 
 ```python
 pr_gen_fuel = pr_gen_fuel.replace(to_replace = ".", value = pd.NA).convert_dtypes()
 pr_gen_fuel_final = pr_gen_fuel.loc[~((pr_gen_fuel.plant_id_eia == 62410) & (pr_gen_fuel.date.dt.year == 2020) & (pr_gen_fuel.value.isnull()))]
 ```
 
-A. Clean up non-standard nulls, convert dtypes, and drop a bad value.
-B. Clean up the data.
-C. Replace all "." values with null values, automatically convert data types to the best possible choice, and then drop any null data for plant ID 62410 in 2020.
-D. TODO.
+A. Clean up non-standard nulls, convert dtypes, and drop a bad value in a Pandas DataFrame.
+B. Address some data problems and return a cleaner Pandas DataFrame.
+C. Replace all "." values with null values, automatically convert data types, and drop any rows with a null in the "value" column for plant ID 62410 in 2020.
+D. Create ``pr_gen_fuel_final``.
 
 :::: solution
-Fix!
+A. Clean up non-standard nulls, convert dtypes, and drop a bad value in a Pandas DataFrame.
+
+Why A.? Unlike B., A. describes the *intention* behind the code (e.g., we're dropping a
+value because we've subjectively decided that it is *bad*), while providing enough detail
+about the specific steps taked in the code (unlike C. or D.).
+
+* B. does not give us any specific information about what types of cleaning we are performing.
+* C. gives us a lot of information about the methods we're using, but not any more information than reading the code would directly.
+* D. only describes the name of the final output, but doesn't explain at all what the code does.
 ::::
 
 ::::::::
 
-* having a high-level understanding of what code does gives us tools to respond to data changes
+Having a plain language description of the code is an important first step for function
+design.
 
-* review - what is a function
-* what makes a good function (brief, callback to the last challenge)
-* why should we make our functions reusable and modularized?
+- what is a function?
+
+* what makes a good function? (brief, callback to the last challenge)
+    * it has one task (can be composed of multiple other functions)
+    * someone other than the person who wrote it can understand what it does
+    * it can be adaptable (e.g., we can run this transformation function on a new year of data).
+    * it can be tested (next module!)
+
+- when we're taught how to write a function, typically focus on the basics: var names
+and function name
+
+```python
+def transform_pr_gen_fuel(raw_pr_gen_fuel):
+    # Your code here
+    return pr_gen_fuel_final
+```
 
 TODO: In setting this up, borrow heavily from:
 https://carpentries-lab.github.io/good-enough-practices/03-software.html#decompose-programs-into-functions
 https://carpentries-lab.github.io/good-enough-practices/03-software.html#give-functions-and-variables-meaningful-names
 
-Here or below??, mention:
-* function should have data type specified
-
-To cover briefly?:
-* some other best practices for functions - demo naming, text. No exercises needed.
-Do this at the end to make it a seperate skill than the structural stuff
-
-* function should have clear name
-* inputs should have clear names
-* docstring should explain what the function does
+- plain language approach: documentation isn't just something we shoehorn in at the end
+for someone else - it helps us and others understand what we're doing.
+- use type hints to specify inputs and output datatypes (what do we expect to feed into this and get back?)
+- docstring explains in plain english what the function does, what the arguments are, and
+what it returns
+- choose names for functions and vars that are informative, but not unwieldy. `i` is bad, but so is
+`raw_puerto_rico_generation_fuel_data_from_eia_923`.
 
 ```python
 def transform_pr_gen_fuel(raw_pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
-    """ This function cleans raw Puerto Rico generation fuel data from EIA 923.
+    """ This function cleans Puerto Rico generation fuel data from EIA 923.
 
     The transformations include:
-    * replace EIA "." NAs with nulls
+    * replace non-standard EIA "." NAs with nulls
     * conversion of datatypes
     * dropping known bad values for plants
 
@@ -89,10 +108,19 @@ def transform_pr_gen_fuel(raw_pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
     Returns:
         A dataframe of cleaned Puerto Rico generation fuel data.
     """
-    
+    pr_gen_fuel = pr_gen_fuel.replace(to_replace = ".", value = pd.NA).convert_dtypes()
+    pr_gen_fuel_final = pr_gen_fuel.loc[~((pr_gen_fuel.plant_id_eia == 62410) & (pr_gen_fuel.date.dt.year == 2020) & (pr_gen_fuel.value.isnull()))]
     return pr_gen_fuel_final
 ```
 
+Borrow from: https://carpentries-incubator.github.io/python-intermediate-development/32-software-architecture-design.html#good-software-design-goals
+
+* We're done! Just kidding. Now that we have a plain language description, it's
+clear to us what our *intentions* are regarding the transformation of our data. Knowing
+what we *want* to be doing helps us to creatively tackle changes in the data, see opportunities
+to apply the same code to other contexts, and switch out existing implementations for more efficient or generalized ones.
+* Let's take a look at a specific example to make this more concrete.
+    
 :::::::: challenge
 
 ### Challenge 2: moving towards reusability
@@ -188,7 +216,6 @@ problems:
 * what if it fails? transition to next lesson hahaha.
 
 ::::::::
-
 
 
 ::::::::::::::::::::::::::::::::::::: keypoints
