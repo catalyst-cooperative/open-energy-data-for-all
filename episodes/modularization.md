@@ -29,7 +29,7 @@ why plain language?
 - helps us pay attention to the desired outcome, rather than the specific method.
 - when data changes, keeps us attuned to what we actually care about.
 - helps us to understand the discrete steps involved in a method.
-- helps us communicate what our code does to others 
+- helps us communicate what our code does to others
 
 :::::::: challenge
 
@@ -120,7 +120,7 @@ clear to us what our *intentions* are regarding the transformation of our data. 
 what we *want* to be doing helps us to creatively tackle changes in the data, see opportunities
 to apply the same code to other contexts, and switch out existing implementations for more efficient or generalized ones.
 * Let's take a look at a specific example to make this more concrete.
-    
+
 :::::::: challenge
 
 ### Challenge 2: moving towards reusability

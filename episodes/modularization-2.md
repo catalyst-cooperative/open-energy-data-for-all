@@ -18,7 +18,7 @@ exercises: 0
 
 Scratch notes from discussion
 
-Goal end state of lesson: 
+Goal end state of lesson:
 package_name/
 package_name/
 __init__.py
