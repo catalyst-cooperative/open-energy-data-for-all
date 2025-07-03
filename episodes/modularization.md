@@ -147,7 +147,7 @@ def terrible_function_name(pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
     """ This function does some stuff
 
     The transformations include:
-    * 
+    *
 
     Args:
         pr_gen_fuel: The raw Puerto Rico generation fuel dataframe.
@@ -155,7 +155,7 @@ def terrible_function_name(pr_gen_fuel: pd.DataFrame) -> pd.DataFrame:
     Returns:
         A dataframe of cleaned Puerto Rico generation fuel data.
     """
-    
+
     return pr_gen_fuel_final
 ```
 
