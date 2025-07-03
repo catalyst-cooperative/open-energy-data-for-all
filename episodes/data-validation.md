@@ -21,6 +21,8 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+**By the time the students hit here, they should not freak out when they see `uv run pytest` and they should feel OK about slamming a bunch of functions in a .py file.**
+
 ## Introduction
 
 have you ever:
@@ -37,17 +39,19 @@ let's try to avoid that by:
 
 ### Identifying assumptions
 
-Take 3 minutes to list out as many assumptions as you can about [the subset of the PR data that we looked at].
+Take 3 minutes to list out as many assumptions as you can about the EIA 923 Puerto Rico data in the [data directory](../data/).
 
 :::::::: solution
 
 Some options...
 
-* '.' means NA
+* '.' means "no value reported (expected)" *and* "no value reported (unexpected)"
 * the categorical 'energy source' 'prime mover' etc. values all correspond to the values listed in the spreadsheet
 * same ID -> same plant
 * the monthly columns sum up to the total columns
 * net generation always positive
+* the order of the columns will always be the same
+* there are no values reported where we would actually expect a null value
 * ...
 
 ::::::::
@@ -61,13 +65,19 @@ Some options...
 
 Think about your list that you just wrote down.
 
-* here is a list of assumptions. which ones will crash your code if untrue? which ones will not affect your code? which ones will be in the middle?
-* here is a list of assumptions. which ones feel safe? which ones feel like something that could easily get screwed up?
-* here is a list of assumptions. which ones would be easy to check? which ones would be hard?
+For each assumption, spend a little time thinking about:
 
-Which assumptions are in the high risk/low effort bucket?
+* what will happen if this assumption isn't true? Will it crash your code? Or, worse, will it just quietly feed you bad data?
+* can you imagine situations in which this assumption isn't true? how likely do those situations feel?
+* can you imagine an easy way to test this assumption?
 
-KM: some of the assumptions from challenge 1 will feel "ridiculous" to the people who suggested them, but they will actually not be ridiculous and be good ideas. We should make sure that people know that assumptions that seem ridiculous at first glance are often the ones you're looking for.
+Can you identify any assumptions that are high impact, high likelihood, and easy to test?
+
+:::::::: callout
+
+Some of the assumptions in your list, especially the later ones you wrote down after you ran out of ideas, will feel "ridiculous." Oftentimes these are actually good ideas to test precisely because they are the ones that you weren't thinking about when working with the data the first time around.
+
+::::::::
 
 ::::
 
@@ -77,70 +87,76 @@ KM: some of the assumptions from challenge 1 will feel "ridiculous" to the peopl
 
 Pick one of the high risk/low effort assumptions, then flesh out the body of this function:
 
-
 ```python
 
 def check_cool_assumption(input_data: DataFrame) -> bool:
     """Return whether or not the cool assumption holds for the input data.
     """
-    # check the cool assumption idk
+    # check the cool assumption 
 ```
 ::::
 
 
-KM: motivate pytest - "what if we wanted to check all of these assumptions?"
-(still need a little motivation for why not just write "test_whatever.py" and run it that way)
-(pytest gives a lot of nice QOL stuff, and is very straightforward to get started with.)
+## Managing your testing code
+
+* ok, now imagine you have multiple of these test functions. lots of assumptions * lots of datasets = lots & lots of tests
+* annoying to go call them all manually and/or store them in your notebook.
+* so let's pull them into `tests.py`.
+
+:::: challenge
+### put your code in tests.py
+
+::::
+
+... wait, but how do we run these tests?
+
+enter... pytest!
+
+### Example: a pytest test & how to run it
+
+* use `test_`
+* use `assert`
+* `uv run pytest`
+
+Oooooh pretty output :heart_eyes:
 
 :::: challenge
 
-### Porting the code to pytest
+### Challenge: moving your test(s) in test.py to pytest
 
-Take that `check_cool_assumption` code and turn it into a test that pytest will pick up.
+Go take your test.py and make it so that when you run `uv run pytest` you get some output.
+
+Can you make your test fail? What does that look like?
+
+::::
+
+### Example: fixtures
+
+* you might want to reuse the same test data for a bunch of different assumptions... use a *fixture* to do that.
+* you *don't* want to use a constant dataframe... what if you mutate it in one test?? then you'll literally die
 
 ```python
-
-@pytest.fixture()
-def my_cool_df():
-    ....
-
-def test_cool_assumption(my_cool_df):
+@pytest.fixture
+def sweet_dataframe():
     pass
-    
-
-def test_cooler_assumption(my_cool_df):
-    pass
-    
-def test_cool_assumption_for_one_dataframe():
-    # ...
-
-    df = pd.read....
-    assert check_cool_assumption(df)
-
-def test_cool_assumption_for_other_dataframe():
-    # ...
-
-    df = pd.read....
-    assert check_cool_assumption(df)
-
-
-def test_cool_assupmtion_for_lots_of_dfs():
-    dfs = [...]
-    for df in dfs:
-        assert check...
-
-
-@pytest.mark.parametrize(
-...
-)
-def test_cool_assumption():
-    ....
 ```
+
+
+:::: challenge
+
+### Challenge: fixtures
+
+Add another test for the same dataframe (pulling from your Cool List of Cool Assumptions).
+
+Update your `test.py` to use fixtures for your two tests.
 
 ::::
 
 
-TODO: use the various snippets that people made for testing, and introduce fixtures.
+### Example: parametrization
+
+* OK, now what if 
+   
 
 To think about: introduce parametrization? (years? states?)
 
