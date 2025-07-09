@@ -6,34 +6,50 @@ exercises: 0
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-- How do I make sure that new data doesn't break my system?
-  - figure out what assumptions you are making about the inputs and enforce them
-- How do I make sure that new code changes aren't breaking the outputs?
-  - figure out what guarantees you are making about the outputs and enforce them
-  - your outputs are just inputs for someone else... or your next function
+- Exploratory data analysis was fun, but what did I learn?
+- How do I make sure that new code changes or new data aren't breaking my system?
+- When something does break, how can I identify which part of the system has broken?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Prioritize assumptions by importance and likelihood
-- Programmatically detect violations of high-impact assumptions
+- Articulate assumptions about a dataset
+- Evaluate assumptions by impact and likelihood of breakage
+
+- Write tests that reduce the toil of manually checking that your system works
+- Use tests to identify what parts of the system are broken/working
+
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 **By the time the students hit here, they should not freak out when they see `uv run pytest` and they should feel OK about slamming a bunch of functions in a .py file.**
 
-## Introduction
+## Making assumptions about your data
 
-have you ever:
-- noticed something funny about your data output
-- spent hours tracing backwards through your code to figure out what went wrong
-- eventually found that it was due to some strange thing about the input data?
 
-let's try to avoid that by:
-- identifying *input assumptions*: what we need to be true about the input data so that our code will produce the correct output
-- prioritizing which ones to check
-- writing code to check these assumptions easily
+### Intro
+
+#### post-eda
+
+- you've looked at the data and gotten a sort of intuitive feel for it
+- it might be useful to characterize the data in a slightly more rigorous way - can point you at current holes or future problems.
+- we'll go through a framework: list out a bunch of assumptions, then figure out which ones are likely to be problematic
+
+#### post-modularization-2
+
+- you've learned about automated testing for functions & their inputs/outputs
+- but your whole system also has inputs/outputs
+- maybe we can apply that testing tool here, too!
+- start w checking assumptions about the input data, then move to assumptions about the outputs
+  - TODO: this signals... too much - this is where we're going but we're not going to cover it all until the second hemiepisode
+
+
+### What is an assumption anyways?
+
+- it's just a property you think is true about the data
+
+- the trickiest assumptions are the ones that you scrape the bottom of the barrel for - you're really looking for stuff that you didn't expect. so just... no judgement, throw whatever you can think of at this next challenge.
  
 :::: challenge
 
@@ -59,6 +75,20 @@ Some options...
 ::::
 
 
+### Example: assessing risk/effort
+
+
+- some are maybe more useful than others...
+
+- useful:
+  - 'this column always has values between 10 and 1000'
+  - 'the ratio of column A to column B is roughly stable'
+
+- less useful:
+  - 'the person filling out the form is trying to tell the truth'
+
+- what makes these useful/less useful? impact/likelihood/testability.
+
 :::: challenge
 
 ### Assessing risk and effort
@@ -80,6 +110,8 @@ Some of the assumptions in your list, especially the later ones you wrote down a
 ::::::::
 
 ::::
+
+## Making sure your system is behaving
 
 :::: challenge
 
