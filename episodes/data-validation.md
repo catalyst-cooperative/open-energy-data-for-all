@@ -1,12 +1,12 @@
 ---
-title: "Data validation"
+title: "Making sure your system is behaving"
 teaching: 0
 exercises: 0
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-- Exploratory data analysis was fun, but what did I learn?
+- How do I make sure that my system is working as I expect?
 - How do I make sure that new code changes or new data aren't breaking my system?
 - When something does break, how can I identify which part of the system has broken?
 
@@ -14,135 +14,102 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Articulate assumptions about a dataset
-- Evaluate assumptions by impact and likelihood of breakage
-
 - Write tests that reduce the toil of manually checking that your system works
 - Use tests to identify what parts of the system are broken/working
-
+- Use a debugger to narrow down the source of bad behavior
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-**By the time the students hit here, they should not freak out when they see `uv run pytest` and they should feel OK about slamming a bunch of functions in a .py file.**
+## Intro
 
-## Making assumptions about your data
+So we just wrote a little data pipeline... how do we know it works?
+
+- think of what properties you expect from the whole system output
+- look at output and see if those properties hold
+
+Then if it doesn't work, what do we do?
+
+- check sub-parts of the system - did it get the right input? did it produce the right output?
+- repeat fractally until you find the specific cause of the problem
+
+In this episode, we'll introduce some tools that help make this process smoother:
+
+- integration tests: tell you if your system is functioning as expected
+  - mention that it's probably good to write tests about the input data assumptions too...
+- unit tests: tell you if the subparts of your system are functioning as expected
+- automated test runner: makes it easy to run all your tests at once so you don't have to remember/manually execute all the steps
+- debugger: lets you zoom in even further to your system to figure out what exactly is happening
+
+### Integration tests
 
 
-### Intro
+blah blah
 
-#### post-eda
-
-- you've looked at the data and gotten a sort of intuitive feel for it
-- it might be useful to characterize the data in a slightly more rigorous way - can point you at current holes or future problems.
-- we'll go through a framework: list out a bunch of assumptions, then figure out which ones are likely to be problematic
-
-#### post-modularization-2
-
-- you've learned about automated testing for functions & their inputs/outputs
-- but your whole system also has inputs/outputs
-- maybe we can apply that testing tool here, too!
-- start w checking assumptions about the input data, then move to assumptions about the outputs
-  - TODO: this signals... too much - this is where we're going but we're not going to cover it all until the second hemiepisode
-
-
-### What is an assumption anyways?
-
-- it's just a property you think is true about the data
-
-- the trickiest assumptions are the ones that you scrape the bottom of the barrel for - you're really looking for stuff that you didn't expect. so just... no judgement, throw whatever you can think of at this next challenge.
- 
 :::: challenge
 
-### Identifying assumptions
+#### Writing an integration test
 
-Take 3 minutes to list out as many assumptions as you can about the EIA 923 Puerto Rico data in the [data directory](../data/).
+Think about the pipeline we made together in the modularization episode.
 
-:::::::: solution
+:::::::: instructor
 
-Some options...
-
-* '.' means "no value reported (expected)" *and* "no value reported (unexpected)"
-* the categorical 'energy source' 'prime mover' etc. values all correspond to the values listed in the spreadsheet
-* same ID -> same plant
-* the monthly columns sum up to the total columns
-* net generation always positive
-* the order of the columns will always be the same
-* there are no values reported where we would actually expect a null value
-* ...
+**TODO**
+We can also prepare a separate broken pipeline in case we run this standalone.
 
 ::::::::
 
-::::
+What is a property that you expect the output to have? Write a function that tests this, by filling out the following skeleton:
 
-
-### Example: assessing risk/effort
-
-
-- some are maybe more useful than others...
-
-- useful:
-  - 'this column always has values between 10 and 1000'
-  - 'the ratio of column A to column B is roughly stable'
-
-- less useful:
-  - 'the person filling out the form is trying to tell the truth'
-
-- what makes these useful/less useful? impact/likelihood/testability.
-
-:::: challenge
-
-### Assessing risk and effort
-
-Think about your list that you just wrote down.
-
-For each assumption, spend a little time thinking about:
-
-* what will happen if this assumption isn't true? Will it crash your code? Or, worse, will it just quietly feed you bad data?
-* can you imagine situations in which this assumption isn't true? how likely do those situations feel?
-* can you imagine an easy way to test this assumption?
-
-Can you identify any assumptions that are high impact, high likelihood, and easy to test?
-
-:::::::: callout
-
-Some of the assumptions in your list, especially the later ones you wrote down after you ran out of ideas, will feel "ridiculous." Oftentimes these are actually good ideas to test precisely because they are the ones that you weren't thinking about when working with the data the first time around.
-
-::::::::
-
-::::
-
-## Making sure your system is behaving
-
-:::: challenge
-
-### Writing testing code
-
-Pick one of the high risk/low effort assumptions, then flesh out the body of this function:
-
+**TODO** get the right filenames/function names
 ```python
-
-def check_cool_assumption(input_data: DataFrame) -> bool:
-    """Return whether or not the cool assumption holds for the input data.
-    """
-    # check the cool assumption 
+def test_cool_output_property():
+    input_data = pd.read_parquet(...)
+    output = process(input_data)
+    # make some assertions about the data
 ```
 ::::
 
+#### Unit tests
 
-## Managing your testing code
-
-* ok, now imagine you have multiple of these test functions. lots of assumptions * lots of datasets = lots & lots of tests
-* annoying to go call them all manually and/or store them in your notebook.
-* so let's pull them into `tests.py`.
+- show a happy path test
 
 :::: challenge
-### put your code in tests.py
+
+### Writing a unit test
+
+Pick one of the functions that makes up the data pipeline.
+
+What do you expect the output to look like?
+Can you imagine some weird input that *might* break your function?
+
+Try writing a test that tells you if that weird input breaks things or not!
+
+```python
+def test_function_edge_case():
+    # weird_input = ...
+    # observed = function(weird_input)
+    # expected = ...
+    # assert expected == observed
+```
+
+**TODO what if you want to grab a sub-property of `function(weird_input)` instead of the whole output? adjust skeleton**
 
 ::::
 
-... wait, but how do we run these tests?
 
-enter... pytest!
+#### Automated test runners
+
+OK, how do we run these tests?
+
+We could add `if __name__ == "__main__":...` to tests.py and run `uv run tests.py`
+
+But that runs into problems:
+- annoying boilerplate
+- if you have lots of tests & want to break them up you now have to run all these other files
+- if one test breaks it immediately exits with an `AssertionError` and now you don't know what else broke
+
+Enter `pytest` - solves all these quality-of-life problems and more.
+Lots of docs and functionality, we'll just touch on the basic bit where it discovers tests and runs them for you.
 
 ### Example: a pytest test & how to run it
 
@@ -154,97 +121,61 @@ Oooooh pretty output :heart_eyes:
 
 :::: challenge
 
-### Challenge: moving your test(s) in test.py to pytest
+#### Try `pytest`
 
-Go take your test.py and make it so that when you run `uv run pytest` you get some output.
+**TODO do we need to make them install pytest in their project?**
 
-Can you make your test fail? What does that look like?
+To install `pytest` we can add it to the `pyproject.toml` dependency list as before, then run `uv sync`.
 
+Try running `uv run pytest` in your own project and see if it's picking up your tests!
 ::::
 
-### Example: fixtures
+### The debugger
 
-* you might want to reuse the same test data for a bunch of different assumptions... use a *fixture* to do that.
-* you *don't* want to use a constant dataframe... what if you mutate it in one test?? then you'll literally die
+We've found out which function isn't working right. How do we figure out why that function isn't working?
+
+Options:
+- break the function down into smaller parts and write more unit tests: sometimes a good idea, but often tedious and breaks up your code into unnecessarily small chunks
+- throw in a bunch of `print(f"value of something is {something}")` statements: super easy, but kind of annoying to go back and keep adding more until you figure your stuff out
+- use the **interactive debugger** wheeeeee
+
+Interactive debugger pauses your program at a specific spot ("breakpoint") and then you get to go in and poke around. Super powerful, lots of documentation here as well, but let's go over the basics:
+
+* how to get help: ?
+* how to figure out what you're looking at & where you are in the execution: `l` `list`
+* how to print out values of variables / expressions: `p` `pp`
+* how to move: `next` vs `step`
+* how to quit: `q`
+
+do this in a live demo
+
+:::: challenge
+
+If your function fails your unit test, throw a breakpoint in the function & go check it out! Can you figure out what's going wrong?
+
+You can also copy this function & test code if your function already works perfectly:
 
 ```python
-@pytest.fixture
-def sweet_dataframe():
-    pass
+def foo():
+    breakpoint()
+    ...
+    
+
+def bar():
+    # bug should be in here
+    ...
+
+def test_foo():
+    observed = foo()
+    expected = ...
+    assert observed == expected
 ```
-
-
-:::: challenge
-
-### Challenge: fixtures
-
-Add another test for the same dataframe (pulling from your Cool List of Cool Assumptions).
-
-Update your `test.py` to use fixtures for your two tests.
-
 ::::
 
+Additional notes?
 
-### Example: parametrization
-
-* OK, now what if 
-   
-
-To think about: introduce parametrization? (years? states?)
-
-EB: official parametrization docs are kind of mid, so maybe worth giving people the Short Version?
-
-
-:::: challenge
-
-### Testing outputs
-
-Since the output of your code is just the input to other code...
-
-What assumptions will other people want to make about your code?
-Which ones do you expect to actually be true?
-Write a test that makes sure that one of those assumptions about your *output* holds
-
-KM: assumptions other ppl will make is hard. consider just "what guarantees are you making"
-
-KM: other common approach. your jerk/pedant friend doesn't believe you that your function works. how do you prove to them that it works?
-
-EB: maybe there's a more concrete version of this. we've been talking about Doing A Bunch Of Stuff to the data. how do we check that we actually did what we think we did? ties in well to "see if it works" from the last lesson.
-
-KM: also ties in better to "what guarantees are you making"
-
-```python
-
-def test_output_assumption():
-    input_data = pd.read_parquet(...)
-    observed = my_cool_pipeline(input_data)
-    # expected = ...
-    # assert(...)
-```
-
-::::
-
-:::: challenge
-
-### connect to new data high-level question
-
-* run this on... some different data? imagine your analysis expands beyond PR - what if you want to know about FL too?
-
-KM: probably worth thinking about, but not worth doing.
-
-EB: helpful to think of these three modules as a loop. explore, modularize, test. bring in new data - something is wrong but at least you have something firm to stand on. go back to the start.
-
-TODO: this is not actually a Challenge, this is a "discuss" or a "really makes you think, huh?" at the end
-
-::::
-
-:::: challenge
-
-for the folks who are bored and reading ahead:
-
-* here is a function and a test, the test is kind of awkward, how would you rearrange the function so the test was easier to read?
-
-::::
+- `pytest --pdb`?
+- stepping into library code is useful!
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
