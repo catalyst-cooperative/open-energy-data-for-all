@@ -65,8 +65,44 @@ Some options...
 ::::
 
 
-### Example: assessing risk/effort
+### Example: testing assumptions
 
+
+example:
+
+here's an assumption: cool property of input
+
+here's how we might test that using an `assert` statement.
+
+`assert` basically says, "if this next part is True, great! if it's false, we'll raise an error."
+
+```python
+assert 1 == 1
+assert 1 == 2
+```
+
+We can also add a little message if we want a friendlier error:
+
+```python
+assert 1 == 2, "useful message for debugging :)"
+```
+
+```python
+property = df.loc[...]...
+assert property.all(), "all x must be y"
+```
+
+:::: challenge
+
+### Writing code to test an assumption
+
+Take an assumption you identified as easy to test, and write some code to assert that the assumption is true!
+
+::::
+
+
+
+### Which assumptions are worth testing?
 
 - some are maybe more useful than others...
 
@@ -80,36 +116,20 @@ Some options...
 
 - what makes these useful/less useful? impact/likelihood/testability.
 
-:::: challenge
+- impact is hard to think about when you haven't built up a whole system yet
+  - though - it is better for your system to crash, than for it to subtly give you incorrect output... noodle on that.
+- likelihood is a gut check that you'll refine over time
 
-### Assessing risk and effort
-
-**TODO: maybe move this "assess impact" part to the actual testing module**
-
-Think about your list that you just wrote down.
-
-For each assumption, spend a little time thinking about:
-
-* what will happen if this assumption isn't true? Will it crash your code? Or, worse, will it just quietly feed you bad data? (also you might not know what your code is doing yet that's OK) (flesh out what 'bad data' means here)
-* can you imagine situations in which this assumption isn't true? how likely do those situations feel?
-* can you imagine an easy way to test this assumption?
-
-Can you identify any assumptions that are high impact, high likelihood, and easy to test?
-
-::::
-
-
-### Asserting that an assumption is true
-
-- pick an assumption (that is false)
-- write an expression that shows the property
-- use an assert statement
 
 :::: challenge
 
-### Writing code to test an assumption
+### Identifying worthwhile assumptions
 
-Take an assumption you identified as easy to test, and write some code to assert that the assumption is true!
+Look at your list of assumptions. See if you can find an example for each of these criteria:
+* has a high impact
+* has a low impact
+* high/low likelihood
+* high/low testability
 
 ::::
 
@@ -117,5 +137,6 @@ Take an assumption you identified as easy to test, and write some code to assert
 
 - you're always making assumptions about your data - nice to know when they've been broken
 - you can use `assert` statements to tell you they're broken
+- impact/likelihood/testability framework
 
 ::::
