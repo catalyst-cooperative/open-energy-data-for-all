@@ -19,56 +19,90 @@ exercises: 0
 
 ## Intro
 
-- you've looked at the data and gotten a sort of intuitive feel for it
-- it might be useful to characterize the data in a slightly more rigorous way - can point you at current holes or future problems.
-- we'll go through a framework: list out a bunch of assumptions, then figure out which ones are likely to be problematic
+Now that you've looked at the data and gotten a sort of intuitive feel for it, it might be useful to characterize the data in a slightly more rigorous way. This can point you at current holes in your understanding or future problems with however you are planning on working with the data.
+
+We'll go through three steps:
+
+1. list out a bunch of assumptions about your assumptions
+2. identify useful assumptions to test
+3. write some code to verify those assumptions
 
 ### What is an assumption anyways?
 
-- it's just a property you think is true about the data
+In this context, an *assumption* can be any property you think is true about the data.
 
-- the trickiest assumptions are the ones that you scrape the bottom of the barrel for - you're really looking for stuff that you didn't expect. so just... no judgement, throw whatever you can think of at this next challenge.
+Some examples:
+- the data values themselves are clean: year is something sensible (some time close-ish to present day, probably), categorical values have well-defined meanings
+- relationships are well-defined: same ID -> same plant, columns sum up to "total" columns, ratio of one column to another is roughly what you expect
+- data types are consistent: an ID field that is all numbers doesn't occasionally have a letter in it
+- column headers are stable: each new data file has the same column names
+- stable NA values: there's a well-defined, non-growing set of values that mean "there is no value here"
+- units stay the same: each new data file has the same units for each column
 
-- some examples
-  - data values are good: year is real, categoricals exist
-  - relationships are good: same ID -> same plant, columns sum up or provide good ratios
-  - data types are consistent
-  - column headers are stable
-  - stable na values
-  - units stay the same
-  etc.
-    
+These assumptions form the core of your mental model, and if they turn out not to be true then anything that depends on your mental model might break in unexpected ways. That includes your code, of course, but also your documentation, and any papers or articles you may write.
 
-- where are assumptions embedded? in documentation, your  code, library code, papers, etc.
+The most dangerous assumptions (and thus, the most useful to enumerate) are particulary hard to think of - if they're obvious to you, then on some level you are aware of the need to work around them. With that in mind, let's try to come up with some assumptions of our own!
  
 :::: challenge
 
 ### Identifying assumptions
 
-Take 3 minutes to list out as many assumptions as you can about the EIA 923 Puerto Rico data in the [data directory](../data/).
+Take 5 minutes to list out as many assumptions as you can about the EIA 923 Puerto Rico data in the [data directory](../data/).
+
+The goal is to get past the obvious ones and start thinking of some un-obvious assumptions - no need to limit yourself to 'realistic' ones at this stage.
 
 :::::::: solution
 
 Some options...
 
 * '.' means "no value reported (expected)" *and* "no value reported (unexpected)"
-* the categorical 'energy source' 'prime mover' etc. values all correspond to the values listed in the spreadsheet
-* same ID -> same plant
-* the monthly columns sum up to the total columns
-* net generation always positive
-* the order of the columns will always be the same
-* there are no values reported where we would actually expect a null value
-* ...
+* the utility worker filling out the form didn't make any mistakes
+* the 'MMBtu of fuel consumed' field has different values for renewables in different years, and those values mean something related to the real world
+* there will be future versions of this data
 
 ::::::::
 
 ::::
 
 
+### Which assumptions are worth testing?
+
+After that challenge, you might feel like some assumptions are more useful to test than others in some nebulous way:
+
+Some examples of assumptions that might feel "more useful":
+
+- this column always has values between 10 and 1000
+- the ratio of column A to column B is roughly stable
+- the same plant always has the same name over time
+
+Some examples of "less useful" assumptions:
+- only one specific plant reports `fuel_consumption_mmbtu` to a 0.1 MMBtu precision
+- the plant name column is always going to be a string of characters, not a numeric field
+- the person filling out the form is trying to tell the truth
+
+What makes these useful or less so?
+
+* the impact on your system if the assumption turns out to not be true
+* the likelihood this assumption is violated
+* how easy it is to test these assumptions
+
+
+Impact is hard to think about when you haven't built up a whole system yet.
+ But you can usually sort problems into "won't cause any problems,"
+"will cause problems which will be easy to notice (i.e. the whole program crashing),"
+and "will cause problems which will be hard to notice (i.e., the data will just be wrong)."
+In most cases, it is better to have your program crash loudly than to have your program silently give you bad data.
+
+Likelihood can also be tricky - you are guessing at the future based on your experience of the past.
+The easiest heuristic is "can I imagine a situation where this assumption would be false?"
+You'll build up a more nuanced intuition over time.
+
+The effort required to test these assumptions is similarly easiest evaluated with the question,
+"Can I imagine a snippet of code that would verify this assumption?"
+If you don't have a lot of tools for assumption verification, that can be hard.
+Let's introduce a simple one.
+
 ### Example: testing assumptions
-
-
-example:
 
 here's an assumption: cool property of input
 
@@ -101,26 +135,6 @@ Take an assumption you identified as easy to test, and write some code to assert
 ::::
 
 
-
-### Which assumptions are worth testing?
-
-- some are maybe more useful than others...
-
-- useful:
-  - 'this column always has values between 10 and 1000'
-  - 'the ratio of column A to column B is roughly stable'
-  - 'the order of columns is the same'
-
-- less useful:
-  - 'the person filling out the form is trying to tell the truth'
-
-- what makes these useful/less useful? impact/likelihood/testability.
-
-- impact is hard to think about when you haven't built up a whole system yet
-  - though - it is better for your system to crash, than for it to subtly give you incorrect output... noodle on that.
-- likelihood is a gut check that you'll refine over time
-
-
 :::: challenge
 
 ### Identifying worthwhile assumptions
@@ -132,6 +146,7 @@ Look at your list of assumptions. See if you can find an example for each of the
 * high/low testability
 
 ::::
+
 
 :::: keypoints
 
