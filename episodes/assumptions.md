@@ -45,7 +45,7 @@ The most dangerous assumptions (and thus, the most useful to enumerate) are part
  
 :::: challenge
 
-### Identifying assumptions
+### Challenge: identifying assumptions
 
 Take 5 minutes to list out as many assumptions as you can about the EIA 923 Puerto Rico data in the [data directory](../data/).
 
@@ -64,6 +64,8 @@ Some options...
 
 ::::
 
+
+## Testing assumptions
 
 ### Which assumptions are worth testing?
 
@@ -93,9 +95,36 @@ Impact is hard to think about when you haven't built up a whole system yet.
 and "will cause problems which will be hard to notice (i.e., the data will just be wrong)."
 In most cases, it is better to have your program crash loudly than to have your program silently give you bad data.
 
+:::: challenge
+
+### Challenge: evaluating impact
+
+Look at the list of your assumptions and imagine each one is not actually true.
+
+Can you identify one example for each of the following?
+
+* will probably break downstream work in some obvious way?
+* will probably not break anything downstream?
+* will cause some subtle and hard-to-notice problem?
+
+::::
+
 Likelihood can also be tricky - you are guessing at the future based on your experience of the past.
 The easiest heuristic is "can I imagine a situation where this assumption would be false?"
 You'll build up a more nuanced intuition over time.
+
+
+:::: challenge
+
+### Challenge: evaluating likelihood
+
+Look at the list of your assumptions and imagine a scenario in which they would not be true.
+
+Can you identify an example scenario that:
+* seem very plausible?
+* seems very implausible?
+
+::::
 
 The effort required to test these assumptions is similarly easiest evaluated with the question,
 "Can I imagine a snippet of code that would verify this assumption?"
@@ -104,26 +133,47 @@ Let's introduce a simple one.
 
 ### Example: testing assumptions
 
-here's an assumption: cool property of input
+Here's an assumption we dug into last time:
 
-here's how we might test that using an `assert` statement.
+> For solar photovoltaics, the reported heat rate (Btu of fuel consumed / KWh of net generation) is fairly consistent after 2022.
 
-`assert` basically says, "if this next part is True, great! if it's false, we'll raise an error."
+How would we verify that?
+
+First, we can calculate that heat rate:
+
+```python
+
+solar_pv_post_2022 = monthly_gen_fuel[
+    (monthly_gen_fuel["date"] >= "2022-01-01") &
+    (monthly_gen_fuel["energy_source_code"] == "SUN") &
+    (monthly_gen_fuel["prime_mover_code"] == "PV")
+]
+consumption_btu = solar_pv_post_2022["fuel_consumed_for_electricity_mmbtu"] * 1_000_000
+net_gen_kwh = solar_pv_post_2022["net_generation_mwh"] * 1_000
+heat_rate = consumption_btu / net_gen_kwh
+```
+
+Let's take a quick look:
+
+```python
+heat_rate.hist()
+```
+
+Yeah, looks like almost all of the values are clustered at 3500, and the min and max values are between 2000 and 5000.
+
+Then, we can use an `assert` statement to verify some fact about it.
+
+`assert` basically says, "if this next part is True, great! Nothing happens. If it's false, we'll raise an error."
 
 ```python
 assert 1 == 1
 assert 1 == 2
 ```
 
-We can also add a little message if we want a friendlier error:
+So let's assert something about this heat rate - maybe that the standard deviation is below a certain percentage of the mean:
 
 ```python
-assert 1 == 2, "useful message for debugging :)"
-```
-
-```python
-property = df.loc[...]...
-assert property.all(), "all x must be y"
+assert heat_rate.std() / heat_rate.mean() <= 0.05
 ```
 
 :::: challenge
@@ -137,13 +187,11 @@ Take an assumption you identified as easy to test, and write some code to assert
 
 :::: challenge
 
-### Identifying worthwhile assumptions
+### Evaluating testability
 
-Look at your list of assumptions. See if you can find an example for each of these criteria:
-* has a high impact
-* has a low impact
-* high/low likelihood
-* high/low testability
+Look at your list of assumptions.
+
+Can you find one that would be easy to test, and one that would be hard to test?
 
 ::::
 
@@ -152,6 +200,6 @@ Look at your list of assumptions. See if you can find an example for each of the
 
 - you're always making assumptions about your data - nice to know when they've been broken
 - you can use `assert` statements to tell you they're broken
-- impact/likelihood/testability framework
+- you can evaluate the usefulness of assumptions by thinking about their impact, likelihood, and testability.
 
 ::::
