@@ -159,7 +159,7 @@ Right now: when we run main.py, run the main function.
 - run the damn thing using uv!
 ::::
 
-### 
+###
 
 
 ** out of scope: we'll cover creating utils.py in the modularization lesson
