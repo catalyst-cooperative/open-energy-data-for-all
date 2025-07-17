@@ -49,9 +49,9 @@ pr_gen_fuel_raw
 Things to notice:
 
 * There are multiple different data types: category data (associated_combined_heat_power) and numeric data (*_mmbtus)
-* Some of the numeric columns have weird numbers in them like ".", which doesn't seem right
+* Some of the numeric columns have weird "." entries, which doesn't seem right
 * There's a column for each month, but these are in... alphabetical order?
-* Year is an integer but also sometimes a float?
+* Year is an integer but also sometimes has a decimal?
 
 We could try to clean this up ourselves, but there's a good chance our predecessor fixed at least some of them. Let's go see!
 
@@ -59,6 +59,254 @@ We could try to clean this up ourselves, but there's a good chance our predecess
 
 If we open `puerto-rico-project.ipynb` we see:
 
+```python
+# Handle EIA null values
+pr_gen_fuel = pr_gen_fuel.replace(to_replace = ".", value = pd.NA)
+```
+
+Hey, nice! That's the weird "." out of the way.
+
+Next we get:
+
+```python
+# Convert data types (mmbtu/units to numeric)
+pr_gen_fuel = pr_gen_fuel.convert_dtypes()
+```
+
+The help() for `convert_dtypes()` says:
+
+> Convert columns to the best possible dtypes using dtypes supporting ``pd.NA``.
+
+That seems close-ish to the problem with years being integers or floats. If we get stuck on dtypes later we can always come back to it.
+
+Next we get:
+
+```python
+# create some useful column sets
+primary_key_columns = ['plant_id_eia', 'plant_name_eia', 'report_year', 'prime_mover_code', 'energy_source_code']
+
+monthly_variables = []
+for col in pr_gen_fuel.columns:
+    if col.endswith("january"):
+        monthly_variables.append(col.replace("_january", ""))
+
+monthly_columns = []
+for col in pr_gen_fuel.columns:
+    for var in monthly_variables:
+        if col.startswith(var):
+            monthly_columns.append(col)
+```
+
+A primary key is sometimes called an index; it just means that no two rows have the same values for those columns taken together.
+
+It looks like they built a list of the monthly data columns by first grabbing all the January columns, then using the front part of the string to get a list of all the monthly variables. Then from there, you can grab all the columns that start with each monthly variable, and get all the months.
+
+Next we get:
+
+```python
+# pivot the monthly variables into their own df
+monthly_dfs = []
+# swap in a different date column
+monthly_primary_key_columns = ["date"] + [c for c in primary_key_columns if c != "report_year"]
+for monthly_var in monthly_variables:
+    ## Only keep the index and monthly variable columns
+    column_subset_list = primary_key_columns + [col for col in pr_gen_fuel.columns if col.startswith(monthly_var)]
+    var_pivot = (
+        pr_gen_fuel.loc[:, column_subset_list]
+        .melt(id_vars = primary_key_columns)
+    )
+    ## Split the month from the variable
+    var_pivot[['variable', 'month']] = var_pivot['variable'].str.rsplit("_", n=1, expand=True)
+    ## Create date from month and year
+    var_pivot['date'] = pd.to_datetime(var_pivot['month'] + var_pivot['report_year'].astype(str), format='%B%Y')
+    # we don't need the year/month/variable cols anymore
+    monthly_dfs.append(
+        var_pivot.drop(columns=["report_year", "month", "variable"])
+        .rename(columns={"value":monthly_var})
+        # setting an index so we can concatenate later
+        .set_index(monthly_primary_key_columns)
+    )
+pr_gen_fuel_monthly = pd.concat(monthly_dfs, axis="columns").reset_index()
+```
+
+That's ... a big chunk of code. Rather than try to interpret it line-by-line, let's see if we can match their comment `split off a separate table for monthly data` to the actual output.
+
+```python
+pr_gen_fuel_monthly
+```
+
+That went from 96 columns down to 11! There's now a `date` column that looks like it's always the first of the month. Then we have columns identifying the plant, prime mover, and energy source. Then six numeric columns, one for each monthly variable.
+
+That looks like it could be very useful!
+
+There are only two more cells. First we have:
+
+```python
+# the rest of the columns are annual
+pr_gen_fuel_annual = pr_gen_fuel.drop(columns=monthly_columns)
+```
+
+That's fair; with the monthly data in a separate table we don't need to keep those columns around.
+
+Then we have:
+
+```python
+# drop a bad plant
+pr_gen_fuel_monthly = (
+    pr_gen_fuel_monthly.loc[~(
+        (pr_gen_fuel_monthly.plant_id_eia == 62410)
+        & (pr_gen_fuel_monthly.date.dt.year == 2020)
+        & (pr_gen_fuel_monthly.fuel_consumed_for_electricity_mmbtu.isnull()))]
+)
+```
+
+Dropping a bad plant sounds like something we may need to do again later, so we'll remember this is here but otherwise leave it alone.
+
+Let's store the clean version of the data so we can play with it more in our notebook, without polluting this one too much:
+
+```python
+pr_gen_fuel_monthly.to_parquet("../data/eia923__monthly_puerto_rico_generation_fuel.parquet")
+pr_gen_fuel_annual.to_parquet("../data/eia923__annual_puerto_rico_generation_fuel.parquet")
+```
+
+Back in our notebook, we'll load up the data:
+
+```python
+pr_gen_fuel_monthly = pd.read_parquet("../data/eia923__monthly_puerto_rico_generation_fuel.parquet")
+pr_gen_fuel_annual = pd.read_parquet("../data/eia923__annual_puerto_rico_generation_fuel.parquet")
+```
+
+Let's start with annual data first.
+
+# 3: Build on our predecessor's work
+
+Our predecessor had these set as primary key columns; let's take a closer look at them.
+
+```python
+primary_key_columns = [
+    'plant_id_eia', 'plant_name_eia', 'report_year', 'prime_mover_code', 'energy_source_code'
+]
+pr_gen_fuel_annual[primary_key_columns]
+```
+
+They're supposed to be unique combinations; are they?
+
+```python
+pr_gen_fuel_annual[primary_key_columns].groupby(primary_key_columns).size()
+```
+
+```
+pk_hits = pr_gen_fuel_annual[primary_key_columns].groupby(primary_key_columns).size()
+pk_hits[pk_hits>1]
+```
+
+```output
+plant_id_eia  plant_name_eia            report_year  prime_mover_code  energy_source_code
+62410         Cervecera de Puerto Rico  2020         IC                DFO                   2
+dtype: int64
+```
+
+Just one weirdo. Any chance it's from the same plant our predecessor found?
+
+Why, yes. Indeed it is. We'll add that to the "deal with later" list while we're still exploring.
+
+## Categorical data
+
+What columns contain categorical data? Are they well-behaved?
+
+```python
+pr_gen_fuel_annual.dtypes
+```
+
+```python
+pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"]
+```
+
+```python
+list(pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index)
+```
+
+```python
+category_cols = list(pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index)
+pr_gen_fuel_annual[category_cols[0]].value_counts()
+```
+
+:::: challenge
+
+Make a `for` loop to show the value counts for all the category columns. Do any of them show anything wacky?
+
+:::::::: solution
+```python
+for c in category_cols:
+    print("="*40)
+    print(pr_gen_fuel_annual[c].value_counts())
+```
+::::::::
+
+::::
+
+## Numeric data
+
+What columns contain numeric data? Are they well-behaved?
+
+```python
+pr_gen_fuel_annual.dtypes
+```
+
+Oh dang, most of these integer columns aren't really numeric. Looks like we want four of the int columns and one of the floats. It's probably easier to make a list manually.
+
+```python
+numeric_cols = [
+    "elec_fuel_consumption_mmbtu", "electric_fuel_consumption_quantity",
+    "total_fuel_consumption_mmbtu", "total_fuel_consumption_quantity",
+    "total_net_generation_mwh"
+]
+pr_gen_fuel_annual[numeric_cols].describe()
+```
+
+We've got two pairs of mmbtu+quantity variables. Since they're measuring in different units, we don't expect their quartiles to match, but we do kinda expect them to have the same shape. Let's look closer with a histogram:
+
+```python
+elec_fuel_consumption = (
+    pr_gen_fuel_annual[["elec_fuel_consumption_mmbtu","electric_fuel_consumption_quantity"]]
+)
+
+(elec_fuel_consumption / elec_fuel_consumption.max()).plot.hist(bins=20, logy=True, alpha=0.5)
+```
+
+Wow, that's seriously systemic.
+
+```python
+for gr, df in pr_gen_fuel_annual.groupby("associated_combined_heat_power"):
+    axs = df.hist(column=elec_fuel_consumption_cols, density=True)
+    axs[-1][-1].legend([gr])
+```
+
+:::: challenge
+
+Find a categorical column that seems to explain why there are so many more zeros in `quantity` than in `mmbtu`.
+
+:::::::: solution
+
+```python
+for gr, df in pr_gen_fuel_annual.groupby("energy_source_code"):
+    axs = df.hist(column=elec_fuel_consumption_cols, density=True)
+    axs[-1][-1].legend([gr])
+```
+
+* SUN, WAT, and WND _always_ have zero `quantity`. Which kinda makes sense! How many suns did we burn today at the power plant? How about winds? ... waters? It doesn't explain why `mmbtu` for renewables is nonzero, but it's something!
+* Bonus puzzle: MWH always has zero `mmbtu`! How odd.
+
+Honorable mentions:
+
+* `prime_mover` shows moderate differences for BA, CT, and ST as well as the overwhelming differences for HY, PV, and WT
+* `fuel_unit` shows suspicious differences for megawatthours, though it's in the opposite direction
+* `reporting_frequency_code` shows suspicious differences for AM, and mild but noticeable differences for M and A
+* `data_maturity` shows mild differences for incremental_ytd
+
+::::::::
+
+::::
 
 ----
 # Prior draft
