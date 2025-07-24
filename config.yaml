@@ -57,6 +57,7 @@ episodes:
 - scraping-data.md
 - coming-soon.md
 # chapter 2. visualization/reusability
+- visual-data-exploration.md
 #- plotting.md # pick a few transforms and do them - dropping nulls, adding dtypes, stacking, unit conversion
 #- data-validation.md
 #- modularization.md
