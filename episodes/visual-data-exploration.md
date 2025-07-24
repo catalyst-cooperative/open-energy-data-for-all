@@ -6,7 +6,7 @@ exercises: 25
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-- How do I get ready to do research with this new data I found?
+- How do I get ready to do research with data that is new to me?
 - What should I do when I find something that doesn't look right?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
@@ -25,17 +25,225 @@ Maybe you already have a research question;
 how do you get your data into a form that can help you answer it?
 How do you know your data doesn't have gremlins hiding in it that will mess up your research?
 
-In this session we will do some initial data explorations,
-build familiarity with the kinds of cleaning that are typically necessary for energy data,
-and develop strategies for identifying and diagnosing sneaky data problems
+In this session we will do some initial data explorations and develop strategies for identifying and diagnosing sneaky data problems
 -- including the use of data visualization as part of your exploration toolkit.
 Plots aren't just for papers!
 
-# 1: Look at the data
+Data problems come in many different forms, and how you respond to them will depend on the source of the problem and what kind of impact it will have on the kinds of modeling and analysis you want to do.
 
-You have a raw data file, `raw_eia923__puerto_rico_generation_fuel.parquet`.
+* Problems introduced by the respondent - typos and other data entry errors - These can be fixed if they're simple, or can be a reason to exclude certain rows if correct values can't be reconstructed.
+* Problems introduced by the data aggregator - disagreement between documentation you received and the actual forms filled out by respondents; a bad choice of data format that doesn't preserve relationships within the data - These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes
+* "Problems" introduced by external forces - natural disasters, policy change - These may be retained or excluded depending on your exact area of research.
+* Problems we created for ourselves - We'll talk about this later.
 
-You also have a notebook from your predecessor, `puerto-rico-project.ipynb`.
+Data problems can be identified at the column level and in the relationship between columns.
+
+When identifying data problems, it is useful to think about what you expect to see from certain kinds of data.
+
+* Numeric data might be in whole numbers (1, 2, -11, 56,912) or use decimal fractions (3.14, 0.000123, -65,536.2).
+  In programming, a whole number is often called an "integer" or "int" while a number with a decimal fraction is often called a "float"
+  (short for "floating point", which has to do with minutiae of how fractions are implemented in binary -- we don't need to know the details for this course)
+* Categorical data takes on one of a restricted set of available values.
+  They might be ID numbers, an alphanumeric string, a few words, or a few letters meant to abbreviate a longer category name.
+  If a value appears that is not in the restricted set, that value is invalid, and likely resulted from a typo or similar error.
+  An explanation of all the available values for each categorical column is usually included in the documentation for a data source, but sometimes you can get a rough idea from context.
+* Free text data [which we won't cover today] is unrestricted, except perhaps in length.
+  It might be a description of an incident, location, or piece of equipment.
+  A free text value is not required to match any other entry or registry, and there's usually no such thing as an invalid value.
+  Free text typically requires the application of qualitative research methods before it can be analyzed further.
+
+All data types need to deal with situations where no value is available for that entry.
+In pandas, we usually encode an intentionally missing value as `NA`.
+Elsewhere in Python, we use `None`.
+Other programming languages, software, and systems may make different choices.
+Often, one of the first things to do when getting a new data set ready for research is to figure out how missing data was encoded by the data source, and map that to how *you* plan to encode missing data.
+
+# Put it into practice
+
+Let's take a look at how these ideas apply to real data.
+
+You have two data files which were prepared by your predecessor, based on raw data from EIA-923 for Puerto Rico:
+
+* `eia923__annual_puerto_rico_generation_fuel.parquet`
+* `eia923__monthly_puerto_rico_generation_fuel.parquet`
+
+(They also left you their source code, but it looks horrendous, so we'll start with the data and take a look at the code in another session)
+
+We will ask ourselves:
+
+* What kinds of data are there?
+* What do I expect to see from this data?
+* What do I actually see?
+* Can I justify or explain any differences between what I expect and what I actually see?
+
+## Annual data
+
+We'll start with the annual file.
+
+```python
+annual_pr_gen_fuel = pd.read_parquet('../data/eia923__annual_puerto_rico_generation_fuel.parquet')
+annual_pr_gen_fuel
+```
+
+Our predecessor has already taken care of a lot of the cleaning necessary for this data.
+If any of you have used EIA data before, you may know that they use "." to encode missing numeric values, which does not normally play nicely with math.
+In this data frame, those have all been converted to something else, probably pandas `NA` or Python `None`:
+
+```python
+annual_pr_gen_fuel == "."
+(annual_pr_gen_fuel == ".").any()
+```
+
+There are 24 columns here, which is a little much to reason about all at once.
+One way to tackle a problem that seems too large is to break it up into smaller pieces.
+There are lots of ways to split up a wide table, and they'll all work well enough to get you started:
+
+* Split up columns by purpose
+  * Primary key or index columns: the columns that uniquely identify each row of data; closely related to what each row represents
+  * Timeseries columns: the independent and dependent variables you would plot in a line chart
+  * _ columns: the columns you could use to group data together and see if different groups have different properties
+* Split up columns by data type
+  * Numeric data
+  * Categorical data
+    * Identifiers
+    * ...Other stuff
+
+Generally, splitting up columns by purpose requires more domain knowledge, but can also help you understand the meaning of the data more quickly than looking just based on data type.
+We'll use a little of both so you can see what they're like.
+
+### Primary key
+
+Let's start with a primary key.
+What columns, taken together, have unique values from row to row?
+What does each row in this file represent?
+If you happen to know, you can shout it out in chat, otherwise I'll open up the source data Excel file, the grandfather of this dataframe, which has some documentation we can look at.
+
+TODO: screenshot. Alt text:
+Excel screenshot showing tab "Page 7 File Layout" of file "eia923_pr.xlsx".
+A table titled "Generation and Fuel Data" has two columns, "Data Elements" and "Description".
+The first few rows are visible; contents as follows.
+Plant ID: EIA Plant Identification number. One to five digit numeric.
+Combined Heat & Power Plant: Whether or not the plant is a combined heat & power facility (cogenerator). One character alphanumeric, "Y" or "N".
+Nuclear Unit ID: For nuclear plants only, the unit number. One digit numeric. Nuclear plants are the only type of plants for which data are shown explicitly at the generating unit level.
+Plant Name: Plant name. Alphanumeric.
+Operator Name: The name of the entity which operates the plant. Alphanumeric.
+Operator ID: The EIA operator identification number. Five digit numeric, padded with leading zeros.
+State: State the facility is located in. Two character alphanumeric (standard state postal codes).
+
+The documentation doesn't tell you what has to be unique for each entry; we will have to reason it out.
+
+[time passes]
+
+* Plant ID
+* Year
+
+Let's check.
+If that's the primary key, then we expect each pair of (plant ID, year) values to only occur once in the data frame.
+We can test that by grouping by those columns and then printing the size of each group.
+If there are no groups with more than one row in them, or few enough that we could believe they were mistakes, then we got it.
+
+```python
+primary_key_columns = ["plant_id_eia", "report_year"]
+annual_pr_gen_fuel.groupby(primary_key_cols).size()
+```
+
+Oh dear there are some twos and threes.
+For easier readability we can add the plant name in.
+
+```python
+primary_key_columns = ["plant_id_eia", "plant_name_eia", "report_year"]
+annual_pr_gen_fuel.groupby(primary_key_cols).size()
+```
+
+And then filter for just the ones with multiple rows.
+
+```python
+primary_key_columns = ["plant_id_eia", "plant_name_eia", "report_year"]
+pk_sizes = annual_pr_gen_fuel.groupby(primary_key_cols).size()
+pk_sizes.loc[pk_sizes>1]
+```
+
+Ninety one! Out of 283.
+That's almost a third.
+We might expect a few errors but a third is too many;
+it's more likely we're wrong about the primary key.
+
+[time passes]
+
+```python
+primary_key_columns = [
+    'plant_id_eia', 'plant_name_eia', 'report_year', 'prime_mover_code', 'energy_source_code'
+]
+pk_sizes = annual_pr_gen_fuel.groupby(primary_key_columns).size()
+pk_sizes.loc[pk_sizes>1]
+```
+
+```output
+plant_id_eia  plant_name_eia            report_year  prime_mover_code  energy_source_code
+62410         Cervecera de Puerto Rico  2020         IC                DFO                   2
+dtype: int64
+```
+
+Only one!
+That's plausibly a respondent error or data entry problem.
+We can note that plant down as a possible troublemaker to investigate later.
+
+But we have our primary key!
+That's five columns we've carved off of the original 24, using the "split columns by purpose" strategy.
+We wound up needing a combination of domain knowledge from the documentation, and empirical knowledge gained by guess-and-check.
+
+Next let's take a look at an example of the "split columns by data type" strategy.
+
+### Categorical data
+
+To find out what columns probably contain categorical data, we can list the data type of each column.
+
+```python
+annual_pr_gen_fuel.dtypes
+```
+
+Because this data frame doesn't contain any free text, it is likely that any column with a string type contains categorical data.
+To get a list, we can filter:
+
+```python
+annual_pr_gen_fuel.dtypes[annual_pr_gen_fuel.dtypes == "string[python]"]
+annual_pr_gen_fuel.dtypes[annual_pr_gen_fuel.dtypes == "string[python]"].index
+list(annual_pr_gen_fuel.dtypes[annual_pr_gen_fuel.dtypes == "string[python]"].index)
+category_columns = list(annual_pr_gen_fuel.dtypes[annual_pr_gen_fuel.dtypes == "string[python]"].index)
+```
+
+We know from the documentation we looked at earlier that some of these are identifiers with large sets of possible values, and the rest have much smaller sets of possible values.
+It is useful to treat these separately.
+Let's do that now.
+
+```python
+identifier_columns = [
+    "operator_name",
+    "plant_name_eia",
+]
+category_columns = [c for c in category_columns if c not in identifier_columns]
+category_columns
+```
+
+We can use `.describe()` to show some basic information about category data.
+Let's look at the identifier columns as an example:
+
+```python
+annual_pr_gen_fuel[identifier_columns].describe()
+```
+
+```output
+                             operator_name plant_name_eia
+count                                  450            450
+unique                                  30             55
+top     Puerto Rico Electric Pwr Authority  Aguirre Plant
+freq                                   206             45
+```
+
+
+----
+
+## Previous content
 
 We could jump right into the notebook, but reading someone else's code is always easier if you can establish a little context first.
 
@@ -307,6 +515,201 @@ Honorable mentions:
 ::::::::
 
 ::::
+
+So now we know to stick to mmbtus if we want to capture renewables.
+
+# Monthly data
+
+Now let's look at the monthly data.
+
+Most of these variables are time series, and that lends itself to plotting especially well.
+
+Most people are familiar with putting plots in research papers, reports, and slides, where they're useful as evidence supporting your argument. To be effective, those plots need to -- essentially -- look nice: clear labels and titles, appropriate units and limits, good color separation for print or screen, tidy legends, minimizing extraneous data. The goal is to communicate your point.
+
+When you're in the exploratory phase, you don't know what the point is yet, and you're communicating with yourself, now and future-you. Exploratory plots can be sloppy, so long as they are not _actively confusing_.
+
+Pandas has great support for sloppy, but _quick_, plotting.
+
+Let's look at all the monthly variables at once.
+
+What do we want to see?
+
+* a different line for each variable: fuel consumed for electricity, fuel consumed, fuel mmbtu, and net generation
+* one value for each month -- we'll sum across all the plants
+
+```python
+pr_gen_fuel_monthly
+pr_gen_fuel_monthly.groupby("date").sum()
+pr_gen_fuel_monthly.groupby("date").sum().plot(y=monthly_variables)
+```
+
+Things to notice:
+* Big zero spike in late 2017, all variables
+* Everything drops to zero after early 2025; that's probably the end of the real data
+* Variables are on vastly different scales but pandas did its best and it's okay
+
+Let's dive in further. What's the energy source breakdown look like throughout the year?
+
+What do we want to see?
+
+* just fuel consumed mmbtus
+* a different line for each energy source: CFO, SUN, NG, etc
+* one value for each month -- we'll sum across all the plants
+
+```python
+pr_gen_fuel_monthly
+pr_gen_fuel_monthly.groupby(["energy_source_code", "date"]).sum()
+pr_gen_fuel_monthly.groupby(["energy_source_code", "date"]).sum().fuel_consumed_mmbtu
+pr_gen_fuel_monthly.groupby(["energy_source_code", "date"]).sum().fuel_consumed_mmbtu.unstack("energy_source_code")
+pr_gen_fuel_monthly.groupby(["energy_source_code", "date"]).sum().fuel_consumed_mmbtu.unstack("energy_source_code").plot()
+```
+
+Things to notice:
+
+* Zero spike in 2017 visible in all energy sources but recovery severely delayed for BIT and renewables
+* NG another big drop in late 2019/early 2020; again in late 2021. Independent of other energy sources though.
+* RFO also seems to vary quite a lot; also not related to other energy sources.
+* Renewables way smaller than others
+* Renewables all drop starting in 2022
+
+Let's put the renewables on their own plot so we can see them better.
+
+```python
+(
+    pr_gen_fuel_monthly.loc[pr_gen_fuel_monthly.energy_source_code in renewables]
+    .groupby(["energy_source_code", "date"]).sum()
+    .fuel_consumed_mmbtu.unstack("energy_source_code").plot()
+)
+```
+
+That makes an error. Darn. It would've been super convenient if that had worked.
+
+What are our options here?
+
+* do `(== "SUN") | (== "WND") | (== "WAT")`
+* do something ... a little more flexible
+
+```python
+(
+    pr_gen_fuel_monthly.set_index("energy_source_code").loc[renewables].reset_index()
+    .groupby(["energy_source_code", "date"]).sum()
+    .fuel_consumed_mmbtu.unstack("energy_source_code").plot()
+)
+```
+
+Okay, yes, that is dramatic. Does this show up in the net generation as well?
+
+:::: challenge
+
+Adapt our current fuel_consumed_mmbtu plot to show net_generation instead.
+
+:::::::: solution
+
+(
+    pr_gen_fuel_monthly.set_index("energy_source_code").loc[renewables].reset_index()
+    .groupby(["energy_source_code", "date"]).sum()
+    .net_generation_mwh.unstack("energy_source_code").plot()
+)
+
+::::::::
+
+No, not really :(
+
+:::
+
+Okay, what else could it be? Maybe a big renewables plant opened or closed that did things differently than the others? Let's look for patterns or clusters in the relationship between net generation and fuel consumed mmbtus for renewables.
+
+What do we want to see?
+
+* a scatter plot with one point for each row
+* net generation on the x axis
+* fuel consumed on the y axis
+
+```python
+(
+    renewables_monthly.plot
+    .scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu")
+)
+```
+
+Well that's quite linear. Let's clean it up a little so we can see better; the dots are overlapping a lot.
+
+
+```python
+(
+    renewables_monthly.plot
+    .scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.1)
+)
+```
+
+Is that three lines? Three lines for three energy sources is awfully suspicious. Let's add color.
+
+```python
+(
+    renewables_monthly
+    .plot.scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.1, c="energy_source_code")
+)
+```
+
+"c must be a sequence of numbers, not an array of strings"
+
+Okay, well pandas has a categorical type that will turn our array of strings into numbers, let's use that.
+
+```python
+(
+    renewables_monthly.assign(energy_source_code=pr_gen_fuel_monthly_renewables.energy_source_code.astype("category"))
+    .plot.scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.1, c="energy_source_code", colormap="rainbow")
+)
+```
+
+Oh do not like that. There are colors for all three energy sources on both lines. That does not explain this at all.
+
+:::: challenge
+
+Are there any other variables in our data that, when used to color this plot, clearly separate the lines by color?
+
+::::::: solution
+
+Disappointingly, `date` is the only one that really does it:
+
+```python
+(
+    renewables_monthly
+    .plot.scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.2, c="date", colormap="rainbow")
+)
+```
+
+But at least it clearly identifies three lines. This feels like a policy change effect -- a coordinated change throughout Puerto Rico in how fuel consumption is reported for renewables (which as we know, is already a little weird).
+
+:::::::
+
+::::
+
+Let's grab the slopes of those lines and see if that gets us any further:
+
+```python
+(
+    renewables_monthly
+    .assign(ratio=renewables_monthly.fuel_consumed_mmbtu/renewables_monthly.net_generation_mwh)
+    .plot.scatter(x="date", y="ratio", s=0.2, c="date", colormap="rainbow")
+)
+```
+
+Oh hey, more subtle than we thought. It looks like whatever constant everyone was using to compute fuel consumption changed a little bit each year, with a big gap for Maria, and then suddenly decided once and for all in 2022.
+
+There's these little stragglers though; are those individual plants or some other effect?
+
+```python
+(
+    renewables_monthly
+    .assign(ratio=renewables_monthly.fuel_consumed_mmbtu/renewables_monthly.net_generation_mwh)
+    .assign(plant_factor=renewables_monthly.plant_name_eia.astype("category"))
+    .plot.scatter(x="date", y="ratio", s=0.2, c="plant_factor", colormap="rainbow")
+)
+```
+
+Seems likely to be one or a small number of plants. If we wanted to figure out exactly which ones, we could split the data by year, use `.describe()` to get the median ratio for each year, then select all the rows that had a different ratio.
+
 
 ----
 # Prior draft
