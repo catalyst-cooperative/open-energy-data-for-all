@@ -14,7 +14,7 @@ exercises: 0
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Identify limitations of Jupyter notebooks for collaborative and reproducible research
-- Reorganize code from a Jupyter notebook into a series of Python modules
+- Reorganize code from a Jupyter notebook into a Python script environment
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -111,6 +111,7 @@ to specify many, many things about project set-up. To get us started, we can see
 - requires-python: the version of Python your code uses
 - dependencies: which packages are needed to run the code. Right now we can see we don't have any!
 
+TODO: add some pyproject.toml reference.
 
 #### Adding packages to uv
 Let's add our first package:
@@ -122,7 +123,7 @@ In the terminal, you should be able to see that `uv` successfully added and inst
 
 ```
 dependencies = [
-    "pandas>=2.3.1", # TODO: how to make this not out of date always?
+    "pandas>=2.3.1", # Your version might be different!
 ]
 ```
 
@@ -130,8 +131,7 @@ dependencies = [
 
 In the corresponding `uv.lock` file, we can also see a ton of new information! While `pyproject.toml` gives us high-level instructions, `uv.lock` tells us which exact version of each package and which link it was installed from. This is the recipe other computers will follow to recreate the same environment when they setup your environment.
 
-To keep our environment up to date as time goes on, we can run
-`uv sync`.
+To keep our environment up to date as time goes on, we can run `uv sync`.
 
 #### Challenge 1: setting up our working environment
 
