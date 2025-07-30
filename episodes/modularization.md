@@ -19,23 +19,42 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-- cover 'plain language' code descriptions
-- this gives us tools to think about the code in parts and make improvements
+- start by looking at the code mess
+- where do we start
+- there are parts to the code - what do they do? how do I break this up into chunks?
+- start by describing the code - what do we want it to do?
 
-why plain language?
-- gives us important context about the *why*
-- helps us assess whether the code does what we think it should do
-- there are many ways to do most tasks. helps us assess whether different options of doing the same thing will meet our goals better.
-- helps us pay attention to the desired outcome, rather than the specific method.
-- when data changes, keeps us attuned to what we actually care about.
-- helps us to understand the discrete steps involved in a method.
-- helps us communicate what our code does to others
+TODO: Flip: modularization first. Show chunk of code, plain language what does it do, modularization, 
+how to make things more generalizeable (and when not to do this.... - maybe an example of when something shouldn't go into a generalized function?). then function (how to write a docstring, and then....?).
+- 
+
+def drop_baddies(pr_gen_fuel):
+    """Drop specifically bad rows!"""
+    pr_gen_fuel = pr_gen_fuel.loc[~((pr_gen_fuel.plant_id_eia == 62410) & (pr_gen_fuel.date.dt.year == 2020) & (pr_gen_fuel.value.isnull()))]
+    pr_gen_fuel = pr_gen_fuel.loc[~((pr_gen_fuel.plant_id_eia == 62411) & (pr_gen_fuel.date.dt.year == 2022) & (pr_gen_fuel.value.isnull()))]
+    pr_gen_fuel = pr_gen_fuel.dropnas() # Don't add this.
+    return pr_gen_fuel
+
+def drop_baddies(df, list):
+    return
+
+
+As we've seen through in previous lessons, it's easy to write a lot of code in a Jupyter
+notebook. Yet as our code grows, it can get increasingly repetitive, confusing, and
+challenging to explain to others. Important context about *why* we dropped a row of data
+can easily get lost over time, and .... TODO.
+
+#TODO: Explain plain language code
+- Usually start by writing code first, and adding some comments about it later.
+- cover 'plain language' code descriptions
+
+- add example
 
 :::::::: challenge
 
 ### Challenge 1: breaking down code
 
-Look at the following code. Which of these best describes what it does in plain language?
+Look at the following code. Which of these best describes the intent of the code?
 
 ```python
 pr_gen_fuel = pr_gen_fuel.replace(to_replace = ".", value = pd.NA).convert_dtypes()
@@ -61,19 +80,36 @@ about the specific steps taked in the code (unlike C. or D.).
 
 ::::::::
 
+
+Why plain language?
+- Plain language helps provide important context about *why* we've written this code.
+- Plain language helps us break down the discrete steps involved in a task.
+- There are many ways to do most tasks. Using plain language descriptions focuses us
+on the desired outcome, and helps us assess whether different ways of doing the same
+thing might help meet our goals better.
+- For ourselves and others reading our code, plain language helps us to easily
+communicate what we are doing.
+- When our underlying data changes or we try to reuse our code in a different context, 
+plain language descriptions can help us pay attention to what the code we've written
+can and can't be used to do.
+
+
 Having a plain language description of the code is an important first step for function
 design.
 
-- what is a function?
+What's a function? A function is a reusable piece of code that can be treated as a black box by the
+rest of your workflow.
 
-* what makes a good function? (brief, callback to the last challenge)
-    * it has one task (can be composed of multiple other functions)
-    * someone other than the person who wrote it can understand what it does
-    * it can be adaptable (e.g., we can run this transformation function on a new year of data).
-    * it can be tested (next module!)
+What makes a good function?
+* It has one task (can be composed of multiple other functions)
+* Someone other than the person who wrote it can understand what it does
+* It can be adaptable (e.g., we can run this transformation function on a new year of data).
+* It can be tested (we'll talk about this next module!)
 
-- when we're taught how to write a function, typically focus on the basics: var names
-and function name
+When we're taught how to write a function, lessons typically focus on the basics:
+* A function should have a name
+* A function should have inputs
+* A function should have an output (return something)
 
 ```python
 def transform_pr_gen_fuel(raw_pr_gen_fuel):

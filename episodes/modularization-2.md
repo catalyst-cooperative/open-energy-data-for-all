@@ -37,8 +37,8 @@ Having to constantly scroll up and down to find that helpful function you wroteâ
 
 Objective:
 - Extract reusable functionality into an importable module
-- Demonstrate that you can also import this into a notebook? If so, can show that you can call help() on your
-own functions (nice!).
+- Demonstrate that you can also import this into a notebook. Can show that you can call help() on your own functions (nice!).
+- Demonstrate import into transform.py
 
 Challenge:
 Add your cool new function into utils and call it in your transform.py file (probably the drop nulls one)
