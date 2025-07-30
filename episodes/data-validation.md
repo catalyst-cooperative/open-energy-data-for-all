@@ -69,13 +69,13 @@ def test_fuel_consumption_units_for_renewables():
     raw_data = pd.read_parquet(...)
     pr_gen_fuels = process(raw_data)
     renewable_codes = {"SUN", "WND", "WAT"}
-    renewable_gen_fuels = pr_gen_fuels[pr_gen_fuels["energy_source_code"] in renewable_codes]
+    renewable_gen_fuels = pr_gen_fuels[pr_gen_fuels["energy_source_code"].isin(renewable_codes)]
     renewable_fuel_units = renewable_gen_fuels["fuel_consumption_units"]
     assert (renewable_fuel_units == 0).all()
 ```
 
 It's kind of nice to not have to do that setup for extracting the renewable data within your pipeline code itself!
-Let's actually run this function when we run `uv run tests/test_pipeline.py` by calling the function here:
+Let's actually run this function when we run `uv run tests/test_pipeline.py` by calling the function here (like before!):
 
 ```python
 if __name__ == "__main__":
@@ -86,6 +86,8 @@ if __name__ == "__main__":
 ```bash
 % uv run tests/test_pipeline.py
 ```
+
+**TODO** maybe show making the test break to verify that the test itself is working
 
 Now it's your turn.
 
@@ -104,6 +106,8 @@ Think about the pipeline we made together in the modularization episode.
 
 What is a property that you expect the output to have?
 Write a function in `test_pipeline.py` that tests this by filling out the following skeleton:
+
+**TODO** it is OK if the test fails. that means you have found a problem with the pipeline. or maybe you wrote your test wrong.
 
 **TODO** get the right filenames/function names
 ```python
@@ -128,6 +132,7 @@ but we want to make sure that the `.` is always marked as NA.
 **TODO** update to work with modularized code from previous lesson
 
 ```python
+from utils import clean_nas
 import pandas as pd
 
 def test_function_happy_path():
@@ -142,7 +147,7 @@ when given the nice inputs you expect,
 the outputs are nice as well.
 You will probably also want to test that your system works even when you throw some strange inputs at it.
 These are called "edge cases."
-Let's try writing one!
+Let's try writing a test for one!
 
 :::: challenge
 
@@ -213,6 +218,9 @@ What `pytest` is doing is:
 Try running `uv run pytest tests/` in your own project and see if it's picking up your tests!
 ::::
 
+
+**TODO** wrap up pytest
+
 ### The debugger
 
 We've found out which function isn't working right. How do we figure out why that function isn't working?
@@ -226,6 +234,7 @@ An interactive debugger pauses your program at a specific spot (a "breakpoint"),
 at which point you get to go in and poke around.
 It can be super powerful and overwhelmingly complicated - let's go over the basics:
 
+* how to make a breakpoint: `breakpoint()`
 * how to get help: ?
 * how to figure out what you're looking at & where you are in the execution: `l` `list`
 * how to print out values of variables / expressions: `p` `pp`
