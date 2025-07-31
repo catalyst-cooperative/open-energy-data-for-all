@@ -16,7 +16,7 @@ exercises: 0
 
 - Identify limitations of Jupyter notebooks for collaborative and reproducible research
 - Reorganize code from a Jupyter notebook into series of Python scripts
-- Use `uv` to create a vritual environment and codebase
+- Use `uv` to create a virtual environment and codebase
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -87,7 +87,7 @@ main.py  pyproject.toml  README.md
 ```
 
 We'll talk through each file in a moment, but first, let's just try and run our `.py` file.
-Rather than using `python main.py`, we use `uv run` to run the script within our virtual
+We will use `uv run` to run the script within our virtual
 environment.
 
 ```shell
@@ -218,11 +218,11 @@ This section of the file helps us distinguish between what we want to have happe
 run this script directly (e.g., use `uv run main.py`) and what we want to happen when we
 use this code in any other context (e.g., import it into a Jupyter notebook).
 
-When we run this file directly (e.g., using `uv run main.py`), Python assigns this file
-the attribute `__name__` as `__main__`. While we might add many functions into `main.py`,
-we can use this `if __name__ == "__main__":` code block to specify which functions we want
-to run *when we run the script*, and even which variables they should take by default.
-Putting these functions in this `if` block will prevent us from running the entire
+`__name__` is a built-in variable in Python; a variable that gets set by the system and not by you.
+When we run this file directly (e.g., using `uv run main.py`), Python sets the value of `__name__` to the string `"__main__"`.
+We can use this `if __name__ == "__main__":` block to specify which code we want
+to run *only when we run the script directly*.
+Calling our pipeline function in this `if` block will prevent us from running the entire
 transformation unexpectedly in other contexts.
 
 ```python
@@ -293,7 +293,7 @@ Now, when you make a tweak to `TODOFUNCTIONNAME`, that tweak will be applied acr
 all of your code immediately. No more copy-pasting!
 
 As your code grows, you can use modules and imports to reorganize your project into
-multiple scripts in folders and subfolders, as makes sense to you. Here are but a few options:
+multiple files in folders and subfolders, as makes sense to you. Here are but a few options:
 - One script per dataset (e.g., `eia923_pr.py`, `eia860_pr.py`, `eia923_nonpr.py`), with a general `utils.py` file
 - One folder per step of the data transformation process (e.g., `extract`, `transform`, `load`)
 
