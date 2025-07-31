@@ -250,7 +250,7 @@ can be run.
 **TODO**: Is this helpful? Should this live here?
 ::::
 
-Let's start by creating a new file, and call it `utils.py`. In this file, let's 
+Let's start by creating a new file, and call it `utils.py`. In this file, let's
 migrate over the `TODOFUNCTIONNAME()` function we wrote in the last episode:
 
 ```python
@@ -282,7 +282,7 @@ help(utils.TODOFUNCTIONNAME)
 
 #### Importing your code into `main.py`
 
-The same is true in our `main.py` file. 
+The same is true in our `main.py` file.
 
 ::: challenge
 Import `utils` and replace existing references to `TODOFUNCTIONNAME` with
