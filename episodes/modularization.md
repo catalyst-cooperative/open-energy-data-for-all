@@ -39,9 +39,9 @@ For each cell, let's write one sentence about what it is doing:
 - do ...
 
 
-TODO: Flip: modularization first. Show chunk of code, plain language what does it do, modularization, 
+TODO: Flip: modularization first. Show chunk of code, plain language what does it do, modularization,
 how to make things more generalizeable (and when not to do this.... - maybe an example of when something shouldn't go into a generalized function?). then function (how to write a docstring, and then....?).
-- 
+-
 
 def drop_baddies(pr_gen_fuel):
     """Drop specifically bad rows!"""
@@ -104,7 +104,7 @@ on the desired outcome, and helps us assess whether different ways of doing the 
 thing might help meet our goals better.
 - For ourselves and others reading our code, plain language helps us to easily
 communicate what we are doing.
-- When our underlying data changes or we try to reuse our code in a different context, 
+- When our underlying data changes or we try to reuse our code in a different context,
 plain language descriptions can help us pay attention to what the code we've written
 can and can't be used to do.
 
