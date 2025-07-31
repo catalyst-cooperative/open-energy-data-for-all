@@ -7,6 +7,7 @@ exercises: 0
 :::::::::::::::::::::::::::::::::::::: questions
 
 - How can I re-use code I've already written to address similar problems?
+- How can I reduce duplication in my code?
 - How can I clearly communicate what my code is doing?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
@@ -23,6 +24,20 @@ exercises: 0
 - where do we start
 - there are parts to the code - what do they do? how do I break this up into chunks?
 - start by describing the code - what do we want it to do?
+
+
+- start by looking at all the code: what do we notice?
+-- exact duplication
+-- duplication with slight variations
+-- a bunch of one-off code
+-- similar but not identical types of things.
+
+For each cell, let's write one sentence about what it is doing:
+- read in the data
+- handle dtypes for X data
+- handle dtypes for Y data
+- do ...
+
 
 TODO: Flip: modularization first. Show chunk of code, plain language what does it do, modularization, 
 how to make things more generalizeable (and when not to do this.... - maybe an example of when something shouldn't go into a generalized function?). then function (how to write a docstring, and then....?).
