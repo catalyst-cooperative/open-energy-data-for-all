@@ -60,6 +60,7 @@ episodes:
 #- plotting.md # pick a few transforms and do them - dropping nulls, adding dtypes, stacking, unit conversion
 #- data-validation.md
 #- modularization.md
+- escape-from-jupyter.md
 #- automated-testing.md
 # chapter 3. when things go wrong
 #- debugging.md
