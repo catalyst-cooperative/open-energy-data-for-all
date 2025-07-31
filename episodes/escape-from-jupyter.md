@@ -246,8 +246,6 @@ A note on terminology:
 can be run.
 - **Script:** A file that contains code that can be run directly (e.g., `main.py`)
 - **Module:** A piece of code that can be used in other contexts (e.g., the `pandas` library, or a sub-section of a library (e.g., `pandas.eval`))
-
-**TODO**: Is this helpful? Should this live here?
 ::::
 
 Let's start by creating a new file, and call it `utils.py`. In this file, let's
