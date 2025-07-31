@@ -7,14 +7,16 @@ exercises: 0
 :::::::::::::::::::::::::::::::::::::: questions
 
 - How can I break up this giant notebook I have into smaller pieces?
-- I want to collaborate with someone in another city. How can we effectively share work?
+- How can I effectively reuse modularized functions in multiple places?
+- I want to collaborate with someone in another city. How can I get them to run my code?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Identify limitations of Jupyter notebooks for collaborative and reproducible research
-- Reorganize code from a Jupyter notebook into a Python script environment
+- Reorganize code from a Jupyter notebook into series of Python scripts
+- Use `uv` to create a vritual environment and codebase
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -137,19 +139,20 @@ which identifies additional fields you can add to your TOML file and provides a 
 
 #### Adding packages to uv
 
-Let's add our first package. We can use `uv add` to add the Pandas package to our
-virtual environment:
+Let's add our first package. We can use `uv add` to add the Pandas package and Jupyter
+to our virtual environment, seperating the packages by a space:
 
 ```bash
-uv add pandas
+uv add pandas jupyter
 ```
 
 In the terminal, you should be able to see that `uv` successfully added and installed
-`pandas` and packages it relies on. In the `pyproject.toml` file, we can now see Pandas
-listed in the dependencies:
+`pandas`, `jupyter` and all the packages they rely on. In the `pyproject.toml` file,
+we can now see Pandas and Jupyter listed in the dependencies:
 
 ```
 dependencies = [
+    "jupyter>=1.1.1",
     "pandas>=2.3.1", # Your version might be different!
 ]
 ```
@@ -210,10 +213,17 @@ import somestuff
 #TODO add the freaking code.
 ```
 
-How do we actually run this code? We can amend the code block that begins with `if __name__ == "__main__"`. This section of the file tells us what happens when we run `uv run main.py`.
+How do we actually run this code? We can amend the code block that begins with `if __name__ == "__main__"`.
+This section of the file helps us distinguish between what we want to have happen when we
+run this script directly (e.g., use `uv run main.py`) and what we want to happen when we
+use this code in any other context (e.g., import it into a Jupyter notebook).
 
-When we run this file directly (e.g., using `uv run main.py`), Python assigns this file the attribute `__name__` as `__main__`. While we might add many functions into `main.py`, we can use
-this `if __name__ == "__main__":` code block to specify which functions we want to run, and even which variables they should take by default.
+When we run this file directly (e.g., using `uv run main.py`), Python assigns this file
+the attribute `__name__` as `__main__`. While we might add many functions into `main.py`,
+we can use this `if __name__ == "__main__":` code block to specify which functions we want
+to run *when we run the script*, and even which variables they should take by default.
+Putting these functions in this `if` block will prevent us from running the entire
+transformation unexpectedly in other contexts.
 
 ```python
 if __name__ == "__main__":
@@ -226,19 +236,74 @@ Run this code using uv, and check to see that it saved the expected transformed 
 
 ### Importing your own code
 
-In the last lesson, we wrote a number of generalizeable functions that could get reused across multiple contexts.
+In the last lesson, we wrote a number of generalizeable functions that could get reused
+across multiple contexts. In order to keep things organized, we can split out these
+general purpose functions from our EIA 923-specific code by creating another script.
 
-TODO:
-- create utils.py
-- add a docstring at the top explaining what the file contains
-- import from utils.py into a notebook
-- import from utils.py into main.py
-- add a docstring there too
-- general reflections on organization of modules
+:::: callout
+A note on terminology:
+- **File:** A file can contain many things - documentation, code definitions, or code that
+can be run.
+- **Script:** A file that contains code that can be run directly (e.g., `main.py`)
+- **Module:** A piece of code that can be used in other contexts (e.g., the `pandas` library, or a sub-section of a library (e.g., `pandas.eval`))
 
+**TODO**: Is this helpful? Should this live here?
+::::
+
+Let's start by creating a new file, and call it `utils.py`. In this file, let's 
+migrate over the `TODOFUNCTIONNAME()` function we wrote in the last episode:
+
+```python
+import somestuff
+
+def TODOFUNCTIONNAME():
+    # some code
+    return something
+```
+
+Because we only want to use this function in other contexts and not run any of the
+functions in this file, we don't need to include an `if __name__ == "__main__":` block.
+
+#### Importing your code into a notebook
+
+Now that we've created our `utils.py` file, we can use it in a Jupyter notebook
+just like any other package by importing it.
+
+```python
+import utils
+```
+
+Better yet, we can access the excellent documentation we've written about it.
+
+```python
+help(utils)
+help(utils.TODOFUNCTIONNAME)
+```
+
+#### Importing your code into `main.py`
+
+The same is true in our `main.py` file. 
+
+::: challenge
+Import `utils` and replace existing references to `TODOFUNCTIONNAME` with
+`utils.TODOFUNCTIONNAME()`.
+:::
+
+Now, when you make a tweak to `TODOFUNCTIONNAME`, that tweak will be applied across
+all of your code immediately. No more copy-pasting!
+
+As your code grows, you can use modules and imports to reorganize your project into
+multiple scripts in folders and subfolders, as makes sense to you. Here are but a few options:
+- One script per dataset (e.g., `eia923_pr.py`, `eia860_pr.py`, `eia923_nonpr.py`), with a general `utils.py` file
+- One folder per step of the data transformation process (e.g., `extract`, `transform`, `load`)
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
-- placeholder
+- Jupyter is great for data exploration and visualization, but working with scripts
+and modules is preferable for reusability, legibility and collaboration
+- `uv` bundles packages into a virtual environment, and helps us move our code into
+a codebase
+- Reorganizing code into multiple modules can help us reuse code in multiple places and
+keep our project organized.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
