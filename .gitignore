@@ -57,3 +57,8 @@ data/.~lock*
 
 # ipynb stuff
 **/.ipynb_checkpoints/*
+
+# etl output
+data/pr_gen_fuel_monthly.parquet
+data/pr_gen_fuel_annual.parquet
+data/pr_plant_frame.parquet
