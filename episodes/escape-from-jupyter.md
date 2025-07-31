@@ -1,7 +1,7 @@
 ---
 title: "Escape from Jupyter!"
-teaching: "ideally 20"
-exercises: 0
+teaching: 20
+exercises: 10
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions
