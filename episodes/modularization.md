@@ -78,7 +78,7 @@ Cells 6, 7, 8, and 9 all do the same thing. Note that each cell does this for a 
 We're doing *almost* the same thing five times! Imagine you find an error in your first code
 cell - now you have to copy paste the code into each cell where similar code appears. Or,
 image you want to do this for 25 columns rather than five. What if instead of repeating this code,
-we replaced it with single function we could re-use each time? 
+we replaced it with single function we could re-use each time?
 
 :::: callout
 What's a **function**? A function is a reusable piece of code that can be treated as a black box by the
@@ -109,13 +109,13 @@ cells differently than the others. *Should* it get combined into this `melt_mont
 
 As we think about how to organize and re-organize our code, it doesn't take long to run into
 these types of tricky questions. One strategy to help us figure out which
-code we can modularize is a **plain language approach**. 
+code we can modularize is a **plain language approach**.
 
 Often, we start by writing our code first and adding comments or documentation at the end. In contrast, starting by briefly outlining what a piece of our code *should do* and *why* can be incredibly valuable.
 
 Let's go back to the description we wrote earlier:
 
-> This code takes a table with data stored in one column per month and stacks all the fields for a single variable 
+> This code takes a table with data stored in one column per month and stacks all the fields for a single variable
 > (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
 > order to make it easier to plot our data over time.
 
@@ -128,7 +128,7 @@ Let's take another example from our notebook:
 # Plant 62410 has two 2020 data entries but one is null
 # Drop the bad row
 pr_gen_fuel_final = pr_gen_fuel_clean.loc[
-    ~((pr_gen_fuel_clean.plant_id_eia == 62410) 
+    ~((pr_gen_fuel_clean.plant_id_eia == 62410)
     & (pr_gen_fuel_clean.date.dt.year == 2020)
     & (pr_gen_fuel_clean.fuel_consumed_for_electricity_mmbtu.isnull()))
 ]
@@ -233,10 +233,10 @@ A docstring can contain the following information:
 ```python
 def melt_monthly_vars(pr_gen_fuel, variable_name):
     """Melt many columns of monthly data for a single variable into a month column and a value column.
-    
+
     This code takes a table with data stored in one column per month and stacks all the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
     order to make it easier to plot our data over time. Note that this drops the other variables of data.
-    
+
     Args:
         pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
         variable_name: The variable to be melted.
@@ -287,10 +287,10 @@ While Python won't raise an error if you pass a different datatype in, this prov
 ```python
 def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, variable_name: str) -> pd.DataFrame:
     """Melt many columns of monthly data for a single variable into a month column and a value column.
-    
+
     This code takes a table with data stored in one column per month and stacks all the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
     order to make it easier to plot our data over time. Note that this drops the other variables of data.
-    
+
     Args:
         pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
         variable_name: The variable to be melted.
