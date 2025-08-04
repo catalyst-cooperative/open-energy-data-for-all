@@ -159,7 +159,9 @@ What do you expect the output to look like?
 Can you imagine some weird input that *might* break your function?
 
 Try writing a test in `test_pipeline.py` that tells you what happens with that weird input!
-If it fails with an error telling you that your function can't actually handle that weird input, that is a totally acceptable output of this challenge.
+If it fails with an error telling you that your function can't actually handle that weird input,
+that is a totally acceptable output of this challenge.
+In fact, that will set us up well for later in this episode when we learn about how to debug these failures.
 
 ```python
 def test_function_edge_case():
@@ -208,44 +210,237 @@ What `pytest` is doing is:
 
 * it looks for files named `test_*.py` or `*_test.py` within the given directory (defaults to current directory)
 * in those files, it looks for functions that start with `test`
-* it runs all those tests and makes a nice report
+* it runs all those tests independently and makes a nice report
 
 
 :::: challenge
 
 #### Try `pytest`
 
-Try running `uv run pytest tests/` in your own project and see if it's picking up your tests!
+Try installing `pytest`, then running `uv run pytest tests/` in your own project and see if it's picking up your tests!
 ::::
 
-
-**TODO** wrap up pytest
+As your software gets more complicated, testing it can also get more complicated.
+`pytest` offers a lot more beyond the functions we've already seen
+(automatically finding your test functions & running them separately for you).
+Check out the [official documentation](https://docs.pytest.org/en/stable/index.html) for more info!
 
 ### The debugger
 
-We've found out which function isn't working right. How do we figure out why that function isn't working?
+Suppose we now have a test that fails,
+and now we know which subsystem isn't working right.
+How do we figure out why it's broken?
 
-Options:
-- break the function down into smaller parts and write more tests: sometimes a good idea, but often tedious and breaks up your code into unnecessarily small chunks
-- throw in a bunch of `print(f"value of something is {something}")` statements: super easy, but kind of annoying to go back and keep adding more until you figure your stuff out. Plus then you have to delete them later to not clutter your output.
+At this point, we have a few options:
+- break the function down into smaller parts and write more tests:
+  sometimes a good idea,
+  but often tedious and breaks up your code into unnecessarily small chunks
+- throw in a bunch of `print(f"value of something is {something}")` statements:
+  super easy, but annoying to keep going back and adding more.
+  Plus then you have to delete them later to not clutter your output.
 - use an **interactive debugger**!
 
 An interactive debugger pauses your program at a specific spot (a "breakpoint"),
 at which point you get to go in and poke around.
 It can be super powerful and overwhelmingly complicated - let's go over the basics:
 
-* how to make a breakpoint: `breakpoint()`
-* how to get help: ?
-* how to figure out what you're looking at & where you are in the execution: `l` `list`
-* how to print out values of variables / expressions: `p` `pp`
-* how to move: `next` vs `step`
-* how to quit: `q`
+First, how to start the debugger at all: `breakpoint()`.
+If you decide you want to figure out what's going on in a certain part of your code,
+add the `breakpoint()` statement right where you want to pause the execution.
+When you call your code from the CLI (or from a Jupyter notebook), it will pause right there.
+Here's an example:
 
-do this in a live demo
+```python
+# debugger_example.py
+
+def inner_func(x, y):
+    return f"({x}, {y})"
+
+
+def outer_func():
+    x = 1
+    breakpoint()
+    y = x + 1
+    z = inner_func(x, y)
+    return z
+
+
+if __name__ == "__main__":
+    outer_func()
+```
+
+```bash
+% python foo.py
+```
+
+This will drop you into the debugger,
+at which point you'll be greeted with this terse situation:
+
+```bash
+-> breakpoint()
+(Pdb)
+```
+
+`l` or `list` shows the code around where your execution is paused.
+The `->` denotes the line that is *about* to run.
+
+```
+(Pdb) l
+  2         return f"({x}, {y})"
+  3  
+  4  
+  5     def outer_func():
+  6         x = 1
+  7  ->     breakpoint()
+  8         y = x + 1
+  9         z = inner_func(x, y)
+ 10         return z
+ 11  
+ 12  
+(Pdb) l
+ 13     if __name__ == "__main__":
+ 14         outer_func()
+[EOF]
+(Pdb) list
+[EOF]```
+
+If you call it multiple times in a row,
+it tries to keep reading out more lines of the file.
+Our file is very short, so this quickly reaches the end of the file (`[EOF]`).
+
+To take a look at variable values, we can use `p` (short for "print"), or omit the command entirely:
+
+```
+(Pdb) p x
+1
+(Pdb) x
+1
+```
+
+We can also print out an expression value in to check that something behaves the way we expect:
+
+```
+(Pdb) x+1
+2
+```
+
+We can also slowly step through the code using `next`/`n`:
+```
+(Pdb) next
+> /home/daz/scratch/foo.py(8)outer_func()
+-> y = x + 1
+```
+
+At this point, we are about to execute `y = x + 1`, which means that `x` should be defined as 1, but `y` is not defined yet:
+```
+(Pdb) x
+1
+(Pdb) y
+*** NameError: name 'y' is not defined
+```
+
+But if we use `next` to move to the next line, we expect `y` to have the value 2:
+```
+(Pdb) n
+> /home/daz/scratch/foo.py(9)outer_func()
+-> z = inner_func(x, y)
+(Pdb) y
+2
+```
+
+Now we're about to call `inner_func()`. If we run `next` we'll run `z = inner_func(x, y)`:
+
+```
+(Pdb) n
+> /home/daz/scratch/foo.py(10)outer_func()
+-> return z
+(Pdb) z
+'(1, 2)'
+```
+
+But if we call `step` or `s` instead, we can go into that `inner_func` call:
+
+```
+(Pdb) step
+--Call--
+> /home/daz/scratch/foo.py(1)inner_func()
+-> def inner_func(x, y):
+```
+
+This drops you in right at the beginning of the function call,
+where you can continue using your other commands:
+
+```
+(Pdb) l
+  1  -> def inner_func(x, y):
+  2         return f"({x}, {y})"
+  3
+  4
+  5     def outer_func():
+  6         x = 1
+  7         breakpoint()
+  8         y = x + 1
+  9         z = inner_func(x, y)
+ 10         return z
+ 11
+(Pdb) n
+> /home/daz/scratch/foo.py(2)inner_func()
+-> return f"({x}, {y})"
+```
+
+It will pause you before you return a value as well:
+```
+(Pdb) next
+--Return--
+> /home/daz/scratch/foo.py(2)inner_func()->'(1, 2)'
+-> return f"({x}, {y})"
+(Pdb) l
+  1     def inner_func(x, y):
+  2  ->     return f"({x}, {y})"
+  3
+  4
+  5     def outer_func():
+  6         x = 1
+  7         breakpoint()
+  8         y = x + 1
+  9         z = inner_func(x, y)
+ 10         return z
+ 11
+```
+
+And a further `next` drops you back into the original calling function:
+```
+(Pdb) next
+> /home/daz/scratch/foo.py(10)outer_func()
+-> return z
+(Pdb) z
+'(1, 2)'
+```
+
+Finally, to quit your session, you can use `q`:
+```
+(Pdb) q
+Traceback (most recent call last):
+  File "/home/daz/scratch/foo.py", line 14, in <module>
+    outer_func()
+    ~~~~~~~~~~^^
+  File "/home/daz/scratch/foo.py", line 10, in outer_func
+    return z
+           ^
+  File "/usr/lib64/python3.13/bdb.py", line 102, in trace_dispatch
+    return self.dispatch_line(frame)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/usr/lib64/python3.13/bdb.py", line 129, in dispatch_line
+    if self.quitting: raise BdbQuit
+                      ^^^^^^^^^^^^^
+bdb.BdbQuit
+```
+
+Note that if you quit, you get this `BdbQuit` error in the console.
 
 :::: challenge
 
-If your function fails your unit test, throw a breakpoint in the function & go check it out! Can you figure out what's going wrong?
+If your function failed your unit test, throw a breakpoint in the function & go check it out! Can you figure out what's going on?
 
 You can also copy this function & test code if your function already works perfectly:
 
@@ -256,6 +451,7 @@ def foo():
     
 
 def bar():
+
     # bug should be in here
     ...
 
@@ -266,13 +462,18 @@ def test_foo():
 ```
 ::::
 
-Additional notes?
+Those are the basics of how to use the interactive debugger.
+Some additional tips:
 
-- `pytest --pdb`?
-- stepping into library code is useful!
+- When running tests in `pytest`, you can drop into a debugger whenever a test fails or errors - run `pytest <your_test_location> --pdb`.
+- The libraries you use are mostly Python code as well, which means you can `step` your way into them. This is a great way to understand the details of how that library code works!
+- Type `help` while in a `(Pdb)` prompt to see what other things the debugger can do for you.
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
-- placeholder
+- Use `breakpoint()` to get into a debugger interface
+- Use `l`/`list` to look around,
+  `n`/`next` and `s`/`step` to control execution,
+  and `p` to observe what's happening at each point.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
