@@ -22,7 +22,7 @@ exercises: 0
 
 ## Intro
 
-So we just wrote a little data pipeline... how do we know if it works?
+So we just wrote a bunch of code... how do we know if it works?
 
 First, we should know what "it works" means.
 Think about what you expect from the system - what do you think the output should look like?
@@ -37,7 +37,7 @@ Well, the system is a chain of sub-systems, each of which take some input and ma
 
 Once we find the problem sub-system, we can continue fractally drilling down until we find the piece of code we need to change.
 
-We can do this purely with the `assert` statement we worked with already, but we'll introduce some tools that help make this process much smoother:
+We'll introduce some tools that help make this process go smoothly:
 
 - *test functions* tell you if your system is functioning as expected
 - an *automated test runner* makes it easy to run all your tests at once so you don't have to remember/manually execute all the steps
@@ -45,11 +45,13 @@ We can do this purely with the `assert` statement we worked with already, but we
 
 ### Test functions
 
-Writing assertions in various places can absolutely work to tell you if your system is functioning as expected. But there are some common situations that can make it a little painful:
+Writing assertions in various places can absolutely work to tell you if your system is functioning as expected.
+But there are some common situations that can make it a little painful:
 
 * sometimes there's a bunch of weird setup to even make that assertion, and you'd like to keep that out of your actual pipeline
 * sometimes you want to test that something works in a variety of situations, but the assertions need to change based on the situation
 * sometimes your *full* pipeline takes forever but there's a subsetted version of your pipeline that will expose most of the problems anyways, so you want to run the same checks on both
+* when an assertion fails, your whole pipeline stops running - so if there are multiple problems you only know about the first one.
 
 That's where test functions come in.
 By writing small functions that do that setup for you,
@@ -102,17 +104,24 @@ We can also prepare a separate broken pipeline in case we run this standalone.
 
 ::::::::
 
-Think about the pipeline we made together in the modularization episode.
+Think about the data pipeline we wrote in the last exercise in the modularization episode.
 
 What is a property that you expect the output to have?
-Write a function in `test_pipeline.py` that tests this by filling out the following skeleton:
 
-**TODO** it is OK if the test fails. that means you have found a problem with the pipeline. or maybe you wrote your test wrong.
+You can pick from this list, or choose your own:
+* all plants report some non-null values
+* all fuel consumption units are positive
+* 
 
-**TODO** get the right filenames/function names
+Write a function in `test_pipeline.py` that tests this property by filling out the following skeleton:
+
+It's OK if the test fails.
+The point of writing tests is to find out when things are broken!
+We'll talk about how to find the specific problem later.
+
 ```python
 def test_cool_output_property():
-    input_data = pd.read_parquet(...)
+    input_data = pd.read_parquet("../data/pr_gen_fuel_monthly.parquet")
     output = process(input_data)
     # make some assertions about the data
 ```
@@ -156,12 +165,11 @@ Let's try writing a test for one!
 Pick one of the functions that makes up the data pipeline.
 
 What do you expect the output to look like?
-Can you imagine some weird input that *might* break your function?
+Can you imagine some weird situation that *might* break your function?
 
 Try writing a test in `test_pipeline.py` that tells you what happens with that weird input!
-If it fails with an error telling you that your function can't actually handle that weird input,
-that is a totally acceptable output of this challenge.
-In fact, that will set us up well for later in this episode when we learn about how to debug these failures.
+Again, don't worry if your test fails.
+That will set us up well for later when we learn about how to debug these failures.
 
 ```python
 def test_function_edge_case():
@@ -178,7 +186,7 @@ def test_function_edge_case():
 As we write more tests,
 we're starting to run into some of the problems with our `if __name__ == "__main__":...` strategy:
 
-- the boilerplate is annoying and it's easy to forget to add a test
+- the boilerplate is annoying and it's easy to forget to add a test. then when that test would fail, you will never know.
 - if you have lots of tests & want to break them into multiple files, you now have to run all these other files too
 - if one test breaks it immediately exits with an `AssertionError` and now you don't know what else broke
 
@@ -187,8 +195,7 @@ automatically finds testing code,
 runs tests separately,
 and reports the outputs of *all* your tests regardless of if one failed or not.
 `pytest` solves all these quality-of-life problems and more.
-
-While the fullness of `pytest` is quite complicated, the basics actually make our existing testing code simpler!
+Let's try it out.
 
 ### Example: pytest quickstart
 
@@ -227,22 +234,22 @@ Check out the [official documentation](https://docs.pytest.org/en/stable/index.h
 
 ### The debugger
 
-Suppose we now have a test that fails,
-and now we know which subsystem isn't working right.
+Suppose we have a test that fails.
+Now we know that a subsystem isn't working right.
 How do we figure out why it's broken?
 
 At this point, we have a few options:
 - break the function down into smaller parts and write more tests:
-  sometimes a good idea,
-  but often tedious and breaks up your code into unnecessarily small chunks
+  this can totally work,
+  but is often tedious and breaks up your code into unnecessarily small chunks
 - throw in a bunch of `print(f"value of something is {something}")` statements:
   super easy, but annoying to keep going back and adding more.
   Plus then you have to delete them later to not clutter your output.
-- use an **interactive debugger**!
+- use an **interactive debugger**:
 
 An interactive debugger pauses your program at a specific spot (a "breakpoint"),
 at which point you get to go in and poke around.
-It can be super powerful and overwhelmingly complicated - let's go over the basics:
+Let's look at how to use it.
 
 First, how to start the debugger at all: `breakpoint()`.
 If you decide you want to figure out what's going on in a certain part of your code,
@@ -436,11 +443,11 @@ Traceback (most recent call last):
 bdb.BdbQuit
 ```
 
-Note that if you quit, you get this `BdbQuit` error in the console.
+Note that if you quit, you get this `BdbQuit` error in the console. That's totally normal.
 
 :::: challenge
 
-If your function failed your unit test, throw a breakpoint in the function & go check it out! Can you figure out what's going on?
+If your function failed your test, throw a breakpoint in the function & go check it out! Can you figure out what's going on?
 
 You can also copy this function & test code if your function already works perfectly:
 

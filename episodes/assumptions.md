@@ -32,16 +32,21 @@ We'll go through three steps:
 In this context, an *assumption* can be any property you think is true about the data.
 
 Some examples:
-- the data values themselves are clean: year is something sensible (some time close-ish to present day, probably), categorical values have well-defined meanings
-- relationships are well-defined: same ID -> same plant, columns sum up to "total" columns, ratio of one column to another is roughly what you expect
-- data types are consistent: an ID field that is all numbers doesn't occasionally have a letter in it
-- column headers are stable: each new data file has the same column names
-- stable NA values: there's a well-defined, non-growing set of values that mean "there is no value here"
-- units stay the same: each new data file has the same units for each column
+- assumptions about the values: the heat rate of renewables after 2022 is reported as a consistent value
+- relationships are well-defined: data rows that share the same plant ID correspond to the same plant
+- data types are consistent: the "year" column only contains numbers, not words or strings of random characters
+- and many more!
 
-These assumptions form the core of your mental model, and if they turn out not to be true then anything that depends on your mental model might break in unexpected ways. That includes your code, of course, but also your documentation, and any papers or articles you may write.
+These assumptions form the core of your mental model,
+and if they turn out not to be true then anything that depends on your mental model might break in unexpected ways.
+That includes your code crashing or spitting out bad data, of course.
+It could also make your documentation confusing or misleading,
+causing others to misinterpret your results.
+It could also end with you publishing results that are based on incorrect data.
 
-The most dangerous assumptions (and thus, the most useful to enumerate) are particulary hard to think of - if they're obvious to you, then on some level you are aware of the need to work around them. With that in mind, let's try to come up with some assumptions of our own!
+The most dangerous assumptions (and thus, the most useful to enumerate) are particulary hard to think of -
+if they're obvious to you, then on some level you are aware of the need to work around them.
+With that in mind, let's try to come up with some assumptions of our own!
  
 :::: challenge
 
@@ -51,91 +56,16 @@ Take 5 minutes to list out as many assumptions as you can about the EIA 923 Puer
 
 The goal is to get past the obvious ones and start thinking of some un-obvious assumptions - no need to limit yourself to 'realistic' ones at this stage.
 
-:::::::: solution
-
-Some options...
-
-* '.' means "no value reported (expected)" *and* "no value reported (unexpected)"
-* the utility worker filling out the form didn't make any mistakes
-* the 'MMBtu of fuel consumed' field has different values for renewables in different years, and those values mean something related to the real world
-* there will be future versions of this data
-
-::::::::
-
 ::::
 
 
 ## Testing assumptions
 
-### Which assumptions are worth testing?
+### Example
 
-After that challenge, you might feel like some assumptions are more useful to test than others in some nebulous way:
+Let's take a look at one of the example assumptions and see how we'd figure out if it's true:
 
-Some examples of assumptions that might feel "more useful":
-
-- this column always has values between 10 and 1000
-- the ratio of column A to column B is roughly stable
-- the same plant always has the same name over time
-
-Some examples of "less useful" assumptions:
-- only one specific plant reports `fuel_consumption_mmbtu` to a 0.1 MMBtu precision
-- the plant name column is always going to be a string of characters, not a numeric field
-- the person filling out the form is trying to tell the truth
-
-What makes these useful or less so?
-
-* the impact on your system if the assumption turns out to not be true
-* the likelihood this assumption is violated
-* how easy it is to test these assumptions
-
-
-Impact is hard to think about when you haven't built up a whole system yet.
- But you can usually sort problems into "won't cause any problems,"
-"will cause problems which will be easy to notice (i.e. the whole program crashing),"
-and "will cause problems which will be hard to notice (i.e., the data will just be wrong)."
-In most cases, it is better to have your program crash loudly than to have your program silently give you bad data.
-
-:::: challenge
-
-### Challenge: evaluating impact
-
-Look at the list of your assumptions and imagine each one is not actually true.
-
-Can you identify one example for each of the following?
-
-* will probably break downstream work in some obvious way?
-* will probably not break anything downstream?
-* will cause some subtle and hard-to-notice problem?
-
-::::
-
-Likelihood can also be tricky - you are guessing at the future based on your experience of the past.
-The easiest heuristic is "can I imagine a situation where this assumption would be false?"
-You'll build up a more nuanced intuition over time.
-
-
-:::: challenge
-
-### Challenge: evaluating likelihood
-
-Look at the list of your assumptions and imagine a scenario in which they would not be true.
-
-Can you identify an example scenario that:
-* seem very plausible?
-* seems very implausible?
-
-::::
-
-The effort required to test these assumptions is similarly easiest evaluated with the question,
-"Can I imagine a snippet of code that would verify this assumption?"
-If you don't have a lot of tools for assumption verification, that can be hard.
-Let's introduce a simple one.
-
-### Example: testing assumptions
-
-Here's an assumption we dug into last time:
-
-> For solar photovoltaics, the reported heat rate (Btu of fuel consumed / KWh of net generation) is fairly consistent after 2022.
+> The heat rate of renewables after 2022 is reported as a consistent value.
 
 How would we verify that?
 
@@ -143,13 +73,12 @@ First, we can calculate that heat rate:
 
 ```python
 
-solar_pv_post_2022 = monthly_gen_fuel[
+renewables_2022 = monthly_gen_fuel[
     (monthly_gen_fuel["date"] >= "2022-01-01") &
-    (monthly_gen_fuel["energy_source_code"] == "SUN") &
-    (monthly_gen_fuel["prime_mover_code"] == "PV")
+    (monthly_gen_fuel["energy_source_code"].isin({"SUN", "WND", "WAT"}))
 ]
-consumption_btu = solar_pv_post_2022["fuel_consumed_for_electricity_mmbtu"] * 1_000_000
-net_gen_kwh = solar_pv_post_2022["net_generation_mwh"] * 1_000
+consumption_btu = renewables_2022["fuel_consumed_for_electricity_mmbtu"] * 1_000_000
+net_gen_kwh = renewables_2022["net_generation_mwh"] * 1000
 heat_rate = consumption_btu / net_gen_kwh
 ```
 
@@ -159,9 +88,10 @@ Let's take a quick look:
 heat_rate.hist()
 ```
 
-Yeah, looks like almost all of the values are clustered at 3500, and the min and max values are between 2000 and 5000.
+Looks like almost all of the values are clustered at 3400,
+and the min and max values are between 2000 and 5000.
 
-Then, we can use an `assert` statement to verify some fact about it.
+Then, we can use an `assert` statement to verify some fact.
 
 `assert` basically says, "if this next part is True, great! Nothing happens. If it's false, we'll raise an error."
 
@@ -176,22 +106,100 @@ So let's assert something about this heat rate - maybe that the standard deviati
 assert heat_rate.std() / heat_rate.mean() <= 0.05
 ```
 
+
+This took some effort, but now we have some code that verifies that assumption.
+If we add new data in the future, or change how we process the data,
+we can see if this assumption breaks by running this code again.
+Pretty neat - let's try doing another one.
+
 :::: challenge
 
-### Writing code to test an assumption
+### Challenge: writing code to test an assumption
 
-Take an assumption you identified as easy to test, and write some code to assert that the assumption is true!
+Pick an assumption from the list we generated above and write some code to assert that the assumption is true!
+
+::::
+
+### Which assumptions are worth testing?
+
+As we just saw, all assumptions take some effort to test.
+While it's useful to test many assumptions,
+the reality is that we have limited time to work on our projects
+and need to prioritize the assumptions that are "worth" the investment of testing them.
+
+What makes assumptions useful or less so?
+
+* how easy it is to test these assumptions
+* the impact on your system if the assumption turns out to not be true
+* the likelihood this assumption is violated
+
+Some examples of less useful assumptions:
+- the person filling out the form is trying to tell the truth:
+  this is *hard to test*.
+  This sort of external human factor, while very impactful and nebulously possible,
+  would require some detailed analysis and cross-comparison of different datasets to even begin testing.
+- `fuel_consumption_mmbtu` is largely reported to 0.1 MMBtu precision,
+  but one specific plant reports `fuel_consumption_mmbtu` to a 0.01 MMBtu precision:
+  this has *low impact*.
+  If there are more plants that report with higher precision,
+  you are not likely to run into problems.
+- the plant name column is always going to be a string of characters, not a numeric field:
+  this has *low probability of being violated*.
+  It would be hard to imagine a plant name column that doesn't have *some* words in the reported values,
+  and that would force the whole column to be "string" type.
+
+We'll think through each of these criteria together:
+
+:::: challenge
+
+### Challenge: evaluating testability
+
+The effort required to test these assumptions can be evaluated with the question,
+"Can I imagine a snippet of code that would verify this assumption?"
+
+Look at your list of assumptions.
+Think about how you would write code to test each one.
+
+Can you identify one that would be easy to test, and one that would be hard to test?
+
+::::
+
+:::: challenge
+
+### Challenge: evaluating impact
+
+Impact is hard to think about when you haven't built up a whole system yet.
+ But you can usually sort problems into "won't cause any problems,"
+"will cause problems which will be easy to notice (i.e. the whole program crashing),"
+and "will cause problems which will be hard to notice (i.e., the data will just be wrong)."
+In most cases,
+it is better to have your program crash loudly than to have your program silently give you bad data.
+
+Look at the list of your assumptions and imagine each one is not actually true.
+
+Can you identify one example for each of the following?
+
+* will probably break downstream work in some obvious way?
+* will probably not break anything downstream?
+* will cause some subtle and hard-to-notice problem?
 
 ::::
 
 
 :::: challenge
 
-### Evaluating testability
+### Challenge: evaluating likelihood
 
-Look at your list of assumptions.
+Evaluating likelihood can be difficult:
+you are guessing at the future based on your experience of the past.
+A heuristic is "can I imagine a situation where this assumption would be false?"
+You'll build up a more nuanced intuition over time.
 
-Can you find one that would be easy to test, and one that would be hard to test?
+Look at the list of your assumptions and imagine a scenario in which they would not be true.
+
+Can you identify an example scenario that:
+* seem very plausible?
+* seems very implausible?
 
 ::::
 
