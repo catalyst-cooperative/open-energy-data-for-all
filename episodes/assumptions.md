@@ -27,7 +27,7 @@ We'll go through three steps:
 2. identify useful assumptions to test
 3. write some code to verify those assumptions
 
-### What is an assumption anyways?
+## What is an assumption anyways?
 
 In this context, an *assumption* can be any property you think is true about the data.
 
@@ -120,7 +120,7 @@ Pick an assumption from the list we generated above and write some code to asser
 
 ::::
 
-### Which assumptions are worth testing?
+## Which assumptions are worth testing?
 
 As we just saw, all assumptions take some effort to test.
 While it's useful to test many assumptions,

@@ -43,7 +43,7 @@ We'll introduce some tools that help make this process go smoothly:
 - an *automated test runner* makes it easy to run all your tests at once so you don't have to remember/manually execute all the steps
 - a *debugger* lets you zoom in even further to your system to figure out what exactly is happening
 
-### Test functions
+## Test functions
 
 Writing assertions in various places can absolutely work to tell you if your system is functioning as expected.
 But there are some common situations that can make it a little painful:
@@ -95,7 +95,7 @@ Now it's your turn.
 
 :::: challenge
 
-#### Writing a test function
+### Writing a test function
 
 :::::::: instructor
 
@@ -181,7 +181,7 @@ def test_function_edge_case():
 ::::
 
 
-#### Automated test runners
+## Automated test runners
 
 As we write more tests,
 we're starting to run into some of the problems with our `if __name__ == "__main__":...` strategy:
@@ -222,9 +222,10 @@ What `pytest` is doing is:
 
 :::: challenge
 
-#### Try `pytest`
+### Challenge: try `pytest`
 
 Try installing `pytest`, then running `uv run pytest tests/` in your own project and see if it's picking up your tests!
+
 ::::
 
 As your software gets more complicated, testing it can also get more complicated.
@@ -232,7 +233,7 @@ As your software gets more complicated, testing it can also get more complicated
 (automatically finding your test functions & running them separately for you).
 Check out the [official documentation](https://docs.pytest.org/en/stable/index.html) for more info!
 
-### The debugger
+## The debugger
 
 Suppose we have a test that fails.
 Now we know that a subsystem isn't working right.
@@ -283,7 +284,7 @@ if __name__ == "__main__":
 This will drop you into the debugger,
 at which point you'll be greeted with this terse situation:
 
-```bash
+```
 -> breakpoint()
 (Pdb)
 ```
@@ -309,7 +310,8 @@ The `->` denotes the line that is *about* to run.
  14         outer_func()
 [EOF]
 (Pdb) list
-[EOF]```
+[EOF]
+```
 
 If you call it multiple times in a row,
 it tries to keep reading out more lines of the file.
@@ -324,7 +326,7 @@ To take a look at variable values, we can use `p` (short for "print"), or omit t
 1
 ```
 
-We can also print out an expression value in to check that something behaves the way we expect:
+We can also print out an expression value to check that something behaves the way we expect:
 
 ```
 (Pdb) x+1
@@ -447,6 +449,8 @@ Note that if you quit, you get this `BdbQuit` error in the console. That's total
 
 :::: challenge
 
+### Challenge: using the interactive debugger
+
 If your function failed your test, throw a breakpoint in the function & go check it out! Can you figure out what's going on?
 
 You can also copy this function & test code if your function already works perfectly:
@@ -467,6 +471,7 @@ def test_foo():
     expected = ...
     assert observed == expected
 ```
+
 ::::
 
 Those are the basics of how to use the interactive debugger.
