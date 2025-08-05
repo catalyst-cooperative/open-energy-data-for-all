@@ -8,13 +8,15 @@ exercises: 25
 
 - How do I get ready to do research with data that is new to me?
 - What should I do when I find something that doesn't look right?
+- How can I get a head start on identifying data problems that might cause headaches later?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Use divide-and-conquer to split a wide table into manageable pieces
-- Examine data for anomalies
+- Examine data for anomalies using summarization and visualization
+- Articulate the difference between refining plots for exploration and refining plots for presentation
 - Execute strategies for locating cause and extent of anomalies
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
@@ -32,7 +34,7 @@ Plots aren't just for papers!
 Data problems come in many different forms, and how you respond to them will depend on the source of the problem and what kind of impact it will have on the kinds of modeling and analysis you want to do.
 
 * Problems introduced by the respondent - typos and other data entry errors - These can be fixed if they're simple, or can be a reason to exclude certain rows if correct values can't be reconstructed.
-* Problems introduced by the data aggregator - disagreement between documentation you received and the actual forms filled out by respondents; a bad choice of data format that doesn't preserve relationships within the data - These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes
+* Problems introduced by the data aggregator - disagreement between documentation you received and the actual forms filled out by respondents; a bad choice of data format that doesn't preserve relationships within the data - These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes TODO
 * "Problems" introduced by external forces - natural disasters, policy change - These may be retained or excluded depending on your exact area of research.
 * Problems we created for ourselves - We'll talk about this later.
 
@@ -81,8 +83,9 @@ We will ask ourselves:
 We'll start with the annual file.
 
 ```python
-annual_pr_gen_fuel = pd.read_parquet('../data/eia923__annual_puerto_rico_generation_fuel.parquet')
-annual_pr_gen_fuel
+import pandas as pd
+pr_gen_fuel_annual = pd.read_parquet('../data/eia923__annual_puerto_rico_generation_fuel.parquet')
+pr_gen_fuel_annual
 ```
 
 Our predecessor has already taken care of a lot of the cleaning necessary for this data.
@@ -90,8 +93,8 @@ If any of you have used EIA data before, you may know that they use "." to encod
 In this data frame, those have all been converted to something else, probably pandas `NA` or Python `None`:
 
 ```python
-annual_pr_gen_fuel == "."
-(annual_pr_gen_fuel == ".").any()
+pr_gen_fuel_annual == "."
+(pr_gen_fuel_annual == ".").any()
 ```
 
 There are 24 columns here, which is a little much to reason about all at once.
@@ -118,33 +121,31 @@ What columns, taken together, have unique values from row to row?
 What does each row in this file represent?
 If you happen to know, you can shout it out in chat, otherwise I'll open up the source data Excel file, the grandfather of this dataframe, which has some documentation we can look at.
 
-TODO: screenshot. Alt text:
-Excel screenshot showing tab "Page 7 File Layout" of file "eia923_pr.xlsx".
-A table titled "Generation and Fuel Data" has two columns, "Data Elements" and "Description".
+![Excel screenshot showing tab Page 7 File Layout of file eia923_pr.xlsx](fig/excelheader.png){alt="Excel screenshot showing tab Page 7 File Layout of file eia923_pr.xlsx.
+A table titled Generation and Fuel Data has two columns, Data Elements and Description.
 The first few rows are visible; contents as follows.
 Plant ID: EIA Plant Identification number. One to five digit numeric.
-Combined Heat & Power Plant: Whether or not the plant is a combined heat & power facility (cogenerator). One character alphanumeric, "Y" or "N".
+Combined Heat & Power Plant: Whether or not the plant is a combined heat & power facility (cogenerator). One character alphanumeric, Y or N.
 Nuclear Unit ID: For nuclear plants only, the unit number. One digit numeric. Nuclear plants are the only type of plants for which data are shown explicitly at the generating unit level.
 Plant Name: Plant name. Alphanumeric.
 Operator Name: The name of the entity which operates the plant. Alphanumeric.
 Operator ID: The EIA operator identification number. Five digit numeric, padded with leading zeros.
-State: State the facility is located in. Two character alphanumeric (standard state postal codes).
+State: State the facility is located in. Two character alphanumeric (standard state postal codes)."}
 
 The documentation doesn't tell you what has to be unique for each entry; we will have to reason it out.
-
-[time passes]
+We know each plant has to file with the EIA every year, so we'll use that as our initial guess:
 
 * Plant ID
 * Year
 
 Let's check.
 If that's the primary key, then we expect each pair of (plant ID, year) values to only occur once in the data frame.
-We can test that by grouping by those columns and then printing the size of each group.
+We can test that by grouping by those columns and then looking at the size of each group.
 If there are no groups with more than one row in them, or few enough that we could believe they were mistakes, then we got it.
 
 ```python
 primary_key_columns = ["plant_id_eia", "report_year"]
-annual_pr_gen_fuel.groupby(primary_key_cols).size()
+pr_gen_fuel_annual.groupby(primary_key_columns).size()
 ```
 
 Oh dear there are some twos and threes.
@@ -152,14 +153,14 @@ For easier readability we can add the plant name in.
 
 ```python
 primary_key_columns = ["plant_id_eia", "plant_name_eia", "report_year"]
-annual_pr_gen_fuel.groupby(primary_key_cols).size()
+pr_gen_fuel_annual.groupby(primary_key_columns).size()
 ```
 
 And then filter for just the ones with multiple rows.
 
 ```python
 primary_key_columns = ["plant_id_eia", "plant_name_eia", "report_year"]
-pk_sizes = annual_pr_gen_fuel.groupby(primary_key_cols).size()
+pk_sizes = pr_gen_fuel_annual.groupby(primary_key_columns).size()
 pk_sizes.loc[pk_sizes>1]
 ```
 
@@ -167,14 +168,40 @@ Ninety one! Out of 283.
 That's almost a third.
 We might expect a few errors but a third is too many;
 it's more likely we're wrong about the primary key.
+Let's look at one example.
 
-[time passes]
+```python
+pr_gen_fuel_annual.loc[
+    (pr_gen_fuel_annual.plant_id_eia == 61034) &
+    (pr_gen_fuel_annual.report_year == 2017)
+].transpose()
+```
+
+Looks like these two records differ in `prime_mover_code`.
+Let's add that in.
+
+```python
+primary_key_columns = ["plant_id_eia", "plant_name_eia", "report_year", "prime_mover_code"]
+pk_sizes = pr_gen_fuel_annual.groupby(primary_key_columns).size()
+pk_sizes.loc[pk_sizes>1]
+```
+
+Better, but we still have a lot of duplicates.
+
+::: challenge
+
+Look at one of the duplicate entries and propose another column to add to our primary key.
+
+:::: solution
+
+If we add `energy_source_code` to our primary key, we end up with only one duplicate entry.
+
 
 ```python
 primary_key_columns = [
     'plant_id_eia', 'plant_name_eia', 'report_year', 'prime_mover_code', 'energy_source_code'
 ]
-pk_sizes = annual_pr_gen_fuel.groupby(primary_key_columns).size()
+pk_sizes = pr_gen_fuel_annual.groupby(primary_key_columns).size()
 pk_sizes.loc[pk_sizes>1]
 ```
 
@@ -184,6 +211,11 @@ plant_id_eia  plant_name_eia            report_year  prime_mover_code  energy_so
 dtype: int64
 ```
 
+::::
+
+:::
+
+
 Only one!
 That's plausibly a respondent error or data entry problem.
 We can note that plant down as a possible troublemaker to investigate later.
@@ -192,24 +224,29 @@ But we have our primary key!
 That's five columns we've carved off of the original 24, using the "split columns by purpose" strategy.
 We wound up needing a combination of domain knowledge from the documentation, and empirical knowledge gained by guess-and-check.
 
+Using this approach, we found one duplicate entry that could mess up our analysis later.
+
 Next let's take a look at an example of the "split columns by data type" strategy.
 
-### Categorical data
+### String data as categorical data
 
-To find out what columns probably contain categorical data, we can list the data type of each column.
+We'll start with string data.
+First, we'll print out the data type of each column.
 
 ```python
-annual_pr_gen_fuel.dtypes
+pr_gen_fuel_annual.dtypes
 ```
 
-Because this data frame doesn't contain any free text, it is likely that any column with a string type contains categorical data.
+We know from our earlier peek at the full data frame that none of these string columns contain free text.
+Unless we have domain-specific knowledge telling us otherwise, it is reasonable to guess that any column with a string type contains categorical data.
+This might not capture all the categorical data in the data frame, but it'll get us started.
 To get a list, we can filter:
 
 ```python
-annual_pr_gen_fuel.dtypes[annual_pr_gen_fuel.dtypes == "string[python]"]
-annual_pr_gen_fuel.dtypes[annual_pr_gen_fuel.dtypes == "string[python]"].index
-list(annual_pr_gen_fuel.dtypes[annual_pr_gen_fuel.dtypes == "string[python]"].index)
-category_columns = list(annual_pr_gen_fuel.dtypes[annual_pr_gen_fuel.dtypes == "string[python]"].index)
+pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"]
+pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index
+list(pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index)
+category_columns = list(pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index)
 ```
 
 We know from the documentation we looked at earlier that some of these are identifiers with large sets of possible values, and the rest have much smaller sets of possible values.
@@ -229,7 +266,7 @@ We can use `.describe()` to show some basic information about category data.
 Let's look at the identifier columns as an example:
 
 ```python
-annual_pr_gen_fuel[identifier_columns].describe()
+pr_gen_fuel_annual[identifier_columns].describe()
 ```
 
 ```output
@@ -240,277 +277,250 @@ top     Puerto Rico Electric Pwr Authority  Aguirre Plant
 freq                                   206             45
 ```
 
+* `count` shows us how many rows have a value set. If it's equal to the total number of rows, you know you have no nulls. Looks like there aren't any nulls in the operator name or plant name columns, which is good.
+* `unique` shows us how many unique values are in each column. Looks like there are 30 operators and 55 plants. If we knew how many operators and how many plants to expect, this could tell us if there were typos -- each typo would register as an extra unique value.
+* `top` shows us the most common value each each column, and `freq` shows how many times that value appeared. Looks like just under half the rows have the top operator, Puerto Rico Electric Pwr Authority. Exactly 10% of the rows have the top plant, Aguirre.
 
-----
-
-## Previous content
-
-We could jump right into the notebook, but reading someone else's code is always easier if you can establish a little context first.
-
-Let's take a look at the data ourselves.
+If we did suspect a typo, we could look at all the unique values and their frequencies using `.value_counts()`.
 
 ```python
-pr_gen_fuel_raw = pd.read_pickle('../data/raw_eia923__puerto_rico_generation_fuel')
-pr_gen_fuel_raw
+pr_gen_fuel_annual.operator_name.value_counts()
 ```
 
-Things to notice:
-
-* There are multiple different data types: category data (associated_combined_heat_power) and numeric data (*_mmbtus)
-* Some of the numeric columns have weird "." entries, which doesn't seem right
-* There's a column for each month, but these are in... alphabetical order?
-* Year is an integer but also sometimes has a decimal?
-
-We could try to clean this up ourselves, but there's a good chance our predecessor fixed at least some of them. Let's go see!
-
-# 2: Look at our predecessor's work
-
-If we open `puerto-rico-project.ipynb` we see:
+By default this gives you the results in descending order of frequency, which is helpful: typos and other errors are likely to be at the bottom. If there are entries that appear a suspiciously small number of times, you can sort by index to re-order the list and make it more obvious when two neighboring entries differ by a letter:
 
 ```python
-# Handle EIA null values
-pr_gen_fuel = pr_gen_fuel.replace(to_replace = ".", value = pd.NA)
+pr_gen_fuel_annual.operator_name.value_counts().sort_index()
 ```
 
-Hey, nice! That's the weird "." out of the way.
-
-Next we get:
-
-```python
-# Convert data types (mmbtu/units to numeric)
-pr_gen_fuel = pr_gen_fuel.convert_dtypes()
-```
-
-The help() for `convert_dtypes()` says:
-
-> Convert columns to the best possible dtypes using dtypes supporting ``pd.NA``.
-
-That seems close-ish to the problem with years being integers or floats. If we get stuck on dtypes later we can always come back to it.
-
-Next we get:
-
-```python
-# create some useful column sets
-primary_key_columns = ['plant_id_eia', 'plant_name_eia', 'report_year', 'prime_mover_code', 'energy_source_code']
-
-monthly_variables = []
-for col in pr_gen_fuel.columns:
-    if col.endswith("january"):
-        monthly_variables.append(col.replace("_january", ""))
-
-monthly_columns = []
-for col in pr_gen_fuel.columns:
-    for var in monthly_variables:
-        if col.startswith(var):
-            monthly_columns.append(col)
-```
-
-A primary key is sometimes called an index; it just means that no two rows have the same values for those columns taken together.
-
-It looks like they built a list of the monthly data columns by first grabbing all the January columns, then using the front part of the string to get a list of all the monthly variables. Then from there, you can grab all the columns that start with each monthly variable, and get all the months.
-
-Next we get:
-
-```python
-# pivot the monthly variables into their own df
-monthly_dfs = []
-# swap in a different date column
-monthly_primary_key_columns = ["date"] + [c for c in primary_key_columns if c != "report_year"]
-for monthly_var in monthly_variables:
-    ## Only keep the index and monthly variable columns
-    column_subset_list = primary_key_columns + [col for col in pr_gen_fuel.columns if col.startswith(monthly_var)]
-    var_pivot = (
-        pr_gen_fuel.loc[:, column_subset_list]
-        .melt(id_vars = primary_key_columns)
-    )
-    ## Split the month from the variable
-    var_pivot[['variable', 'month']] = var_pivot['variable'].str.rsplit("_", n=1, expand=True)
-    ## Create date from month and year
-    var_pivot['date'] = pd.to_datetime(var_pivot['month'] + var_pivot['report_year'].astype(str), format='%B%Y')
-    # we don't need the year/month/variable cols anymore
-    monthly_dfs.append(
-        var_pivot.drop(columns=["report_year", "month", "variable"])
-        .rename(columns={"value":monthly_var})
-        # setting an index so we can concatenate later
-        .set_index(monthly_primary_key_columns)
-    )
-pr_gen_fuel_monthly = pd.concat(monthly_dfs, axis="columns").reset_index()
-```
-
-That's ... a big chunk of code. Rather than try to interpret it line-by-line, let's see if we can match their comment `split off a separate table for monthly data` to the actual output.
-
-```python
-pr_gen_fuel_monthly
-```
-
-That went from 96 columns down to 11! There's now a `date` column that looks like it's always the first of the month. Then we have columns identifying the plant, prime mover, and energy source. Then six numeric columns, one for each monthly variable.
-
-That looks like it could be very useful!
-
-There are only two more cells. First we have:
-
-```python
-# the rest of the columns are annual
-pr_gen_fuel_annual = pr_gen_fuel.drop(columns=monthly_columns)
-```
-
-That's fair; with the monthly data in a separate table we don't need to keep those columns around.
-
-Then we have:
-
-```python
-# drop a bad plant
-pr_gen_fuel_monthly = (
-    pr_gen_fuel_monthly.loc[~(
-        (pr_gen_fuel_monthly.plant_id_eia == 62410)
-        & (pr_gen_fuel_monthly.date.dt.year == 2020)
-        & (pr_gen_fuel_monthly.fuel_consumed_for_electricity_mmbtu.isnull()))]
-)
-```
-
-Dropping a bad plant sounds like something we may need to do again later, so we'll remember this is here but otherwise leave it alone.
-
-Let's store the clean version of the data so we can play with it more in our notebook, without polluting this one too much:
-
-```python
-pr_gen_fuel_monthly.to_parquet("../data/eia923__monthly_puerto_rico_generation_fuel.parquet")
-pr_gen_fuel_annual.to_parquet("../data/eia923__annual_puerto_rico_generation_fuel.parquet")
-```
-
-Back in our notebook, we'll load up the data:
-
-```python
-pr_gen_fuel_monthly = pd.read_parquet("../data/eia923__monthly_puerto_rico_generation_fuel.parquet")
-pr_gen_fuel_annual = pd.read_parquet("../data/eia923__annual_puerto_rico_generation_fuel.parquet")
-```
-
-Let's start with annual data first.
-
-# 3: Build on our predecessor's work
-
-Our predecessor had these set as primary key columns; let's take a closer look at them.
-
-```python
-primary_key_columns = [
-    'plant_id_eia', 'plant_name_eia', 'report_year', 'prime_mover_code', 'energy_source_code'
-]
-pr_gen_fuel_annual[primary_key_columns]
-```
-
-They're supposed to be unique combinations; are they?
-
-```python
-pr_gen_fuel_annual[primary_key_columns].groupby(primary_key_columns).size()
-```
-
-```
-pk_hits = pr_gen_fuel_annual[primary_key_columns].groupby(primary_key_columns).size()
-pk_hits[pk_hits>1]
-```
-
-```output
-plant_id_eia  plant_name_eia            report_year  prime_mover_code  energy_source_code
-62410         Cervecera de Puerto Rico  2020         IC                DFO                   2
-dtype: int64
-```
-
-Just one weirdo. Any chance it's from the same plant our predecessor found?
-
-Why, yes. Indeed it is. We'll add that to the "deal with later" list while we're still exploring.
-
-## Categorical data
-
-What columns contain categorical data? Are they well-behaved?
-
-```python
-pr_gen_fuel_annual.dtypes
-```
-
-```python
-pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"]
-```
-
-```python
-list(pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index)
-```
-
-```python
-category_cols = list(pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index)
-pr_gen_fuel_annual[category_cols[0]].value_counts()
-```
+Here we see some similar names, but no typos.
 
 :::: challenge
 
-Make a `for` loop to show the value counts for all the category columns. Do any of them show anything wacky?
+Your turn: Use `.describe()` on the other category columns. Use the File Layout documentation to verify whether the `reporting_frequency_code` and `fuel_unit` columns have the expected number of unique values in them.
 
-:::::::: solution
+:::::: solution
+
 ```python
-for c in category_cols:
-    print("="*40)
-    print(pr_gen_fuel_annual[c].value_counts())
+pr_gen_fuel_annual[category_columns].describe()
 ```
-::::::::
+
+`reporting_frequency_code` looks good; the File Layout documentation says there are three options, and we see three unique values here. There are some nulls though. Something to keep an eye on if we end up needing this column for something later.
+
+`fuel_unit` looks off, since File Layout says there should be three values but `.describe()` found four. Let's look closer:
+
+```python
+pr_gen_fuel_annual.fuel_unit.value_counts()
+```
+
+```output
+fuel_unit
+barrels          237
+mcf               49
+megawatthours     24
+short tons         9
+Name: count, dtype: Int64
+```
+
+Huh. `megawatthours` is not a valid physical unit, according to the documentation... but it's definitely not a typo. How is this being used in the data?
+
+We can filter for just the rows that use `megawatthours` in the `fuel_unit` column:
+
+```python
+pr_gen_fuel_annual.loc[pr_gen_fuel_annual.fuel_unit == "megawatthours"]
+pr_gen_fuel_annual.loc[pr_gen_fuel_annual.fuel_unit == "megawatthours", category_columns].describe()
+```
+
+We can eyeball the whole dataframe looking for patterns, or we can use `.describe()` to help us know for sure whether each column has multiple values or only one.
+
+* `energy_source_code` is MWH, which intuitively matches the unit but isn't particularly illuminating
+* `fuel_type_code_agg` is OTH, probably for "Other"; no help there
+* `prime_mover_code` is BA, which is worth looking up. "Energy Storage, Battery" -- looks like at least some of the PR respondents report generation from batteries using a fuel unit, which isn't expected by the EIA, but they're consistent about it, which is nice.
+
+::::::
 
 ::::
 
-## Numeric data
+We've split off 11 of the 24 columns (2 identifiers, 9 other categoricals) using the "split by data type" approach to look at string data.
+Using this approach, we found some null values we'll need to handle carefully if we need those columns for our research,
+and we found one off-spec-but-ultimately-reasonable rogue value for `fuel_unit` that could have tripped us up if we relying on the documentation alone.
 
-What columns contain numeric data? Are they well-behaved?
+### Numeric data
+
+But we're here for *visual* data exploration! Let's look at some data we can plot.
 
 ```python
 pr_gen_fuel_annual.dtypes
+pr_gen_fuel_annual.drop(columns=category_columns).dtypes
 ```
 
-Oh dang, most of these integer columns aren't really numeric. Looks like we want four of the int columns and one of the floats. It's probably easier to make a list manually.
+So while the string data was pretty much all categorical, the numeric data is... more of a mess.
+A bunch of these columns are numeric identifiers for other kinds of categories.
+We want to plot measurement data, not numeric identifiers.
+We need some domain knowledge to help us sort numeric measurement data from the others.
+This is where dataset documentation can help.
+
+::: challenge
+
+Open `data/eia923_pr.xlsx` and use the File Layout tab to determine which columns contain measurement data.
+
+Watch out!
+* Some of the column names in our data frame have been changed from the originals referenced in the documentation.
+* Some of the documentation has typos.
+
+:::: solution
 
 ```python
-numeric_cols = [
+measurement_columns = [
     "elec_fuel_consumption_mmbtu", "electric_fuel_consumption_quantity",
     "total_fuel_consumption_mmbtu", "total_fuel_consumption_quantity",
     "total_net_generation_mwh"
 ]
-pr_gen_fuel_annual[numeric_cols].describe()
 ```
 
-We've got two pairs of mmbtu+quantity variables. Since they're measuring in different units, we don't expect their quartiles to match, but we do kinda expect them to have the same shape. Let's look closer with a histogram:
+::::
+
+:::
+
+When we were looking at categorical string data, we used `.describe()` to show a summary that helped us determine whether the data was reasonable or not.
+We can use `.describe()` on numeric data, too!
 
 ```python
-elec_fuel_consumption = (
-    pr_gen_fuel_annual[["elec_fuel_consumption_mmbtu","electric_fuel_consumption_quantity"]]
-)
-
-(elec_fuel_consumption / elec_fuel_consumption.max()).plot.hist(bins=20, logy=True, alpha=0.5)
+pr_gen_fuel_annual[measurement_columns].describe()
 ```
 
-Wow, that's seriously systemic.
+For numeric data, `.describe()` gives us statistics for each column.
+
+* `count` is the same as with string data: it shows us how many rows have a value set. For all of these numeric columns, it is equal to the total number of rows, so we know we have no nulls.
+* `mean` is the average. If one of these showed a wildly unexpected scale, or large negative, we would know something was weird, but these all look plausible.
+* `std` is the standard deviation, which tells you how spread out the values are in each column.
+* `min`, `25%` `50%` `75%` (quartiles), `max` give a rough idea of how the data are distributed. We have some negatives in `total_net_generation_mwh`, but negatives do show up sometimes in netgen, and negative 3,000 on a maximum of 3,000,000 is reasonable.
+
+We've got two pairs of mmbtu+quantity variables.
+Since they're measuring in different units,
+we don't expect their values to match,
+but we do kinda expect them to have the same shape.
+But it looks like the `_quantity` variables have a lot more zeros in them.
+Let's look closer with a histogram:
+
+```python
+elec_fuel_consumption_cols = ["elec_fuel_consumption_mmbtu","electric_fuel_consumption_quantity"]
+elec_fuel_consumption = pr_gen_fuel_annual[elec_fuel_consumption_cols]
+elec_fuel_consumption.hist()
+# elec_fuel_consumption.hist(sharey=True)
+elec_fuel_consumption.hist(sharey=True, log="y")
+```
+
+The first thing it prints out is this array of Axes.
+There is one for each column we plotted.
+We'll talk more about Axes in a little bit.
+
+The next thing is shows is the histogram.
+There are a few things preventing this graph from telling us what we want to know.
+A histogram has the value on the x axis and the frequency of that value / range of values on the y axis.
+These two plots have different y axes, which makes it difficult to see that the zero bin has a different frequency for mmbtus on the left than for quantity on the right.
+We can fix that with `sharey`.
+
+```python
+elec_fuel_consumption_cols = ["elec_fuel_consumption_mmbtu","electric_fuel_consumption_quantity"]
+elec_fuel_consumption = pr_gen_fuel_annual[elec_fuel_consumption_cols]
+elec_fuel_consumption.hist(sharey=True)
+```
+
+Now we can see that zeros are much more common on the right.
+In fact, zeros are so common in both variables that the shape of the distribution over the rest of the values is difficult to see.
+We can sacrifice some detail at the top of the y axis in exchange for greater detail at the bottom of the y axis by switching the y axis to log scale.
+
+```python
+elec_fuel_consumption_cols = ["elec_fuel_consumption_mmbtu","electric_fuel_consumption_quantity"]
+elec_fuel_consumption = pr_gen_fuel_annual[elec_fuel_consumption_cols]
+elec_fuel_consumption.hist(sharey=True, log="y")
+```
+
+This refinement was more of a tradeoff.
+The differences in frequencies for the bins above zero is now more clear,
+but the zero bin looks more similar.
+We can turn off log scale until we have a question that needs more detailed comparison of the bins above zero.
+
+Finally let's make use of this empty space to the right of the plot.
+The default plot width is quite narrow.
+To widen it, we will use the following incantation:
+
+```python
+import matplotlib.pyplot as plt
+plt.rcParams['figure.figsize'] = [10, 4]
+```
+
+This sets the default figure size to 10 inches wide and 4 inches tall.
+You can use whatever default size makes sense for your monitor.
+
+Back to our question: why does `_quantity` have so many more zeros than `_mmbtu`?
+
+The easiest explanation would be if one of our categorical variables could identify a group that behaved wildly differently in `_quantity` than it did in `_mmbtu`.
+
+Let's check one categorical variable together.
+
+We can use a for loop to plot each group from `associated_combined_heat_power`:
 
 ```python
 for gr, df in pr_gen_fuel_annual.groupby("associated_combined_heat_power"):
-    axs = df.hist(column=elec_fuel_consumption_cols, density=True)
-    axs[-1][-1].legend([gr])
+    axs = df.hist(column=elec_fuel_consumption_cols, sharey=True)
 ```
+
+That gave us one row for each value of `associated_combined_heat_power`, but it hasn't told us which value goes with which row.
+That's confusing.
+Let's add some labels using the `legend()` function:
+
+```python
+for gr, df in pr_gen_fuel_annual.groupby("associated_combined_heat_power"):
+    axs = df.hist(column=elec_fuel_consumption_cols, sharey=True)
+    axs[-1][-1].legend([f"associated_combined_heat_power: {gr}"])
+```
+
+Okay, so the first row is for `associated_combined_heat_power` No and the second row is for `associated_combined_heat_power` Yes.
+These show some slight differences, particularly for the Yes group, but nothing overwhelmingly convincing.
+Ideally we would want to see a group that had some nonzero bins for `mmbtu`, but only the zero bin for `quantity`.
+We can mark `associated_combined_heat_power` as a "maybe" for helping explain our question.
 
 :::: challenge
 
+Now it's your turn.
 Find a categorical column that seems to explain why there are so many more zeros in `quantity` than in `mmbtu`.
 
 :::::::: solution
 
 ```python
 for gr, df in pr_gen_fuel_annual.groupby("energy_source_code"):
-    axs = df.hist(column=elec_fuel_consumption_cols, density=True)
+    axs = df.hist(column=elec_fuel_consumption_cols, sharey=True)
     axs[-1][-1].legend([gr])
 ```
 
-* SUN, WAT, and WND _always_ have zero `quantity`. Which kinda makes sense! How many suns did we burn today at the power plant? How about winds? ... waters? It doesn't explain why `mmbtu` for renewables is nonzero, but it's something!
+* SUN, WAT, and WND _always_ have zero `quantity`.
+  You can kinda guess from the codes themselves, or look them up in the File Layout documentation ("Reported Fuel Type Code"), but these are the energy source codes for solar (SUN), hydro (WAT), and wind (WND) power.
+  Which kinda makes sense, if we're trying to measure a "quantity of fuel consumed".
+  How many units of sun did we burn today at the power plant?
+  How about wind? ... water?
+  It doesn't explain why `mmbtu` for renewables is nonzero, but it's something!
+* Bonus confidence: the other energy source codes have _excellent_ matching between `quantity` and `mmbtu`.
 * Bonus puzzle: MWH always has zero `mmbtu`! How odd.
 
 Honorable mentions:
 
-* `prime_mover` shows moderate differences for BA, CT, and ST as well as the overwhelming differences for HY, PV, and WT
+* `prime_mover` shows moderate differences for BA, CT, and ST as well as the overwhelming differences for HY, PV, and WT.
+  If you're a little more endowed with domain knowledge (or handy with the File Layout documentation, "Reported Primer[sic] Mover") you may notice that these are the prime mover codes for hydro (HY), photovoltaic (PV), and wind turbines (WT), which line up exactly with the WAT, SUN, and WND energy source codes.
+  The only reason this wasn't my top choice for the solution is because this dataset covers 8 energy source codes and 9 prime mover codes.
 * `fuel_unit` shows suspicious differences for megawatthours, though it's in the opposite direction
-* `reporting_frequency_code` shows suspicious differences for AM, and mild but noticeable differences for M and A
+* `reporting_frequency_code` shows suspicious differences for AM, but that only covers ~10 respondents, and our discrepancy is more like 50.
 * `data_maturity` shows mild differences for incremental_ytd
+
+Alternate approach: use boxplots
+
+```python
+axs=pr_gen_fuel_annual.groupby("energy_source_code")[elec_fuel_consumption_cols].plot.box(
+    label="energy_source_code")
+for i, ax in zip(axs.index, axs.values):
+    ax.legend([i])
+```
 
 ::::::::
 
@@ -518,17 +528,40 @@ Honorable mentions:
 
 So now we know to stick to mmbtus if we want to capture renewables.
 
-# Monthly data
+Splitting off the numerical measurement data got us through another 5 columns.
+Using this approach, we found out that renewables are handled oddly in the `fuel_consumption` columns:
+For solar, wind, and hydro, all the useful data are in `_mmbtu`, and for battery storage, they're all in `_quantity`.
+If our research relies on fuel consumption figures, we'll need to either exclude renewables from our analyses, or treat them separately.
+
+The remaining 8 columns are 7 identifiers and the report year.
+We got through a 24-column table of annual data from EIA 923 in Puerto Rico, and we know something about the index columns, string categorical columns, and numeric measurement columns.
+That's a significant step in getting familiar with this dataset!
+
+## Monthly data
 
 Now let's look at the monthly data.
+
+```python
+pr_gen_fuel_monthly = pd.read_parquet("../data/eia923__monthly_puerto_rico_generation_fuel.parquet")
+pr_gen_fuel_monthly
+```
 
 Most of these variables are time series, and that lends itself to plotting especially well.
 
 Most people are familiar with putting plots in research papers, reports, and slides, where they're useful as evidence supporting your argument. To be effective, those plots need to -- essentially -- look nice: clear labels and titles, appropriate units and limits, good color separation for print or screen, tidy legends, minimizing extraneous data. The goal is to communicate your point.
 
-When you're in the exploratory phase, you don't know what the point is yet, and you're communicating with yourself, now and future-you. Exploratory plots can be sloppy, so long as they are not _actively confusing_.
+When you're in the exploratory phase, you don't know what the point is yet, and you're communicating with yourself, now and future-you. To be effective, exploratory plots need to tell you something you don't already know, and ideally they should do that quickly, so you don't lose track of what you're doing. We can skip a lot of the presentation refinements, so long as a plot is not _actively confusing_.
 
-Pandas has great support for sloppy, but _quick_, plotting.
+Pandas has great support for exploratory plotting, since it doesn't require much extra setup, and the options for presentation refinements are extremely limited, reducing the risk of going down pixel-perfection rabbit holes.
+
+In the last section, we started to establish a rhythm for exploratory data visualization.
+Let's break that out more explicitly.
+The steps are:
+
+1. Decide what we want to see
+1. Get pandas/matplotlib to show it to us
+1. If what we want to see is too hard to see, refine the plot
+1. Make a note of anything surprising or weird for followup
 
 Let's look at all the monthly variables at once.
 
@@ -537,13 +570,44 @@ What do we want to see?
 * a different line for each variable: fuel consumed for electricity, fuel consumed, fuel mmbtu, and net generation
 * one value for each month -- we'll sum across all the plants
 
+Now let's get pandas to show it to us.
+
+The primary key or index columns for this data frame are the month ("date"), plant id, plant name, prime mover, and energy source code.
+
+```python
+monthly_index_columns = [
+    "date",
+    "plant_id_eia",
+    "plant_name_eia",
+    "prime_mover_code",
+    "energy_source_code",
+]
+```
+
+We want one value for each month, so we'll group by date and then sum.
+
 ```python
 pr_gen_fuel_monthly
 pr_gen_fuel_monthly.groupby("date").sum()
-pr_gen_fuel_monthly.groupby("date").sum().plot(y=monthly_variables)
 ```
 
+When we sum on some of the index columns, we make a huge mess!
+Let's move the index columns to the actual index; then pandas won't sum them.
+
+```python
+pr_gen_fuel_monthly.set_index(monthly_index_columns).groupby("date").sum()
+```
+
+Much better. Now plot!
+
+```python
+pr_gen_fuel_monthly.set_index(monthly_index_columns).groupby("date").sum().plot()
+```
+
+Check: can we see a different line for each variable, and one value per month? Yes.
+
 Things to notice:
+
 * Big zero spike in late 2017, all variables
 * Everything drops to zero after early 2025; that's probably the end of the real data
 * Variables are on vastly different scales but pandas did its best and it's okay
@@ -552,19 +616,30 @@ Let's dive in further. What's the energy source breakdown look like throughout t
 
 What do we want to see?
 
-* just fuel consumed mmbtus
 * a different line for each energy source: CFO, SUN, NG, etc
+* just fuel consumed mmbtus; we'll lose battery storage but get to see solar, hydro, and wind
 * one value for each month -- we'll sum across all the plants
 
+Now let's get pandas to show it to us.
+
 ```python
-pr_gen_fuel_monthly
-pr_gen_fuel_monthly.groupby(["energy_source_code", "date"]).sum()
-pr_gen_fuel_monthly.groupby(["energy_source_code", "date"]).sum().fuel_consumed_mmbtu
-pr_gen_fuel_monthly.groupby(["energy_source_code", "date"]).sum().fuel_consumed_mmbtu.unstack("energy_source_code")
-pr_gen_fuel_monthly.groupby(["energy_source_code", "date"]).sum().fuel_consumed_mmbtu.unstack("energy_source_code").plot()
+(
+    pr_gen_fuel_monthly.set_index(monthly_index_columns)
+    .groupby(["energy_source_code", "date"]).sum()
+    .fuel_consumed_mmbtu
+    .unstack("energy_source_code").plot()
+)
 ```
 
-Things to notice:
+Check: does this show us the lines we want?
+Yes, though it's pretty busy.
+We may need to split it up to see some elements more clearly.
+
+::: challenge
+
+What do you notice?
+
+:::: solution
 
 * Zero spike in 2017 visible in all energy sources but recovery severely delayed for BIT and renewables
 * NG another big drop in late 2019/early 2020; again in late 2021. Independent of other energy sources though.
@@ -572,32 +647,26 @@ Things to notice:
 * Renewables way smaller than others
 * Renewables all drop starting in 2022
 
+::::
+
+:::
+
 Let's put the renewables on their own plot so we can see them better.
 
 ```python
+renewables = ["SUN", "WND", "WAT"]
 (
-    pr_gen_fuel_monthly.loc[pr_gen_fuel_monthly.energy_source_code in renewables]
+    pr_gen_fuel_monthly.loc[pr_gen_fuel_monthly.energy_source_code.isin(renewables)]
     .groupby(["energy_source_code", "date"]).sum()
     .fuel_consumed_mmbtu.unstack("energy_source_code").plot()
 )
 ```
 
-That makes an error. Darn. It would've been super convenient if that had worked.
+Okay, yes, that is dramatic.
+We can also see that hydro spends a lot of time offline.
+Sufficiently so that we can't really see if it's affected by whatever has happened in 2022.
 
-What are our options here?
-
-* do `(== "SUN") | (== "WND") | (== "WAT")`
-* do something ... a little more flexible
-
-```python
-(
-    pr_gen_fuel_monthly.set_index("energy_source_code").loc[renewables].reset_index()
-    .groupby(["energy_source_code", "date"]).sum()
-    .fuel_consumed_mmbtu.unstack("energy_source_code").plot()
-)
-```
-
-Okay, yes, that is dramatic. Does this show up in the net generation as well?
+Does this 2022 event show up in the net generation as well?
 
 :::: challenge
 
@@ -625,6 +694,12 @@ What do we want to see?
 * net generation on the x axis
 * fuel consumed on the y axis
 
+Now let's get pandas to show it to us.
+
+```python
+renewables_monthly = pr_gen_fuel_monthly.loc[pr_gen_fuel_monthly.energy_source_code.isin(renewables)]
+```
+
 ```python
 (
     renewables_monthly.plot
@@ -632,37 +707,43 @@ What do we want to see?
 )
 ```
 
-Well that's quite linear. Let's clean it up a little so we can see better; the dots are overlapping a lot.
+Check: does this show us a scatter plot with netgen on the x and fuel consumed on the y?
+Yes, and we can even see there are at least two distinct patterns.
+It's pretty blobular though, and that makes it tough to see whether there are only two or if more are hiding here in this top one.
+This is an appropriate time for refinement: the current graph settings aren't giving us all the information we want.
 
+We can reduce the size of each point to see if that gives us clearer separation.
 
 ```python
 (
     renewables_monthly.plot
-    .scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.1)
+    .scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.5)
 )
 ```
 
-Is that three lines? Three lines for three energy sources is awfully suspicious. Let's add color.
+Is that three lines? Three lines for three energy sources is awfully suspicious.
+
+This is another appropriate time for refinement: we can add color to show whether each line is for a different energy source.
 
 ```python
 (
-    renewables_monthly
-    .plot.scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.1, c="energy_source_code")
+    renewables_monthly.plot
+    .scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.1, c="energy_source_code")
 )
 ```
 
-"c must be a sequence of numbers, not an array of strings"
-
-Okay, well pandas has a categorical type that will turn our array of strings into numbers, let's use that.
+oh gee thanks pandas, the default colormap is grayscale. That's not helping at all.
 
 ```python
 (
-    renewables_monthly.assign(energy_source_code=pr_gen_fuel_monthly_renewables.energy_source_code.astype("category"))
-    .plot.scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.1, c="energy_source_code", colormap="rainbow")
+    renewables_monthly.plot
+    .scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu", s=0.1, c="energy_source_code", colormap="rainbow")
 )
 ```
 
-Oh do not like that. There are colors for all three energy sources on both lines. That does not explain this at all.
+Oh do not like that.
+Instead of each line a different color, there are colors for all three energy sources on all the lines.
+So energy source code does not explain what's going on here.
 
 :::: challenge
 
@@ -679,162 +760,78 @@ Disappointingly, `date` is the only one that really does it:
 )
 ```
 
-But at least it clearly identifies three lines. This feels like a policy change effect -- a coordinated change throughout Puerto Rico in how fuel consumption is reported for renewables (which as we know, is already a little weird).
+But at least it clearly identifies three lines. This feels like a policy change effect -- a coordinated change throughout Puerto Rico in how fuel consumption is reported for renewables (which as we know from the annual data, is already pretty weird).
 
 :::::::
 
 ::::
 
-Let's grab the slopes of those lines and see if that gets us any further:
+We've probably extracted all the information we can out of this plot.
+Sometimes viewing the same data from another angle can reveal further insights.
+Let's try that now: What are the slopes of these lines?
+
+
+Fuel consumed per MWH generated is the heat rate, and we can compute that directly:
 
 ```python
 (
     renewables_monthly
-    .assign(ratio=renewables_monthly.fuel_consumed_mmbtu/renewables_monthly.net_generation_mwh)
-    .plot.scatter(x="date", y="ratio", s=0.2, c="date", colormap="rainbow")
+    .assign(heatrate=renewables_monthly.fuel_consumed_mmbtu/renewables_monthly.net_generation_mwh)
+    .plot.scatter(x="date", y="ratio", s=0.5, c="date", colormap="rainbow")
 )
 ```
 
-Oh hey, more subtle than we thought. It looks like whatever constant everyone was using to compute fuel consumption changed a little bit each year, with a big gap for Maria, and then suddenly decided once and for all in 2022.
+Oh hey, more subtle than we thought.
+It looks like whatever constant everyone was using to compute fuel consumption changed a little bit each year, with a big gap for Maria, and then suddenly decided once and for all in 2022.
 
-There's these little stragglers though; are those individual plants or some other effect?
+
+:::: callout
+
+This was a real policy change, and it affected more than Puerto Rico!
+Starting in 2023 (in which reports on 2022 data were published), the EIA changed how it assesses noncombustible renewable energy contributions.
+The old way used a fossil fuel equivalency approach and was adjusted each year using an average heat rate;
+the new way uses a captured energy approach and uses a constant heat conversion factor.
+For more information, see this [CleanEnergyTransition explainer](https://www.cleanenergytransition.org/post/understanding-how-the-eia-is-measuring-noncombustible-renewables?u).
+
+::::
+
+The colormap made it easy to see how the different heatrate values corresponded to our line chart from before, but it's making these little stragglers hard to see.
+Now that we have established some continuity from the previous plot, we can drop the colormap and focus on the stragglers.
 
 ```python
 (
     renewables_monthly
-    .assign(ratio=renewables_monthly.fuel_consumed_mmbtu/renewables_monthly.net_generation_mwh)
+    .assign(heat_rate=renewables_monthly.fuel_consumed_mmbtu/renewables_monthly.net_generation_mwh)
+    .plot.scatter(x="date", y="heat_rate", s=0.5)
+)
+```
+
+Are those individual plants or some other effect?
+
+```python
+(
+    renewables_monthly
+    .assign(heat_rate=renewables_monthly.fuel_consumed_mmbtu/renewables_monthly.net_generation_mwh)
     .assign(plant_factor=renewables_monthly.plant_name_eia.astype("category"))
-    .plot.scatter(x="date", y="ratio", s=0.2, c="plant_factor", colormap="rainbow")
+    .plot.scatter(x="date", y="heat_rate", s=0.5, c="plant_factor", colormap="rainbow")
 )
 ```
 
-Seems likely to be one or a small number of plants. If we wanted to figure out exactly which ones, we could split the data by year, use `.describe()` to get the median ratio for each year, then select all the rows that had a different ratio.
+This colormap is a little too squished to tell us exactly which plant is the troublemaker, but it does give us enough to suggest that it's only one or two plants.
+If we wanted to figure out exactly which ones, we could split the data by year, use `.describe()` to get the median ratio for each year, then select all the rows that had a different ratio.
+We'll leave that for future research!
 
-
-----
-# Prior draft
-
-* primary key columns: plant_id_eia, energy_source_code, prime_mover_code, report_year
-
-## What are all the categorical columns?
-
-* Use `.dtypes`
-* Use `.dtypes.value_counts()`
-* Use `.dtypes[.dtypes=="object"]`
-* Use `.dtypes[.dtypes=="object"].index`
-* Whoops it's got all the monthly columns in it.
-* We'll want to look at monthly data later anyhow so let's identify all the monthly columns now so we can filter them out. We'll figure out why they're objects once we're done with categories.
-* Demo: grab all the month columns of a single variable
-* Demo: grab all the variable columns for january
-
-:::: challenge
-
-Make a list of all the monthly columns. Possible strategies:
-
-- Make a list of variables and filter .columns using .startswith
-- Make a list of months and filter .columns using .endswith
-- Both? Something else?
-
-:::::::: solution
-
-::::::::
-
-::::
-
-* Drop monthly columns and *then* use & save `.dtypes[.dtypes=="object"].index`
-* Use `[category_columns].info()`
-  * 2 columns are always null
-  * 2 columns have some nulls
-
-### What is the NA situation?
-
-* Drop the always-null columns and use `.loc[.isna().any(axis="columns")]`
-* Hypothesis: nulls in fuel_unit are for renewables
-  * Use `.loc[.fuel_unit.isna()].energy_source_code.value_counts()`
-  * Confirmed!
-
-## What are the non-monthly numerical columns?
-
-* Use `.dtypes[.dtypes=="float64"]`; point out pairs of variables
-* Use & save `.dtypes[.dtypes=="float64"].index`
-* Use `[numerical_columns].describe()`
-* Whoops why does quantity have more zeros?
-* Use `.loc[.electric_fuel_consumption_quantity==0) & (.elec_fuel_consumption_mmbtu>0)]`
-* Use `.report_year.value_counts()`
-
-:::: challenge
-
-Find out if one of the categorical columns explains what's happening with the zeros in quantity
-
-* Demo `.loc[..., "report_year"].value_counts()`
-* Demo `print(.loc[..., "report_year"].value_counts())`
-
-:::::::: solution
-
-it's renewables
-
-::::::::
-
-::::
-
-# 2. Look at how far your predecessor got
-
-* Read df from `pr_gen_fuel_elec_final.parquet`
-  * Super narrow! only one numerical variable, fuel_consumed_for_electricity_mmbtu
-  * Date is monthly
-  * "." values are proper NAs
-  * Nice
-* Plot using `.groupby("date").sum().plot()`
-* What is that big drop in 2017?
-* Plot using `.groupby(["energy_source_code","date"]).sum().unstack("energy_source_code").plot()`
-* Ohh that's probably Hurricane Maria :(
-  * Interesting; it took longer for coal to come back than anything else
-* What happened to renewables starting in 2022?
-* Plot just renewables
-* Yep. Let's check netgen. Our predecessor didn't make that one though, so we'll have to extend their code.
-
-# 3. Extend predecessor's code
-
-* Open old notebook & step through what it does
-  * There's the fix for the . thing! Hooray
-  * Here's where it gets rid of all the other numeric columns
-  * Stacking monthly data... looks complicated. We'll come back to it.
-  * A bad plant! good to know
-  * Column renaming. normal
-  * Stacking month columns: the details
-    * Demo melt results: variable vs value
-    * Demo rsplit results: setting fuel_variable and month
-    * Demo month + report_year.astype(str): setting date
-    * Dropping columns we don't need anymore
-* Bring stacking code into our notebook and turn it into a for loop over our monthly variables
-* Use `.set_index` so each item just has its value column
-* Use `pd.concat`
-* Visual check: use `.groupby('date").sum().plot(y=monthly_variables)`
-* Use `.set_index("energy_source_code").loc[renewables].reset_index()`
-* Plot renewables
-  * Oh no netgen stays the same :(
-
-# 4. Grind
-
-* Plot by energy source code -- no help
-* I wonder if some big plants closed that tracked things differently.
-* Plot netgen x fuel mmbtu for each plant
-  * Well there's the problem
-  * It doesn't seem to be split by plants though
-  * There are suspiciously three lines and we know there are three renewables
-* Color by energy source code
-  * That's not it :(
-* Okay, uh, color by date?
-  * Bingo
-  * Probably some kind of coordinated change in reporting
-  * Any models we make will have to account for that carefully
+In the meantime, let's review:
+We were able to use timeseries plots to identify a weird effect in the data, and then use two other visualizations to narrow down the cause and extent of the weirdness.
+We now know that any models that make use of fuel consumed or heat rate will need to account for the changes in how renewables were handled in pre- and post-2022 data.
+Any models that compare or rely on differences in heat rates between plants will probably need to exclude renewables entirely.
 
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
-- Cleaning is an important part of/easy way into getting to know a new data set
-- Different kinds of data -- indexing, categorical, numeric, periodic -- are suited to different kinds of summarization
-- Use divide-and-conquer strategies when working with tables that have a lot of columns (common in energy data)
+- If you are struggling with how to start acquainting yourself with a new data set, looking for data gremlins can be a good icebreaker.
+- Different kinds of data -- indexing, categorical, numeric, time series -- are suited to different kinds of summarization.
+- Use divide-and-conquer strategies when working with tables that have a lot of columns (common in energy data).
 - Visualization is not just for reports, papers, and talks! If you incorporate plotting into your exploration & troubleshooting toolbox you'll be able to identify and diagnose data problems much more quickly than if you wait for your model to exhibit strange behavior.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
