@@ -145,8 +145,13 @@ Though both of these lines are dropping low-quality records, their intent is ver
 ::::
 ::::::::
 
+
 As we saw in this challenge, understanding the intent of our code is necessary to effectively
-reorganizing it.
+reorganizing it into discrete and reusable functions.
+
+Modularizing our code can take some time! Being strategic about when and where to pull
+code out for this kind of treatment takes some practice, but can save a lot of time and
+pain in the long run.
 
 When is code a *good* candidate for modularization?
 
@@ -162,10 +167,6 @@ When is code a *bad* candidate for modularization?
 - You never anticipate reusing it (e.g., a completely bespoke transformation step)
 - It's already a modularized function. For example, Pandas' .replace() method can already
 take multiple input values flexibly, so there's no need to reproduce someone else's work here.
-
-Modularizing our code can take some time! Being strategic about when and where to pull
-code out for this kind of treatment takes some practice, but can save a lot of time and
-pain in the long run.
 
 :::: discussion
 Which other parts of this code are good candidates for modularization?
