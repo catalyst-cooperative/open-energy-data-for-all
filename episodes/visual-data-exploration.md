@@ -33,23 +33,23 @@ Plots aren't just for papers!
 
 Data problems come in many different forms, and how you respond to them will depend on the source of the problem and what kind of impact it will have on the kinds of modeling and analysis you want to do.
 
-* Problems introduced by the respondent - typos and other data entry errors - These can be fixed if they're simple, or can be a reason to exclude certain rows if correct values can't be reconstructed.
-* Problems introduced by the data aggregator - disagreement between documentation you received and the actual forms filled out by respondents; a bad choice of data format that doesn't preserve relationships within the data - These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes TODO
-* "Problems" introduced by external forces - natural disasters, policy change - These may be retained or excluded depending on your exact area of research.
-* Problems we created for ourselves - We'll talk about this later.
+* **Problems introduced by the respondent** - typos and other data entry errors - These can be fixed if they're simple, or can be a reason to exclude certain rows if correct values can't be reconstructed.
+* **Problems introduced by the data aggregator** - disagreement between documentation you received and the actual forms filled out by respondents; a bad choice of data format that doesn't preserve relationships within the data - These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes TODO
+* **"Problems" introduced by external forces** - natural disasters, policy change - These may be retained or excluded depending on your exact area of research.
+* **Problems we created for ourselves** - We'll talk about this in a later session.
 
 Data problems can be identified at the column level and in the relationship between columns.
 
 When identifying data problems, it is useful to think about what you expect to see from certain kinds of data.
 
-* Numeric data might be in whole numbers (1, 2, -11, 56,912) or use decimal fractions (3.14, 0.000123, -65,536.2).
+* **Numeric data** might be in whole numbers (1, 2, -11, 56,912) or use decimal fractions (3.14, 0.000123, -65,536.2).
   In programming, a whole number is often called an "integer" or "int" while a number with a decimal fraction is often called a "float"
   (short for "floating point", which has to do with minutiae of how fractions are implemented in binary -- we don't need to know the details for this course)
-* Categorical data takes on one of a restricted set of available values.
+* **Categorical data** takes on one of a restricted set of available values.
   They might be ID numbers, an alphanumeric string, a few words, or a few letters meant to abbreviate a longer category name.
   If a value appears that is not in the restricted set, that value is invalid, and likely resulted from a typo or similar error.
   An explanation of all the available values for each categorical column is usually included in the documentation for a data source, but sometimes you can get a rough idea from context.
-* Free text data [which we won't cover today] is unrestricted, except perhaps in length.
+* **Free text data** [which we won't cover today] is unrestricted, except perhaps in length.
   It might be a description of an incident, location, or piece of equipment.
   A free text value is not required to match any other entry or registry, and there's usually no such thing as an invalid value.
   Free text typically requires the application of qualitative research methods before it can be analyzed further.
@@ -66,10 +66,10 @@ Let's take a look at how these ideas apply to real data.
 
 You have two data files which were prepared by your predecessor, based on raw data from EIA-923 for Puerto Rico:
 
-* `eia923__annual_puerto_rico_generation_fuel.parquet`
-* `eia923__monthly_puerto_rico_generation_fuel.parquet`
+* `pr_gen_fuel_annual.parquet`
+* `pr_gen_fuel_monthly.parquet`
 
-(They also left you their source code, but it looks horrendous, so we'll start with the data and take a look at the code in another session)
+(They also left you their source code, but we'll start with the data and take a look at the code in another session)
 
 We will ask ourselves:
 
@@ -84,7 +84,7 @@ We'll start with the annual file.
 
 ```python
 import pandas as pd
-pr_gen_fuel_annual = pd.read_parquet('../data/eia923__annual_puerto_rico_generation_fuel.parquet')
+pr_gen_fuel_annual = pd.read_parquet('../data/pr_gen_fuel_annual.parquet')
 pr_gen_fuel_annual
 ```
 
@@ -119,9 +119,10 @@ We'll use a little of both so you can see what they're like.
 Let's start with a primary key.
 What columns, taken together, have unique values from row to row?
 What does each row in this file represent?
-If you happen to know, you can shout it out in chat, otherwise I'll open up the source data Excel file, the grandfather of this dataframe, which has some documentation we can look at.
+If we were familiar with EIA 923 from other research, we might know that already.
+If not, we can open up the source data Excel file, the grandfather of this dataframe, which has some documentation we can look at.
 
-![Excel screenshot showing tab Page 7 File Layout of file eia923_pr.xlsx](fig/excelheader.png){alt="Excel screenshot showing tab Page 7 File Layout of file eia923_pr.xlsx.
+![Excel screenshot showing tab Page 7 File Layout of data/eia923_pr.xlsx](fig/ep-5/eia923-filelayout.png){alt="Excel screenshot showing tab Page 7 File Layout of file data/eia923_pr.xlsx.
 A table titled Generation and Fuel Data has two columns, Data Elements and Description.
 The first few rows are visible; contents as follows.
 Plant ID: EIA Plant Identification number. One to five digit numeric.
@@ -132,7 +133,7 @@ Operator Name: The name of the entity which operates the plant. Alphanumeric.
 Operator ID: The EIA operator identification number. Five digit numeric, padded with leading zeros.
 State: State the facility is located in. Two character alphanumeric (standard state postal codes)."}
 
-The documentation doesn't tell you what has to be unique for each entry; we will have to reason it out.
+The documentation doesn't say what has to be unique for each entry; we will have to reason it out.
 We know each plant has to file with the EIA every year, so we'll use that as our initial guess:
 
 * Plant ID
@@ -237,16 +238,21 @@ First, we'll print out the data type of each column.
 pr_gen_fuel_annual.dtypes
 ```
 
+Some of these have already been labeled as categorical data.
 We know from our earlier peek at the full data frame that none of these string columns contain free text.
 Unless we have domain-specific knowledge telling us otherwise, it is reasonable to guess that any column with a string type contains categorical data.
 This might not capture all the categorical data in the data frame, but it'll get us started.
 To get a list, we can filter:
 
 ```python
-pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"]
-pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index
-list(pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index)
-category_columns = list(pr_gen_fuel_annual.dtypes[pr_gen_fuel_annual.dtypes == "string[python]"].index)
+category_columns = list(
+    pr_gen_fuel_annual.dtypes[
+        (pr_gen_fuel_annual.dtypes == "category") |
+        (pr_gen_fuel_annual.dtypes == "string[python]") |
+        (pr_gen_fuel_annual.dtypes == "boolean")
+    ].index
+)
+category_columns
 ```
 
 We know from the documentation we looked at earlier that some of these are identifiers with large sets of possible values, and the rest have much smaller sets of possible values.
@@ -365,6 +371,7 @@ This is where dataset documentation can help.
 Open `data/eia923_pr.xlsx` and use the File Layout tab to determine which columns contain measurement data.
 
 Watch out!
+
 * Some of the column names in our data frame have been changed from the originals referenced in the documentation.
 * Some of the documentation has typos.
 
@@ -542,7 +549,7 @@ That's a significant step in getting familiar with this dataset!
 Now let's look at the monthly data.
 
 ```python
-pr_gen_fuel_monthly = pd.read_parquet("../data/eia923__monthly_puerto_rico_generation_fuel.parquet")
+pr_gen_fuel_monthly = pd.read_parquet("../data/pr_gen_fuel_monthly.parquet")
 pr_gen_fuel_monthly
 ```
 
@@ -581,6 +588,7 @@ monthly_index_columns = [
     "plant_name_eia",
     "prime_mover_code",
     "energy_source_code",
+    "fuel_unit",
 ]
 ```
 
@@ -624,9 +632,9 @@ Now let's get pandas to show it to us.
 
 ```python
 (
-    pr_gen_fuel_monthly.set_index(monthly_index_columns)
-    .groupby(["energy_source_code", "date"]).sum()
-    .fuel_consumed_mmbtu
+    pr_gen_fuel_monthly
+    .groupby(["energy_source_code", "date"])
+    .fuel_consumed_mmbtu.sum()
     .unstack("energy_source_code").plot()
 )
 ```
@@ -656,9 +664,11 @@ Let's put the renewables on their own plot so we can see them better.
 ```python
 renewables = ["SUN", "WND", "WAT"]
 (
-    pr_gen_fuel_monthly.loc[pr_gen_fuel_monthly.energy_source_code.isin(renewables)]
-    .groupby(["energy_source_code", "date"]).sum()
-    .fuel_consumed_mmbtu.unstack("energy_source_code").plot()
+    pr_gen_fuel_monthly
+    .loc[pr_gen_fuel_monthly.energy_source_code.isin(renewables)]
+    .groupby(["energy_source_code", "date"])
+    .fuel_consumed_mmbtu.sum()
+    .unstack("energy_source_code").plot()
 )
 ```
 
@@ -674,15 +684,17 @@ Adapt our current fuel_consumed_mmbtu plot to show net_generation instead.
 
 :::::::: solution
 
+```python
 (
     pr_gen_fuel_monthly.set_index("energy_source_code").loc[renewables].reset_index()
     .groupby(["energy_source_code", "date"]).sum()
     .net_generation_mwh.unstack("energy_source_code").plot()
 )
-
-::::::::
+```
 
 No, not really :(
+
+::::::::
 
 :::
 
@@ -698,9 +710,6 @@ Now let's get pandas to show it to us.
 
 ```python
 renewables_monthly = pr_gen_fuel_monthly.loc[pr_gen_fuel_monthly.energy_source_code.isin(renewables)]
-```
-
-```python
 (
     renewables_monthly.plot
     .scatter(x="net_generation_mwh", y="fuel_consumed_mmbtu")
@@ -776,8 +785,8 @@ Fuel consumed per MWH generated is the heat rate, and we can compute that direct
 ```python
 (
     renewables_monthly
-    .assign(heatrate=renewables_monthly.fuel_consumed_mmbtu/renewables_monthly.net_generation_mwh)
-    .plot.scatter(x="date", y="ratio", s=0.5, c="date", colormap="rainbow")
+    .assign(heat_rate=renewables_monthly.fuel_consumed_mmbtu/renewables_monthly.net_generation_mwh)
+    .plot.scatter(x="date", y="heat_rate", s=0.5, c="date", colormap="rainbow")
 )
 ```
 
@@ -788,9 +797,11 @@ It looks like whatever constant everyone was using to compute fuel consumption c
 :::: callout
 
 This was a real policy change, and it affected more than Puerto Rico!
+
 Starting in 2023 (in which reports on 2022 data were published), the EIA changed how it assesses noncombustible renewable energy contributions.
 The old way used a fossil fuel equivalency approach and was adjusted each year using an average heat rate;
 the new way uses a captured energy approach and uses a constant heat conversion factor.
+
 For more information, see this [CleanEnergyTransition explainer](https://www.cleanenergytransition.org/post/understanding-how-the-eia-is-measuring-noncombustible-renewables?u).
 
 ::::
