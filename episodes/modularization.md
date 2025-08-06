@@ -67,6 +67,7 @@ Or, in words: this code takes a table with data stored in one column per month a
 order to make it easier to plot our data over time.
 
 :::::::: challenge
+### Challenge 1: Identifying duplicated code
 Open `notebooks/etl.ipynb`. Do you see any code that performs this same task? What differences do you note between the code itself?
 
 :::: solution
@@ -79,17 +80,6 @@ We're doing *almost* the same thing five times! Imagine you find an error in you
 cell - now you have to copy paste the code into each cell where similar code appears. Or,
 image you want to do this for 25 columns rather than five. What if instead of repeating this code,
 we replaced it with single function we could re-use each time?
-
-:::: callout
-What's a **function**? A function is a reusable piece of code that can be treated as a black box by the
-rest of your workflow.
-
-What makes a good function?
-* It has one task (can be composed of multiple other functions)
-* Someone other than the person who wrote it can understand what it does
-* It can be adaptable (e.g., we can run this transformation function on a new year of data).
-* It can be tested (we'll talk about this next module!)
-::::
 
 We can imagine writing a function called `melt_monthly_vars` to replace our repetitive code. Then, our many lines of code might look something like this:
 
@@ -105,9 +95,15 @@ fuel_mmbtu_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_mmbtu")
 ```
 
 Yet, as we just saw, this redundant code isn't *identical* across all variables: the cell working with `net_generation_mwh` selects
-cells differently than the others. *Should* it get combined into this `melt_monthly_vars`?
+cells differently than the others.
 
-As we think about how to organize and re-organize our code, it doesn't take long to run into
+```python
+net_gen_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith("net_generation_mwh")]
+```
+
+*Should* it get combined into this `melt_monthly_vars`?
+
+As we think about how to organize our code into discrete and reusable steps (or to *modularize* it), it doesn't take long to run into
 these types of tricky questions. One strategy to help us figure out which
 code we can modularize is a **plain language approach**.
 
@@ -115,9 +111,9 @@ Often, we start by writing our code first and adding comments or documentation a
 
 Let's go back to the description we wrote earlier:
 
-> This code takes a table with data stored in one column per month and stacks all the fields for a single variable
-> (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
-> order to make it easier to plot our data over time.
+*"This code takes a table with data stored in one column per month and stacks all the fields for a single variable*
+*(fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in*
+*order to make it easier to plot our data over time."*
 
 Yes, the code definitely does this! Whatever code we use to write our `melt_monthly_vars`
 function, it should definitely work for this case.
@@ -138,6 +134,7 @@ pr_gen_fuel_final = pr_gen_fuel_final.loc[pr_gen_fuel_clean.date < pd.Timestamp(
 ```
 
 :::::::: challenge
+### Challenge 2: Writing plain language descriptions
 Write a plain language description (1-2 sentences) for each of these two lines of code. Should they be combined into one `drop_bad_values()` function?
 
 :::: solution
@@ -148,7 +145,11 @@ Though both of these lines are dropping low-quality records, their intent is ver
 ::::
 ::::::::
 
-When is code a good candidate for modularization?
+As we saw in this challenge, understanding the intent of our code is necessary to effectively
+reorganizing it.
+
+When is code a *good* candidate for modularization?
+
 - In plain language, it's a discrete step.
 - You find yourself copy-pasting the same lines of code over and over again.
 - You want to do pretty much the same thing in many different contexts (e.g., on other columns, on other datasets).
@@ -156,6 +157,7 @@ When is code a good candidate for modularization?
 - You want to be able to test it (we'll cover this shortly)
 
 When is code a *bad* candidate for modularization?
+
 - In plain language, it's actually more than one step (e.g., converting data types *and* dropping rows)
 - You never anticipate reusing it (e.g., a completely bespoke transformation step)
 - It's already a modularized function. For example, Pandas' .replace() method can already
@@ -177,8 +179,22 @@ boolean columns, for example.
 
 ## A plain language approach to function design
 
+:::: callout
+What's a **function**? A function is a reusable piece of code that can be treated as a black box by the
+rest of your workflow.
+
+What makes a good function?:
+
+- It has one task (can be composed of multiple other functions)
+- Someone other than the person who wrote it can understand what it does
+- It can be adaptable (e.g., we can run this transformation function on a new year of data).
+- It can be tested (we'll talk about this next module!)
+
+::::
+
 Plain language not only helps us to identify meaningful similarities and differences across
 our code, but it can also serve as an important starting place for function design:
+
 - There are many ways to do most tasks. Using plain language descriptions focuses us
 on the desired outcome, and helps us assess whether different ways of doing the same
 thing might help meet our goals better.
@@ -189,11 +205,11 @@ can and can't be used to do.
 - Plain language helps provide important context about *why* we've written this code and what it does.
 
 When we're taught how to write a function, lessons typically focus on the basics:
-* A function should have a name
-* A function should have inputs
-* A function should have an output (return something)
-* Function and variable names should be informative, but not unwieldy. `i` is bad, but so is
-`raw_puerto_rico_generation_fuel_data_from_eia_923`.
+
+- A function should have a name
+- A function should have inputs
+- A function should have an output (return something)
+- Function and variable names should be informative, but not unwieldy. `i` is bad, but so is `raw_puerto_rico_generation_fuel_data_from_eia_923`.
 
 :::: instructor
 Start with the code for the net generation melt. First, swap out the variable name for a variable
@@ -225,6 +241,7 @@ def melt_monthly_vars(pr_gen_fuel, variable_name):
 We can attach our plain language summary of the function directly to our code by using a docstring. Unlike an in-line comment which uses the hash symbol (e.g., `# melt the vars`), a docstring uses triple quotation marks and is written right after the definition of a function, module, method or class.
 
 A docstring can contain the following information:
+
 - A one-line summary of your function.
 - A paragraph with a longer description (optional)
 - A list of input arguments, and what they are expected to be
