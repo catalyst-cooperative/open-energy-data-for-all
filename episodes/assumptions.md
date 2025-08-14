@@ -30,7 +30,7 @@ This can understandably have impact on your work!
 Depending on what you are using the data for,
 these shifts will impact your work differently.
 Some will not actually affect your output
-- maybe you weren't using that column anyways - 
+- maybe you weren't using that column anyways -
 but others will mean you have to make changes to your code,
 your methodology section,
 or the way you answer a question when presenting about your work.
@@ -58,7 +58,7 @@ Some examples:
 The sneakiest assumptions are the ones that are hard to think of.
 If they were obvious to you, then you probably were already working around them in some way.
 With that in mind, let's try to come up with some assumptions of our own!
- 
+
 :::: challenge
 
 ### Challenge: identifying assumptions

@@ -61,7 +61,7 @@ You can think of it sort of like the modularized version of writing in-line asse
 
 Let's do an example in `tests/test_pipeline.py` in our project.
 Take the transformation pipeline from the last episode,
-which takes the raw Puerto Rico data and does some cleaning and reshaping. 
+which takes the raw Puerto Rico data and does some cleaning and reshaping.
 One thing we expect from the output is that there's a `fuel_consumption_units` column and that its value is 0 for renewables.
 
 **TODO** make sure this code actually works with the shape of the output from previous episode
@@ -111,7 +111,7 @@ What is a property that you expect the output to have?
 You can pick from this list, or choose your own:
 * all plants report some non-null values
 * all fuel consumption units are positive
-* 
+*
 
 Write a function in `test_pipeline.py` that tests this property by filling out the following skeleton:
 
@@ -295,16 +295,16 @@ The `->` denotes the line that is *about* to run.
 ```
 (Pdb) l
   2         return f"({x}, {y})"
-  3  
-  4  
+  3
+  4
   5     def outer_func():
   6         x = 1
   7  ->     breakpoint()
   8         y = x + 1
   9         z = inner_func(x, y)
  10         return z
- 11  
- 12  
+ 11
+ 12
 (Pdb) l
  13     if __name__ == "__main__":
  14         outer_func()
@@ -459,7 +459,7 @@ You can also copy this function & test code if your function already works perfe
 def foo():
     breakpoint()
     ...
-    
+
 
 def bar():
 
