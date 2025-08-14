@@ -1,7 +1,7 @@
 ---
 title: "Making assumptions about your data"
-teaching: 0
-exercises: 0
+teaching: 30
+exercises: 20
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions
@@ -19,33 +19,44 @@ exercises: 0
 
 ## Intro
 
-Now that you've looked at the data and gotten a sort of intuitive feel for it, it might be useful to characterize the data in a slightly more rigorous way. This can point you at current holes in your understanding or future problems with however you are planning on working with the data.
+As we explore a dataset we naturally start to make assumptions about it.
+We also constantly find new evidence that our initial assumptions are incorrect.
+We zoom in a little closer to a suspiciously low value,
+or we notice that a certain column has more null values than we expected,
+or we see that certain values seem to be duplicated in a confusing way,
+and suddenly our understanding of the data is irrevocably changed.
 
-We'll go through three steps:
+This can understandably have impact on your work!
+Depending on what you are using the data for,
+these shifts will impact your work differently.
+Some will not actually affect your output
+- maybe you weren't using that column anyways - 
+but others will mean you have to make changes to your code,
+your methodology section,
+or the way you answer a question when presenting about your work.
 
-1. list out a bunch of assumptions about your assumptions
-2. identify useful assumptions to test
-3. write some code to verify those assumptions
+It's nice to at least try to see these things coming,
+so in this episode we'll talk about:
+
+* identifying and articulating assumptions about a dataset
+* simple tools for testing these assumptions
+* prioritizing assumptions for testing
+
+While faulty assumptions lurk everywhere,
+we'll focus here on assumptions about your *data*.
 
 ## What is an assumption anyways?
 
 In this context, an *assumption* can be any property you think is true about the data.
 
 Some examples:
-- assumptions about the values: the heat rate of renewables after 2022 is reported as a consistent value
+- assumptions about the values: the reported fuel usage in MMBTU is never negative.
 - relationships are well-defined: data rows that share the same plant ID correspond to the same plant
 - data types are consistent: the "year" column only contains numbers, not words or strings of random characters
 - and many more!
 
-These assumptions form the core of your mental model,
-and if they turn out not to be true then anything that depends on your mental model might break in unexpected ways.
-That includes your code crashing or spitting out bad data, of course.
-It could also make your documentation confusing or misleading,
-causing others to misinterpret your results.
-It could also end with you publishing results that are based on incorrect data.
-
-The most dangerous assumptions (and thus, the most useful to enumerate) are particulary hard to think of -
-if they're obvious to you, then on some level you are aware of the need to work around them.
+The sneakiest assumptions are the ones that are hard to think of.
+If they were obvious to you, then you probably were already working around them in some way.
 With that in mind, let's try to come up with some assumptions of our own!
  
 :::: challenge
@@ -58,40 +69,32 @@ The goal is to get past the obvious ones and start thinking of some un-obvious a
 
 ::::
 
+## Which assumptions are worth testing?
 
-## Testing assumptions
+All assumptions take some effort to test.
+While it's useful to test many assumptions,
+the reality is that we have limited time to work on our projects
+and need to prioritize the assumptions that are "worth" the investment of testing them.
 
-### Example
+What makes assumptions worth testing?
 
-Let's take a look at one of the example assumptions and see how we'd figure out if it's true:
+* how easy it is to test the assumption
+* the impact on your system if the assumption turns out to not be true
+* the likelihood the assumption is violated
 
-> The heat rate of renewables after 2022 is reported as a consistent value.
+Let's look at each of these dimensions one by one.
 
-How would we verify that?
+## Testability
 
-First, we can calculate that heat rate:
+### How to test your assumptions
 
-```python
+It's hard to imagine how easy it is to test an assumption
+without having seen any examples of assumptions being tested!
+Let's take a look at one of the example assumptions and see how we'd test it:
 
-renewables_2022 = monthly_gen_fuel[
-    (monthly_gen_fuel["date"] >= "2022-01-01") &
-    (monthly_gen_fuel["energy_source_code"].isin({"SUN", "WND", "WAT"}))
-]
-consumption_btu = renewables_2022["fuel_consumed_for_electricity_mmbtu"] * 1_000_000
-net_gen_kwh = renewables_2022["net_generation_mwh"] * 1000
-heat_rate = consumption_btu / net_gen_kwh
-```
+> the reported fuel consumption (in MMBTU) is never negative.
 
-Let's take a quick look:
-
-```python
-heat_rate.hist()
-```
-
-Looks like almost all of the values are clustered at 3400,
-and the min and max values are between 2000 and 5000.
-
-Then, we can use an `assert` statement to verify some fact.
+How would we verify that? We can use an `assert` statement to verify the assumption.
 
 `assert` basically says, "if this next part is True, great! Nothing happens. If it's false, we'll raise an error."
 
@@ -100,102 +103,116 @@ assert 1 == 1
 assert 1 == 2
 ```
 
-So let's assert something about this heat rate - maybe that the standard deviation is below a certain percentage of the mean:
+So let's assert our assumption is true.
 
 ```python
-assert heat_rate.std() / heat_rate.mean() <= 0.05
+# read in the data
+monthly_gen_fuel = pd.read_parquet("../data/pr_gen_fuel_monthly.parquet")
+
+# pull out the piece we're interested in
+fuel_consumed_mmbtu = monthly_pr_gen_fuel["fuel_consumed_mmbtu"]
+
+# finally make that assertion!
+assert not (fuel_consumed_mmbtu < 0).any()
 ```
 
+Which passes with little fanfare.
+Now that your imagination is primed,
+we can evaluate assumptions for whether they'd be easy or hard to test.
+There's no hard and fast rule here - a useful heuristic is,
+"Can I imagine a snippet of code that would verify this assumption?"
+Let's go through some examples.
 
-This took some effort, but now we have some code that verifies that assumption.
-If we add new data in the future, or change how we process the data,
-we can see if this assumption breaks by running this code again.
-Pretty neat - let's try doing another one.
+The assumption we just tested,
+"the reported fuel consumption in MMBTU is never negative",
+is not so bad - we just imagined that snippet of code together above.
 
-:::: challenge
+One that might be a bit harder would be
+"for renewables after 2022, the reported fuel consumption in MMBTU is equivalent to the net generation in MWh." This is a little trickier because of two reasons:
 
-### Challenge: writing code to test an assumption
+* we have to do some unit conversions to even compare these
+* we need to think about "how close is close enough?" due to different precision,
+  and the loss of precision from unit conversions
 
-Pick an assumption from the list we generated above and write some code to assert that the assumption is true!
-
-::::
-
-## Which assumptions are worth testing?
-
-As we just saw, all assumptions take some effort to test.
-While it's useful to test many assumptions,
-the reality is that we have limited time to work on our projects
-and need to prioritize the assumptions that are "worth" the investment of testing them.
-
-What makes assumptions useful or less so?
-
-* how easy it is to test these assumptions
-* the impact on your system if the assumption turns out to not be true
-* the likelihood this assumption is violated
-
-Some examples of less useful assumptions:
-- the person filling out the form is trying to tell the truth:
-  this is *hard to test*.
-  This sort of external human factor, while very impactful and nebulously possible,
-  would require some detailed analysis and cross-comparison of different datasets to even begin testing.
-- `fuel_consumption_mmbtu` is largely reported to 0.1 MMBtu precision,
-  but one specific plant reports `fuel_consumption_mmbtu` to a 0.01 MMBtu precision:
-  this has *low impact*.
-  If there are more plants that report with higher precision,
-  you are not likely to run into problems.
-- the plant name column is always going to be a string of characters, not a numeric field:
-  this has *low probability of being violated*.
-  It would be hard to imagine a plant name column that doesn't have *some* words in the reported values,
-  and that would force the whole column to be "string" type.
-
-We'll think through each of these criteria together:
+One that might be quite hard to test would be
+"There were no mistakes in the data entry."
+That would require some sort of cross-checking with a different reputable source,
+and likely some communication with EIA as well.
 
 :::: challenge
 
 ### Challenge: evaluating testability
 
-The effort required to test these assumptions can be evaluated with the question,
-"Can I imagine a snippet of code that would verify this assumption?"
-
-Look at your list of assumptions.
-Think about how you would write code to test each one.
+Look at the list of assumptions.
 
 Can you identify one that would be easy to test, and one that would be hard to test?
 
+If you have time, write some code to verify the easy assumption!
+
 ::::
+
+
+## Impact
+
+Let's talk about impact!
+
+We can't evaluate the impact of a faulty assumption
+without a corresponding use case to be impacted.
+And different use cases will lead to different impact for the same faulty assumption.
+
+One way to think about the severity of impact is a three-level system:
+
+* no effect: nothing bad happens to your use case.
+* quiet failure: your system produces incorrect outputs
+* loud failure: your system doesn't produce outputs at all
+
+Consider the following:
+
+#### Case 1
+* Use case: longitudinal analysis of one specific plant
+* Assumption: this specific plant reports net generation data for all years it was active.
+* Impact of faulty assumption: there are data gaps in the net generation data.
+  In this case it would probably cause a quiet or loud failure,
+  depending on the specifics of the system.
+
+#### Case 2
+* Use case: aggregate analysis of all plants in Puerto Rico
+* Assumption: a specific plant reports net generation data for all years it was active.
+* Impact of faulty assumption
+  there are data gaps for that specific plant,
+  but the aggregate values are not heavily affected.
+  This would probably lead to no effect or a quiet failure.
+
+We see that the same assumption can lead to different impacts
+due to the use cases we apply them to.
 
 :::: challenge
 
 ### Challenge: evaluating impact
 
-Impact is hard to think about when you haven't built up a whole system yet.
- But you can usually sort problems into "won't cause any problems,"
-"will cause problems which will be easy to notice (i.e. the whole program crashing),"
-and "will cause problems which will be hard to notice (i.e., the data will just be wrong)."
-In most cases,
-it is better to have your program crash loudly than to have your program silently give you bad data.
+Look at the list of assumptions.
 
-Look at the list of your assumptions and imagine each one is not actually true.
-
-Can you identify one example for each of the following?
-
-* will probably break downstream work in some obvious way?
-* will probably not break anything downstream?
-* will cause some subtle and hard-to-notice problem?
+Can you come up with use cases where this assumption's failure will:
+* not affect the use case
+* quietly affect the use case
+* loudly affect the use case?
 
 ::::
 
+## Likelihood
+
+Evaluating likelihood can be difficult:
+you are guessing at the future based on your experience of the past.
+A heuristic is
+"Can I imagine a situation where this assumption would be false?
+How improbable is that situation?"
+You'll build up a more nuanced intuition over time.
 
 :::: challenge
 
 ### Challenge: evaluating likelihood
 
-Evaluating likelihood can be difficult:
-you are guessing at the future based on your experience of the past.
-A heuristic is "can I imagine a situation where this assumption would be false?"
-You'll build up a more nuanced intuition over time.
-
-Look at the list of your assumptions and imagine a scenario in which they would not be true.
+Look at the list of assumptions and imagine a scenario in which they would not be true.
 
 Can you identify an example scenario that:
 * seem very plausible?
@@ -206,8 +223,8 @@ Can you identify an example scenario that:
 
 :::: keypoints
 
-- you're always making assumptions about your data - nice to know when they've been broken
-- you can use `assert` statements to tell you they're broken
+- you're always making assumptions about your data, and many of them are likely to be wrong
+- you can use `assert` statements to tell you if an assumption is wrong
 - you can evaluate the usefulness of assumptions by thinking about their impact, likelihood, and testability.
 
 ::::
