@@ -67,6 +67,23 @@ Take 5 minutes to list out as many assumptions as you can about the EIA 923 Puer
 
 The goal is to get past the obvious ones and start thinking of some un-obvious assumptions - no need to limit yourself to 'realistic' ones at this stage.
 
+:::::::: instructor
+Put these in a Google doc that you share with the class.
+
+
+Some examples, if students are feeling a little quiet:
+
+* the net generation data is actually in MWh and not a mix of units
+* for a given generator in a given time period, NAs mean there was no data reported at all
+  (all measured values are NA or none are)
+* the net generation of batteries is strictly less than the fuel consumed in MWh
+* all energy source codes correspond to the set in the documentation
+* a plant ID corresponds to only one plant name per year
+* every generator has at least one reporting period for which they have non-zero generation
+* electricity generation heat rates are close to known averages for their prime mover / energy source
+
+::::::::
+
 ::::
 
 ## Which assumptions are worth testing?
