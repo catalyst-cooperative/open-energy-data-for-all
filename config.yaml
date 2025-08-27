@@ -55,11 +55,11 @@ episodes:
 - working-with-diverse-filetypes.md
 - accessing-remote-data.md
 - scraping-data.md
-- coming-soon.md
 # chapter 2. visualization/reusability
-#- plotting.md # pick a few transforms and do them - dropping nulls, adding dtypes, stacking, unit conversion
+- visual-data-exploration.md
+# - coming-soon.md
 #- data-validation.md
-#- modularization.md
+- modularization.md
 - escape-from-jupyter.md
 #- automated-testing.md
 # chapter 3. when things go wrong
