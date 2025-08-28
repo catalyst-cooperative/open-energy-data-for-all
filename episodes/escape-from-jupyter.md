@@ -27,10 +27,11 @@ your code grows more complex or you start to collaborate with others, you might 
 it increasingly challenging to work entirely in Jupyter notebooks.
 
 In contrast, moving towards coding in scripts and modules offers us numerous advantages:
+
 - **Keep code organized:** Having to constantly scroll up and down to find that helpful function you wrote… somewhere?
 By organizing code into discrete steps and themes (e.g., one file per dataset), you and your collaborators can easily find relevant code.
 - **Track changes:** Using .py files and modules makes it easy for to see line-by-line
-changes you or others make to files.
+changes you or others make to files, especially when using Github to collaborate.
 - **Concretize final code:** While you might test out three versions of a `transform_eia_gen_fuel()`
 function in a Jupyter notebook or make four exploratory plots, you'll ultimately want to make sure
 you're running the code you need for your final transformation process, and *only* that code. Moving
@@ -53,7 +54,7 @@ in which to run any code we write. A virtual environment is a box that you can u
 wrap up your project and hand it over to a collaborator - it tells their computer how to
 replicate the environment you used when developing your code (e.g., which packages, which Python version).
 
-Like other tools you may have encountered (`pip`, `pyenv`, `virtualenv`), [`uv`](https://docs.astral.sh/uv/) is a tool that helps you install and update packages, and then share those exact installation
+Like other tools you may have encountered (`pip`, `pyenv`, `virtualenv`), [`uv`](https://docs.astral.sh/uv/) is a tool that helps you install and update Python packages, and then share those exact installation
 instructions with your peers. In fact, if you've run any of the code in prior episodes,
 you're already using `uv`! Helpfully, as we move away from Jupyter, we can use `uv` to set up a
 skeleton for our code project.
@@ -66,6 +67,12 @@ Open up your shell (see here for [OS-specific instructions](https://swcarpentry.
 ```shell
 cd ..
 ```
+
+:::: instructor
+Take a moment to check that your students are all one directory above the lesson content.
+Otherwise, `uv` will create a workspace in the lesson's existing `uv` environment instead
+of a new project.
+::::
 
 Let's pick a short but descriptive name for our project (avoid using spaces): `pr-gen-fuel`.
 
@@ -126,6 +133,7 @@ to put into a README, we recommend [this Carpentries module](https://carpentries
 #### pyproject.toml
 A TOML file is a standard configuration format used for Python projects. It can be used
 to specify many, many things about project set-up. To get us started, we can see `uv` has included:
+
 - name: the name you specified when running `uv init`.
 - version: which version of the codebase this is, to help others keep track of updates.
 - description: A short summary of the project (save longer descriptions for the readme).
@@ -172,6 +180,15 @@ dependencies = [
 
 ::::
 
+:::: instructor
+The precise numbers of packages resolved, prepared and installed will vary for each
+user. In case your students are curious:
+
+- *Resolution*: Recursively searching for compatible package versions, ensuring that the
+requested requirements are fulfilled and that the requirements of each requested package
+are compatible. See [docs](https://docs.astral.sh/uv/concepts/resolution/) for more detail.
+::::
+
 In the corresponding `uv.lock` file, we can also see a ton of new information! While `pyproject.toml` gives us high-level instructions, `uv.lock` tells us which exact version of each package and which link it was installed from. This is the recipe other computers will follow to recreate the same environment when they setup your environment.
 
 :::: callout
@@ -180,25 +197,18 @@ don't have to think about it! Every time we use `uv run` to run our Python files
 `uv` will check for new package releases and update our environment.
 ::::
 
-#### Challenge 1: setting up our working environment
-
-What are the packages we were using before? Let's add them.
-
-:::: challenge
-Which packages do we import in our `etl.ipynb` notebook? Add these packages into your uv environment.
-::::
 
 #### Setting up our data pipeline
 
-Now let's migrate our code over. First, let's copy over our `data` folder into our
-project folder. The folder should now look like this:
+Now let's migrate our code over. First, let's copy over our `data` folder and the `etl.ipynb` notebook
+into our project folder. The folder should now look like this:
 
 ```shell
 ls
 ```
 
 ```
-data  main.py  pyproject.toml  README.md  uv.lock
+data  etl.ipynb  main.py  pyproject.toml  README.md  uv.lock
 ```
 
 The `main.py` file provides a helpful skeleton for migrating our code.
@@ -207,6 +217,13 @@ In it, we can see two things:
 2. an if statement that calls `main` if `__name__ == "__main__"`
 
 Let's start by replacing `main()`. We can migrate our modularized code from `etl.ipynb` into one main transformation function called `etl_pr_gen_fuel()`.
+
+First, we can open up the notebook:
+
+```shell
+jupyter notebook etl.ipynb
+```
+
 
 ```python
 import somestuff
@@ -230,9 +247,38 @@ if __name__ == "__main__":
     etl_pr_gen_fuel()
 ```
 
-:::: challenge
-Run this code using uv, and check to see that it saved the expected transformed files.
+Let's try and run this code:
+
+```shell
+uv run main.py
+```
+
+Hm, looks like we got an import error:
+
+```shell
+ImportError: Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.
+A suitable version of pyarrow or fastparquet is required for parquet support.
+Trying to import the above resulted in these errors:
+ - Missing optional dependency 'pyarrow'. pyarrow is required for parquet support. Use pip or conda to install pyarrow.
+ - Missing optional dependency 'fastparquet'. fastparquet is required for parquet support. Use pip or conda to install fastparquet.
+```
+
+:::::::: challenge
+Use `uv` to install the missing packages.
+
+:::: solution
+Run `uv add pyarrow fastparquet`.
 ::::
+
+::::::::
+
+Let's try that again:
+
+```shell
+uv run main.py
+```
+
+TODO: ADD CHANGE FILE LOCATION PROBLEM.
 
 ### Importing your own code
 
