@@ -60,6 +60,7 @@ episodes:
 # - coming-soon.md
 #- data-validation.md
 - modularization.md
+- escape-from-jupyter.md
 #- automated-testing.md
 # chapter 3. when things go wrong
 #- debugging.md
