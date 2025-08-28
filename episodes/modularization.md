@@ -316,7 +316,7 @@ def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, variable_name: str) -> pd.DataF
     Returns:
         var_melt: A dataframe containing only index columns, a month column and the melted variable data.
     """
-    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startwith(variable_name)]
+    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(variable_name)]
     var_df = pr_gen_fuel.loc[:, var_cols]
 
     ## Melt the fuel_consumed columns
