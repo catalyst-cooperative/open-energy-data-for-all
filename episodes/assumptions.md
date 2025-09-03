@@ -13,7 +13,8 @@ exercises: 20
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Articulate assumptions about a dataset
-- Evaluate assumptions by impact and likelihood of breakage
+- Programmatically verify those assumptions
+- Prioritize which assumptions are worth verifying
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -32,11 +33,12 @@ these shifts will impact your work differently.
 Some will not actually affect your output
 - maybe you weren't using that column anyways -
 but others will mean you have to make changes to your code,
+your conclusions,
 your methodology section,
-or the way you answer a question when presenting about your work.
+or the way you answer a question when presenting at a conference.
 
 It's nice to at least try to see these things coming,
-so in this episode we'll talk about:
+so in this lesson we'll talk about:
 
 * identifying and articulating assumptions about a dataset
 * simple tools for testing these assumptions
@@ -50,7 +52,7 @@ we'll focus here on assumptions about your *data*.
 In this context, an *assumption* can be any property you think is true about the data.
 
 Some examples:
-- assumptions about the values: the reported fuel usage in MMBTU is never negative.
+- values are reasonable: the reported fuel usage in MMBtu is always non-negative.
 - relationships are well-defined: data rows that share the same plant ID correspond to the same plant
 - data types are consistent: the "year" column only contains numbers, not words or strings of random characters
 - and many more!
@@ -81,6 +83,8 @@ Some examples, if students are feeling a little quiet:
 * a plant ID corresponds to only one plant name per year
 * every generator has at least one reporting period for which they have non-zero generation
 * electricity generation heat rates are close to known averages for their prime mover / energy source
+* if a value is reported, it is correct and reflects reality
+* if a generator reports all null values for a specific time period, it was non-operational during that time period; if a generator reports 0 generation for a specific time period, it was operational, but not dispatched
 
 ::::::::
 
@@ -109,7 +113,7 @@ It's hard to imagine how easy it is to test an assumption
 without having seen any examples of assumptions being tested!
 Let's take a look at one of the example assumptions and see how we'd test it:
 
-> the reported fuel consumption (in MMBTU) is never negative.
+> the reported fuel consumption in MMBtu is always non-negative.
 
 How would we verify that? We can use an `assert` statement to verify the assumption.
 
@@ -118,6 +122,12 @@ How would we verify that? We can use an `assert` statement to verify the assumpt
 ```python
 assert 1 == 1
 assert 1 == 2
+```
+
+We can include a message in the statement as well, to make the error a little nicer:
+
+```python
+assert 1 == 2, "Expected 1 to be equal to 2."
 ```
 
 So let's assert our assumption is true.
@@ -130,22 +140,41 @@ monthly_gen_fuel = pd.read_parquet("../data/pr_gen_fuel_monthly.parquet")
 fuel_consumed_mmbtu = monthly_pr_gen_fuel["fuel_consumed_mmbtu"]
 
 # finally make that assertion!
-assert not (fuel_consumed_mmbtu < 0).any()
+assert (fuel_consumed_mmbtu >= 0).all(), "The reported fuel consumption in MMBtu should be non-negative"
+```
+
+Oho! We find that the assertion is not true!
+This is pretty common.
+Let's dig in to see what's going on.
+
+```python
+fuel_consumed_mmbtu[~(fuel_consumed_mmbtu >= 0)]
+```
+
+Huh! We get a bunch of not-a-number values.
+That is expected, too, I suppose.
+Let's tweak our assumption to:
+"If fuel consumption in MMBtu is reported at all, it should be non-negative."
+
+```python
+assert (fuel_consumed_mmbtu.dropna() >= 0).all(), "If fuel consumption in MMBtu is reported at all, it should be non-negative."
 ```
 
 Which passes with little fanfare.
+
 Now that your imagination is primed,
 we can evaluate assumptions for whether they'd be easy or hard to test.
 There's no hard and fast rule here - a useful heuristic is,
 "Can I imagine a snippet of code that would verify this assumption?"
+
 Let's go through some examples.
 
 The assumption we just tested,
-"the reported fuel consumption in MMBTU is never negative",
+"the reported fuel consumption in MMBtu is always non-negative",
 is not so bad - we just imagined that snippet of code together above.
 
 One that might be a bit harder would be
-"for renewables after 2022, the reported fuel consumption in MMBTU is equivalent to the net generation in MWh." This is a little trickier because of two reasons:
+"for renewables after 2022, the reported fuel consumption in MMBtu is equivalent to the net generation in MWh." This is a little trickier because of two reasons:
 
 * we have to do some unit conversions to even compare these
 * we need to think about "how close is close enough?" due to different precision,
@@ -224,6 +253,20 @@ A heuristic is
 "Can I imagine a situation where this assumption would be false?
 How improbable is that situation?"
 You'll build up a more nuanced intuition over time.
+
+Some example assumptions:
+
+* The "year" column only contains numbers, not words or strings of random characters
+  * this seems somewhat plausible:
+    if, for example,
+    this comes from a scan of a handwritten form,
+    and there was some automatic character recognition involved,
+    you could totally end up with some wonky values in here.
+* The data is not intentionally incorrect
+  * This seems implausible to be broken:
+    in theory,
+    people are not lying to the EIA about the amount of electricity they generated,
+    and the EIA is still considered a trustworthy organization.
 
 :::: challenge
 
