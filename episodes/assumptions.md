@@ -52,6 +52,7 @@ we'll focus here on assumptions about your *data*.
 In this context, an *assumption* can be any property you think is true about the data.
 
 Some examples:
+
 - values are reasonable: the reported fuel usage in MMBtu is always non-negative.
 - relationships are well-defined: data rows that share the same plant ID correspond to the same plant
 - data types are consistent: the "year" column only contains numbers, not words or strings of random characters
