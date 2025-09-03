@@ -28,7 +28,7 @@ it into smaller chunks we can reuse, test, and combine to transform our data.
 
 ## A plain language approach to code reorganization
 
-We can start by looking at a single cell of code from the `etl.ipynb` notebook:
+We can start by looking at a single cell of code from the `7-modularization.ipynb` notebook:
 
 ```python
 # Pivot fuel_consumed_for_electricity MMBTU columns
@@ -49,26 +49,26 @@ fuel_elec_mmbtu_melt
 
 What does this code do? It transforms a table that looks like this:
 
-| plant_id_eia | plant_name_eia | report_year | prime_mover_code | energy_source_code | fuel_unit | fuel_consumed_for_electricity_mmbtu_january | fuel_consumed_for_electricity_mmbtu_february |
+| plant_id_eia | plant_name_eia | report_year | prime_mover_code | fuel_consumed_for_electricity_mmbtu_january | fuel_consumed_for_electricity_mmbtu_february |
 |---:|---:|---:|---:|---:|---:|---:|---:|
-| 61034 | EcoElectrica | 2017 | CA | NG | mcf | 4773.0 | 0.0 |
-| 61034 | EcoElectrica | 2017 | CT | NG | mcf | 2195139.0 | 2044214.0 |
+| 61034 | EcoElectrica | 2017 | CA | 4773.0 | 0.0 |
+| 61034 | EcoElectrica | 2017 | CT | 2195139.0 | 2044214.0 |
 
 into a table that looks like this:
 
-|  | plant_id_eia | plant_name_eia | report_year | prime_mover_code | energy_source_code | fuel_unit | month | fuel_consumed_for_electricity_mmbtu |
+|  | plant_id_eia | plant_name_eia | report_year | prime_mover_code | month | fuel_consumed_for_electricity_mmbtu |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1801 | 61034 | EcoElectrica | 2017 | CA | NG | mcf | january | 4773.0 |
-| 1351 | 61034 | EcoElectrica | 2017 | CA | NG | mcf | february | 0.0 |
-| 1802 | 61034 | EcoElectrica | 2017 | CT | NG | mcf | january | 2195139.0 |
-| 1352 | 61034 | EcoElectrica | 2017 | CT | NG | mcf | february | 2044214.0 |
+| 1801 | 61034 | EcoElectrica | 2017 | CA | january | 4773.0 |
+| 1351 | 61034 | EcoElectrica | 2017 | CA | february | 0.0 |
+| 1802 | 61034 | EcoElectrica | 2017 | CT | january | 2195139.0 |
+| 1352 | 61034 | EcoElectrica | 2017 | CT | february | 2044214.0 |
 
 Or, in words: this code takes a table with data stored in one column per month and stacks all the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
 order to make it easier to plot our data over time.
 
 :::::::: challenge
 ### Challenge 1: Identifying duplicated code
-Open `notebooks/etl.ipynb`. Do you see any code that performs this same task? What differences do you note between the code itself?
+Open `notebooks/7-modularization.ipynb`. Do you see any code that performs this same task? What differences do you note between the code itself?
 
 :::: solution
 Cells 6, 7, 8, and 9 all do the same thing. Note that each cell does this for a different variable (e.g., "fuel_consumed_units" instead of "fuel_consumed_for_electricity_mmbtu"). In cell 9, we also see that the way we're selecting the columns is different: `if col.startswith()` instead of `if x in col`.
@@ -84,7 +84,7 @@ we replaced it with single function we could re-use each time?
 We can imagine writing a function called `melt_monthly_vars` to replace our repetitive code. Then, our many lines of code might look something like this:
 
 ```python
-def melt_monthly_vars(df, variable_name):
+def melt_monthly_vars(df, melted_var):
     #some code here
     return df_melt
 
@@ -103,6 +103,8 @@ net_gen_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswit
 
 *Should* it get combined into this `melt_monthly_vars`?
 
+### Introducing the plain language approach
+
 As we think about how to organize our code into discrete and reusable steps (or to *modularize* it), it doesn't take long to run into
 these types of tricky questions. One strategy to help us figure out which
 code we can modularize is a **plain language approach**.
@@ -118,35 +120,62 @@ Let's go back to the description we wrote earlier:
 Yes, the code definitely does this! Whatever code we use to write our `melt_monthly_vars`
 function, it should definitely work for this case.
 
-Let's take another example from our notebook:
+:::::::: challenge
+
+### Challenge 2: Writing a plain language description
+
+Look at the following code. Which of these best describes the intent of the code?
 
 ```python
 # Plant 62410 has two 2020 data entries but one is null
-# Drop the bad row
-pr_gen_fuel_final = pr_gen_fuel_clean.loc[
+pr_gen_fuel_clean = pr_gen_fuel_clean.loc[
     ~((pr_gen_fuel_clean.plant_id_eia == 62410)
     & (pr_gen_fuel_clean.date.dt.year == 2020)
     & (pr_gen_fuel_clean.fuel_consumed_for_electricity_mmbtu.isnull()))
 ]
 
 # drop after 2025-03-01 (for now) as these values should not exist
-pr_gen_fuel_final = pr_gen_fuel_final.loc[pr_gen_fuel_clean.date < pd.Timestamp("2025-03-01")]
+pr_gen_fuel_final = pr_gen_fuel_clean.loc[pr_gen_fuel_clean.date < pd.Timestamp("2025-03-01")]
 ```
 
-:::::::: challenge
-### Challenge 2: Writing plain language descriptions
-Write a plain language description (1-2 sentences) for each of these two lines of code. Should they be combined into one `drop_bad_values()` function?
+* A. Drop a known bad value, then drop all data reported with invalid timestamps.
+* B. Address some data problems and return a cleaner Pandas DataFrame.
+* C. Drop any rows with a null in the "value" column for plant ID 62410 in 2020, then drop all records after March 1st 2025.
+* D. Create ``pr_gen_fuel_final``.
 
 :::: solution
-1. This code drops a specific row that has been identified as a "bad" (in this case, duplicated and empty) value.
-2. This code drops all data reported with invalid timestamps.
+A. Drop a known bad value, then drop all data reported with invalid timestamps.
 
-Though both of these lines are dropping low-quality records, their intent is very different. The first line targets a very specific known bad value, while the second drops a potentially large number of records based on valid values in a single column. Though both may address "bad" data, they shouldn't get combined into a single function.
+Why A.? Unlike B., A. describes the *intention* behind the code (e.g., we're dropping a
+value because we've subjectively decided that it is *bad*), while providing enough detail
+about the specific steps taked in the code (unlike C. or D.).
+
+B. does not give us any specific information about what types of cleaning we are performing. We could return a completely different output that would still meet this description.
+
+C. gives us a lot of information about the methods we're using, but not any more information than reading the code would directly. We would have to completely rewrite this description if we were handling a new bad plant or a new invalid date.
+
+D. only describes the name of the final output, but doesn't explain at all what the code does.
 ::::
 ::::::::
 
+A good plain language description should give us important context about the intent of our code, without needing to be completely rewritten every time we use our code in a similar context (e.g., on a new year of data).
+
+:::::::: discussion
+Should these two lines be combined into one `drop_bad_values()` function?
+::::::::
+
+:::: solution
+Though both of these lines are dropping low-quality records, their intent is very different. The first line targets a very specific known bad value, while the second drops a potentially large number of records based on valid values in a single column. Though both may address "bad" data, they shouldn't get combined into a single function.
+::::
+
 As we saw in this challenge, understanding the intent of our code is necessary to effectively
-reorganizing it.
+reorganizing it into discrete and reusable functions.
+
+### Identifying good candidates for modularization
+
+Modularizing our code can take some time! Being strategic about when and where to pull
+code out for this kind of treatment takes some practice, but can save a lot of time and
+pain in the long run.
 
 When is code a *good* candidate for modularization?
 
@@ -163,18 +192,13 @@ When is code a *bad* candidate for modularization?
 - It's already a modularized function. For example, Pandas' .replace() method can already
 take multiple input values flexibly, so there's no need to reproduce someone else's work here.
 
-Modularizing our code can take some time! Being strategic about when and where to pull
-code out for this kind of treatment takes some practice, but can save a lot of time and
-pain in the long run.
-
 :::: discussion
-Which other parts of this code are good candidates for modularization?
+What other part of this code could be a good candidate for modularization?
 ::::
 
 :::: instructor
 The code that handles the data type transformations for both the plant frame and the generation
-fuel table can probably be modularized. We could consider writing a function that maps Y/N to
-boolean columns, for example.
+fuel table can be modularized.
 ::::
 
 ## A plain language approach to function design
@@ -185,7 +209,7 @@ rest of your workflow.
 
 What makes a good function?:
 
-- It has one task (can be composed of multiple other functions)
+- It has one task
 - Someone other than the person who wrote it can understand what it does
 - It can be adaptable (e.g., we can run this transformation function on a new year of data).
 - It can be tested (we'll talk about this next module!)
@@ -208,30 +232,32 @@ When we're taught how to write a function, lessons typically focus on the basics
 
 - A function should have a name
 - A function should have inputs
-- A function should have an output (return something)
+- A function can have an output (return something)
 - Function and variable names should be informative, but not unwieldy. `i` is bad, but so is `raw_puerto_rico_generation_fuel_data_from_eia_923`.
 
 :::: instructor
 Start with the code for the net generation melt. First, swap out the variable name for a variable
-that is called `variable_name`. Then, rename the variables to be more generic (as below). Check that the
+that is called `melted_var`. Then, rename the variables to be more generic (as below). Check that the
 startwith() method works for all the columns by showing that all the other columns we're interested in also start
 with their variable names.
 
 We can use this to demonstrate that we can get the same method to work for all 5 cases with one additional variable.
 ::::
 
+We can generalize our pivot code into a function that looks like this:
+
 ```python
-def melt_monthly_vars(pr_gen_fuel, variable_name):
-    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(variable_name)]
+def melt_monthly_vars(pr_gen_fuel, melted_var):
+    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
     var_df = pr_gen_fuel.loc[:, var_cols]
 
     ## Melt the fuel_consumed columns
     var_melt = var_df.melt(
         id_vars=index_cols,
         var_name="month",
-        value_name=variable_name
+        value_name=melted_var
     )
-    var_melt["month"] = var_melt["month"].str.replace(f"{variable_name}_", "")
+    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
     var_melt = var_melt.set_index(index_cols + ["month"])
     return var_melt
 ```
@@ -245,10 +271,9 @@ A docstring can contain the following information:
 - A one-line summary of your function.
 - A paragraph with a longer description (optional)
 - A list of input arguments, and what they are expected to be
-- A list of returned objects, and what they are expected to be
 
 ```python
-def melt_monthly_vars(pr_gen_fuel, variable_name):
+def melt_monthly_vars(pr_gen_fuel, melted_var):
     """Melt many columns of monthly data for a single variable into a month column and a value column.
 
     This code takes a table with data stored in one column per month and stacks all the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
@@ -256,21 +281,18 @@ def melt_monthly_vars(pr_gen_fuel, variable_name):
 
     Args:
         pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
-        variable_name: The variable to be melted.
-
-    Returns:
-        var_melt: A dataframe containing only index columns, a month column and the melted variable data.
+        melted_var: The variable to be melted.
     """
-    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startwith(variable_name)]
+    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startwith(melted_var)]
     var_df = pr_gen_fuel.loc[:, var_cols]
 
     ## Melt the fuel_consumed columns
     var_melt = var_df.melt(
         id_vars=index_cols,
         var_name="month",
-        value_name=variable_name
+        value_name=melted_var
     )
-    var_melt["month"] = var_melt["month"].str.replace(f"{variable_name}_", "")
+    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
     var_melt = var_melt.set_index(index_cols + ["month"])
     return var_melt
 ```
@@ -284,11 +306,11 @@ help(melt_monthly_vars)
 ### Type hints
 
 In our docstring, we're already implying some things about what we should and shouldn't
-be able to pass into our variables (for example, should we be able to pass a number in as `variable_name`?).
+be able to pass into our variables (for example, should we be able to pass a number in as `melted_var`?).
 **Type hints** help us know exactly what data types our functions take. We can specify one or more datatypes expected as the input and output of the code as follows:
 
 ```python
-def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, variable_name: str) -> pd.DataFrame:
+def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFrame:
 ```
 
 In this case, take a Pandas DataFrame and a string and return another Pandas DataFrame.
@@ -298,11 +320,11 @@ Multiple types can be formatted as follows:
 def my_cool_function(list_of_ints: list[int], str_or_int_or_none: str|int|None) -> list[int|str]:
 ```
 
-While Python won't raise an error if you pass a different datatype in, this provides a helpful form of documentation to yourself and others about what types of data you expect to work with this function, and what the format of the output is intended to be.
+While Python won't raise an error if you pass a different datatype in, this provides a helpful form of documentation to yourself and others about what types of data you expect to work with this function, and what the format of the output is intended to be. Other tools (e.g., code editors like VSCode) will warn you when your data doesn't conform to its expected type.
 
-
+Putting this all together, our new function should look something like:
 ```python
-def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, variable_name: str) -> pd.DataFrame:
+def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFrame:
     """Melt many columns of monthly data for a single variable into a month column and a value column.
 
     This code takes a table with data stored in one column per month and stacks all the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
@@ -310,30 +332,28 @@ def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, variable_name: str) -> pd.DataF
 
     Args:
         pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
-        variable_name: The variable to be melted.
-
-    Returns:
-        var_melt: A dataframe containing only index columns, a month column and the melted variable data.
+        melted_var: The variable to be melted.
     """
-    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startwith(variable_name)]
+    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
     var_df = pr_gen_fuel.loc[:, var_cols]
 
     ## Melt the fuel_consumed columns
     var_melt = var_df.melt(
         id_vars=index_cols,
         var_name="month",
-        value_name=variable_name
+        value_name=melted_var
     )
-    var_melt["month"] = var_melt["month"].str.replace(f"{variable_name}_", "")
+    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
     var_melt = var_melt.set_index(index_cols + ["month"])
     return var_melt
 ```
+
 
 :::::::: challenge
 
 ### Challenge 3: putting it all together!
 
-In a group, identify one task in the `etl.ipynb` that you think is a good candidate for modularization.
+In a group, identify one task in the `7-modularization.ipynb` that you think is a good candidate for modularization.
 In plain language, identify what you want the function you're writing
 to accomplish. Then, try and write a generalizeable function that accomplishes that step.
 
@@ -345,9 +365,6 @@ def my_cool_function(input: Type) -> Type:
 
     Args:
         input: What the input is
-
-    Returns:
-        Something useful.
     """
     # your code here
     return output
