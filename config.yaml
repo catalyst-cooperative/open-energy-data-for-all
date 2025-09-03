@@ -59,7 +59,7 @@ episodes:
 # chapter 2. visualization/reusability
 #- plotting.md # pick a few transforms and do them - dropping nulls, adding dtypes, stacking, unit conversion
 #- data-validation.md
-- modularization.md
+#- modularization.md
 #- automated-testing.md
 # chapter 3. when things go wrong
 #- debugging.md
