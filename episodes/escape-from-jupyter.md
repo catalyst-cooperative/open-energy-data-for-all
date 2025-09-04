@@ -476,7 +476,7 @@ def handle_data_types(pr_df: pd.DataFrame, categorical_cols: list[str]) -> pd.Da
     pr_df = pr_df.astype({col: "category" for col in categorical_cols})
     return pr_df
 ```
-:::: 
+::::
 
 Because we only want to use this function in other contexts, we don't need to include
 an `if __name__ == "__main__":` block.
