@@ -15,7 +15,7 @@ exercises: 0
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Write tests that reduce the toil of manually checking that your system works
-- Use tests to identify what parts of the system are broken/working
+- Use an automated test runner to further reduce that toil
 - Use a debugger to narrow down the source of bad behavior
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
@@ -70,21 +70,32 @@ which takes the raw Puerto Rico data and does some cleaning and reshaping.
 One thing we expect from the output is that
 there's a `fuel_consumption_units` column and that its value is 0 for sun, wind, and water.
 
-**TODO** make sure this code actually works with the shape of the output from previous episode
+How would we test that?
+
+First, we would want to run the code.
+Then, we would want to read the `fuel_consumption_units` column from the output of the code.
+Finally, we'd want to assert that those values are 0 for sun, wind, and water.
+
 
 ```python
-from XXXXX import process
+import pandas as pd
+from pr_gen_fuel.main import transform_pr_gen_fuel
 
-def test_fuel_consumption_units_for_renewables():
-    raw_data = pd.read_parquet(...)
-    pr_gen_fuels = process_monthly(raw_data)
+
+def test_renewables_fuel_units():
+    transform_pr_gen_fuel()
+    pr_gen_fuel = pd.read_parquet("data/pr_gen_fuel_monthly.parquet")
     renewable_codes = {"SUN", "WND", "WAT"}
-    renewable_gen_fuels = pr_gen_fuels[pr_gen_fuels["energy_source_code"].isin(renewable_codes)]
-    renewable_fuel_units = renewable_gen_fuels["fuel_consumption_units"]
-    assert (renewable_fuel_units == 0).all()
+    renewable_gen_fuels = pr_gen_fuel[
+        pr_gen_fuel["energy_source_code"].isin(renewable_codes)
+    ]
+    renewable_fuel_units = renewable_gen_fuels["fuel_consumed_units"]
+    assert (renewable_fuel_units.dropna() == 0).all()
 ```
 
 It's kind of nice to not have to do that setup for extracting the renewable data within your pipeline code itself!
+
+**TODO**: "it is annoying, though, to read from a file on disk, what if you change the output file location, or you want to run this test without overwriting the actual output file? let's refactor
 
 We need to add the test function to the `if __name__ == "__main__":` block in order for it to run.
 
@@ -145,7 +156,7 @@ As we write more tests,
 we're starting to run into some of the problems with our `if __name__ == "__main__":...` strategy:
 
 - The boilerplate is annoying and it's easy to forget to add a test. Then you'll think your code works when it doesn't.
-- We *can* put shared test setup within the `if __name__ == "__main__":` block, but that can get complicated quickly
+- Shared test setup can get complicated quickly
 - If you have lots of tests & want to break them into multiple files, you now have to run all these other files too
 - If one test breaks it immediately exits with an `AssertionError` and now you don't know what else broke
 
