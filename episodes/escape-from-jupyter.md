@@ -60,10 +60,10 @@ you're already using `uv`! Helpfully, as we move away from Jupyter, we can use `
 skeleton for our code project.
 
 :::: callout
-If you haven't yet installed `uv`, follow the [setup instructions](../learners/setup.md) before continuing.
+If you haven't yet installed `uv`, follow the [setup instructions](../learners/setup.md) before continuing. Windows users, you should already have "Git Bash" installed locally if you've followed the [setup instructions](../learners/setup.md), and you can use this, Powershell or WSL for this lesson.
 ::::
 
-Open up your shell (see here for [OS-specific instructions](https://swcarpentry.github.io/shell-novice/index.html#open-a-new-shell).) In a terminal, navigate up one folder.
+Open up your shell (see here for [OS-specific instructions](https://swcarpentry.github.io/shell-novice/index.html#open-a-new-shell)). In a terminal, navigate up one folder.
 ```shell
 cd ..
 ```
@@ -113,7 +113,6 @@ environment, and ran this Python script from within it.
 Let's revisit our list of files:
 
 ```shell
-cd pr-gen-fuel
 ls
 ```
 
@@ -161,20 +160,20 @@ we can now see Pandas and Jupyter listed in the dependencies:
 ```
 dependencies = [
     "jupyter>=1.1.1",
-    "pandas>=2.3.1", # Your version might be different!
+    "pandas>=2.3.2", # Your version might be different!
 ]
 ```
 
 ::::callout
 Sometimes a new version is released that breaks our code, or contains a bug that hasn't
 yet been fixed. `pyproject.toml` allows us to set high-level requirements
-(e.g., pick whichever version is newer than 2.3.1, don't yet upgrade to version
+(e.g., pick whichever version is newer than 2.1, don't yet upgrade to version
 3.0). `uv add` will specify sensible ranges by default, but we can override these ranges
 in the `dependencies` section. For example:
 
 ```
 dependencies = [
-    "pandas>=2.2.9,<2.3.1",
+    "pandas>=2.2.9,<2.3.2",
 ]
 ```
 
@@ -200,52 +199,182 @@ don't have to think about it! Every time we use `uv run` to run our Python files
 
 #### Setting up our data pipeline
 
-Now let's migrate our code over. First, let's copy over our `data` folder and the `etl.ipynb` notebook
-into our project folder. The folder should now look like this:
+Now let's migrate our code over. First, let's copy over our `data` folder and the `checkpoints/transform.ipynb` notebook
+containing our modularized code from the last lesson into our project folder. The folder should now look like this:
 
 ```shell
 ls
 ```
 
 ```
-data  etl.ipynb  main.py  pyproject.toml  README.md  uv.lock
+data  main.py  pyproject.toml  README.md  transform.ipynb  uv.lock
 ```
+
+:::: instructor
+If at any point students are struggling to get to this point, they can catch up by
+unzipping the `pr-gen-fuel-init.zip` file from the `checkpoints` folder into a different
+folder than the lesson is in.
+::::
 
 The `main.py` file provides a helpful skeleton for migrating our code.
 In it, we can see two things:
 1. a function called `main()` with a print statement
 2. an if statement that calls `main` if `__name__ == "__main__"`
 
-Let's start by replacing `main()`. We can migrate our modularized code from `etl.ipynb` into one main transformation function called `etl_pr_gen_fuel()`.
+```python
+def main():
+    print("Hello from pr-gen-fuel!")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Let's start by replacing `main()`. We can migrate our modularized code from `transform.ipynb` into one main transformation function called `etl_pr_gen_fuel()`.
 
 First, we can open up the notebook:
 
 ```shell
-jupyter notebook etl.ipynb
+uv run jupyter notebook transform.ipynb
 ```
 
+:::: instructor
+Copy over the cells, with the import and utility function outside of `main()` and the remaining cells in `main()`. Once that's done, rename
+`main()` to `transform_pr_gen_fuel()` and update the `if __name__ == "__main__":` to call that function instead.
+::::
+
+We should wind up with a block of code in `main.py` that looks like this:
+
+:::: spoiler
 
 ```python
-import somestuff
-#TODO add the freaking code.
-```
+import pandas as pd
+import numpy as np
 
-How do we actually run this code? We can amend the code block that begins with `if __name__ == "__main__"`.
-This section of the file helps us distinguish between what we want to have happen when we
-run this script directly (e.g., use `uv run main.py`) and what we want to happen when we
-use this code in any other context (e.g., import it into a Jupyter notebook).
+# Silence some warnings about deprecated Pandas behavior
+pd.set_option("future.no_silent_downcasting", True)
 
-`__name__` is a built-in variable in Python; a variable that gets set by the system and not by you.
-When we run this file directly (e.g., using `uv run main.py`), Python sets the value of `__name__` to the string `"__main__"`.
-We can use this `if __name__ == "__main__":` block to specify which code we want
-to run *only when we run the script directly*.
-Calling our pipeline function in this `if` block will prevent us from running the entire
-transformation unexpectedly in other contexts.
+# Utility functions
+def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFrame:
+    """Melt many columns of monthly data for a single variable into a month and a value column.
 
-```python
+    This code takes a table with data stored in one column per month and stacks all
+    the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning
+    a table with one month column and one value column for this variable in order to
+    make it easier to plot our data over time. Note that this drops the other
+    variables of data.
+
+    Args:
+        pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
+        melted_var: The variable to be melted.
+    """
+    # set up shared index
+    index_cols = ["plant_id_eia", "plant_name_eia", "report_year", "prime_mover_code", "energy_source_code", "fuel_unit"]
+    
+    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
+    var_df = pr_gen_fuel.loc[:, var_cols]
+
+    ## Melt the fuel_consumed columns
+    var_melt = var_df.melt(
+        id_vars=index_cols,
+        var_name="month",
+        value_name=melted_var
+    )
+    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
+    var_melt = var_melt.set_index(index_cols + ["month"])
+    return var_melt
+
+def handle_data_types(pr_df: pd.DataFrame, categorical_cols: list[str]) -> pd.DataFrame:
+    """Convert EIA 923 PR columns into desired data types.
+
+    In addition to using the standard convert_dtypes() function, handle a series of
+    non-standard data types conversions for associated_combined_heat_power
+    and create categorical columns to save memory.
+
+    Args:
+        pr_df: Dataframe with EIA 923 Puerto Rico data.
+        categorical_cols: List of columns that should be converted to a categorical dtype.
+    """
+    pr_df = pr_df.convert_dtypes()
+    pr_df["associated_combined_heat_power"] = (
+        pr_df["associated_combined_heat_power"]
+        .astype("object") # necessary for the types to work for the .replace() call
+        .replace({"Y": True, "N": False})
+        .astype("boolean")
+    )
+    pr_df = pr_df.astype({col: "category" for col in categorical_cols})
+    return pr_df
+
+def transform_pr_gen_fuel():
+    # Read in the raw data
+    pr_gen_fuel = pd.read_parquet("data/raw_eia923__puerto_rico_generation_fuel.parquet")
+    pr_plant_frame = pd.read_parquet("data/raw_eia923__puerto_rico_plant_frame.parquet")
+    # Handle EIA null values
+    pr_gen_fuel = pr_gen_fuel.replace(to_replace = ".", value = pd.NA)
+
+    # Convert data types (mmbtu/units to numeric, booleans, categories)
+    pr_gen_fuel = handle_data_types(
+            pr_gen_fuel,
+            categorical_cols = ["energy_source_code","fuel_type_code_agg", "prime_mover_code", "reporting_frequency_code", "data_maturity", "plant_state"]
+                                )
+
+    for colname in pr_gen_fuel.columns: # TODO: Do we need this? Check.
+        if (
+            "fuel_consumption" in colname
+            or "fuel_consumed" in colname
+            or "net_generation" in colname
+            or "fuel_mmbtu_per_unit" in colname
+        ):
+            pr_gen_fuel[colname] = pr_gen_fuel[colname].astype("float64")
+            
+    # Handle EIA null values
+    pr_plant_frame = pr_plant_frame.replace(to_replace = ".", value = pd.NA)
+
+    # Convert data types (mmbtu/units to numeric, categories, booleans)
+    pr_plant_frame = handle_data_types(pr_plant_frame, categorical_cols = ["reporting_frequency_code", "data_maturity", "plant_state"])
+
+    #### monthly pivoting
+    # Pivot variable columns
+    fuel_elec_mmbtu_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_for_electricity_mmbtu")
+    fuel_elec_units_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_for_electricity_units")
+    fuel_mmbtu_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_mmbtu")
+    fuel_units_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_units")
+    net_gen_melt = melt_monthly_vars(pr_gen_fuel, "net_generation_mwh")
+
+    # Combine all the pivoted DFs
+    pr_gen_fuel_melt = pd.concat(
+        [fuel_elec_mmbtu_melt, fuel_elec_units_melt, fuel_mmbtu_melt, fuel_units_melt, net_gen_melt],
+        axis="columns",
+    ).reset_index()
+
+    ## Create date from month and year
+    pr_gen_fuel_melt["date"] = pd.to_datetime(
+        pr_gen_fuel_melt["month"] + pr_gen_fuel_melt["report_year"].astype(str),
+        format="%B%Y",
+    )
+    ## Drop old date columns
+    pr_gen_fuel_clean = pr_gen_fuel_melt.drop(columns = ["report_year", "month"])
+
+    # Plant 62410 has two 2020 data entries but one is null
+    # Drop the bad row
+    pr_gen_fuel_final = pr_gen_fuel_clean.loc[
+        ~((pr_gen_fuel_clean.plant_id_eia == 62410) 
+        & (pr_gen_fuel_clean.date.dt.year == 2020)
+        & (pr_gen_fuel_clean.fuel_consumed_for_electricity_mmbtu.isnull()))
+    ]
+
+    # drop after 2025-03-01 (for now) as these values should not exist
+    pr_gen_fuel_final = pr_gen_fuel_final.loc[pr_gen_fuel_clean.date < pd.Timestamp("2025-03-01")]
+
+    ### output the data to Parquet files
+    pr_gen_fuel_final.to_parquet("data/pr_gen_fuel_monthly.parquet")
+    pr_plant_frame.to_parquet("data/pr_plant_frame.parquet")
+
 if __name__ == "__main__":
-    etl_pr_gen_fuel()
+    transform_pr_gen_fuel()
 ```
+
+:::: spoiler
 
 Let's try and run this code:
 
@@ -278,7 +407,7 @@ Let's try that again:
 uv run main.py
 ```
 
-TODO: ADD CHANGE FILE LOCATION PROBLEM.
+If we check our `data` folder, we can see we created two new files!
 
 ### Importing your own code
 
@@ -295,15 +424,67 @@ can be run.
 ::::
 
 Let's start by creating a new file, and call it `utils.py`. In this file, let's
-migrate over the `TODOFUNCTIONNAME()` function we wrote in the last episode:
+migrate over the `melt_monthly_vars()` and `handle_data_types()` functions we wrote in the last episode:
 
+:::: spoiler
 ```python
-import somestuff
+import pandas as pd
+import numpy as np
 
-def TODOFUNCTIONNAME():
-    # some code
-    return something
+# Silence some warnings about deprecated Pandas behavior
+pd.set_option("future.no_silent_downcasting", True)
+
+# Utility functions
+def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFrame:
+    """Melt many columns of monthly data for a single variable into a month column and a value column.
+
+    This code takes a table with data stored in one column per month and stacks all the fields for a
+    single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column
+    and one value column for this variable in order to make it easier to plot our data over time.
+    Note that this drops the other variables of data.
+
+    Args:
+        pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
+        melted_var: The variable to be melted.
+    """
+    # set up shared index
+    index_cols = ["plant_id_eia", "plant_name_eia", "report_year", "prime_mover_code", "energy_source_code", "fuel_unit"]
+    
+    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
+    var_df = pr_gen_fuel.loc[:, var_cols]
+
+    ## Melt the fuel_consumed columns
+    var_melt = var_df.melt(
+        id_vars=index_cols,
+        var_name="month",
+        value_name=melted_var
+    )
+    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
+    var_melt = var_melt.set_index(index_cols + ["month"])
+    return var_melt
+
+def handle_data_types(pr_df: pd.DataFrame, categorical_cols: list[str]) -> pd.DataFrame:
+    """Convert EIA 923 PR columns into desired data types.
+
+    In addition to using the standard convert_dtypes() function, handle a series of
+    non-standard data types conversions for associated_combined_heat_power
+    and create categorical columns to save memory.
+
+    Args:
+        pr_df: Dataframe with EIA 923 Puerto Rico data.
+        categorical_cols: List of columns that should be converted to a categorical dtype.
+    """
+    pr_df = pr_df.convert_dtypes()
+    pr_df["associated_combined_heat_power"] = (
+        pr_df["associated_combined_heat_power"]
+        .astype("object") # necessary for the types to work for the .replace() call
+        .replace({"Y": True, "N": False})
+        .astype("boolean")
+    )
+    pr_df = pr_df.astype({col: "category" for col in categorical_cols})
+    return pr_df
 ```
+:::: spoiler
 
 Because we only want to use this function in other contexts and not run any of the
 functions in this file, we don't need to include an `if __name__ == "__main__":` block.
@@ -313,6 +494,10 @@ functions in this file, we don't need to include an `if __name__ == "__main__":`
 Now that we've created our `utils.py` file, we can use it in a Jupyter notebook
 just like any other package by importing it.
 
+```shell
+uv run jupyter notebook transform.ipynb
+```
+
 ```python
 import utils
 ```
@@ -321,19 +506,22 @@ Better yet, we can access the excellent documentation we've written about it.
 
 ```python
 help(utils)
-help(utils.TODOFUNCTIONNAME)
+help(utils.handle_data_types)
 ```
+
+Now we can use our functions in any notebook we write, without having to copy it over
+into a cell at the top - nice!
 
 #### Importing your code into `main.py`
 
 The same is true in our `main.py` file.
 
 ::: challenge
-Import `utils` and replace existing references to `TODOFUNCTIONNAME` with
-`utils.TODOFUNCTIONNAME()`.
+From `utils`, import our helper functions into `main.py`. Test that this works by re-running
+the script using uv.
 :::
 
-Now, when you make a tweak to `TODOFUNCTIONNAME`, that tweak will be applied across
+Now, when you make a tweak to `handle_data_types()`, that tweak will be applied across
 all of your code immediately. No more copy-pasting!
 
 As your code grows, you can use modules and imports to reorganize your project into
