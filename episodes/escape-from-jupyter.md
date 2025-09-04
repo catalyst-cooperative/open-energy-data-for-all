@@ -1,6 +1,6 @@
 ---
 title: "Escape from Jupyter!"
-teaching: 20
+teaching: 45
 exercises: 10
 ---
 
@@ -374,7 +374,7 @@ if __name__ == "__main__":
     transform_pr_gen_fuel()
 ```
 
-:::: spoiler
+::::
 
 Let's try and run this code:
 
@@ -413,18 +413,10 @@ If we check our `data` folder, we can see we created two new files!
 
 In the last lesson, we wrote a number of generalizeable functions that could get reused
 across multiple contexts. In order to keep things organized, we can split out these
-general purpose functions from our EIA 923-specific code by creating another script.
+general purpose functions from our EIA 923-specific code in another file.
 
-:::: callout
-A note on terminology:
-- **File:** A file can contain many things - documentation, code definitions, or code that
-can be run.
-- **Script:** A file that contains code that can be run directly (e.g., `main.py`)
-- **Module:** A piece of code that can be used in other contexts (e.g., the `pandas` library, or a sub-section of a library (e.g., `pandas.eval`))
-::::
-
-Let's start by creating a new file, and call it `utils.py`. In this file, let's
-migrate over the `melt_monthly_vars()` and `handle_data_types()` functions we wrote in the last episode:
+Let's start by copying the `main.py` file and renaming it `utils.py`. In this file, let's
+only keep the `melt_monthly_vars()` and `handle_data_types()` functions we wrote in the last episode:
 
 :::: spoiler
 ```python
@@ -484,10 +476,10 @@ def handle_data_types(pr_df: pd.DataFrame, categorical_cols: list[str]) -> pd.Da
     pr_df = pr_df.astype({col: "category" for col in categorical_cols})
     return pr_df
 ```
-:::: spoiler
+:::: 
 
-Because we only want to use this function in other contexts and not run any of the
-functions in this file, we don't need to include an `if __name__ == "__main__":` block.
+Because we only want to use this function in other contexts, we don't need to include
+an `if __name__ == "__main__":` block.
 
 #### Importing your code into a notebook
 
@@ -526,6 +518,7 @@ all of your code immediately. No more copy-pasting!
 
 As your code grows, you can use modules and imports to reorganize your project into
 multiple files in folders and subfolders, as makes sense to you. Here are but a few options:
+
 - One script per dataset (e.g., `eia923_pr.py`, `eia860_pr.py`, `eia923_nonpr.py`), with a general `utils.py` file
 - One folder per step of the data transformation process (e.g., `extract`, `transform`, `load`)
 
