@@ -219,7 +219,7 @@ def monthly_clean():
 
 Now, if we add the `@pytest.fixture` decorator,
 we can use `monthly_clean` in multiple tests.
-Crucially, `pytest` knows enough to only run the function once, so 
+Crucially, `pytest` knows enough to only run the function once, so
 
 ```python
 
