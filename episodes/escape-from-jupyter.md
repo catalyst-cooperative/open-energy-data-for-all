@@ -270,7 +270,7 @@ def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFram
     """
     # set up shared index
     index_cols = ["plant_id_eia", "plant_name_eia", "report_year", "prime_mover_code", "energy_source_code", "fuel_unit"]
-    
+
     var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
     var_df = pr_gen_fuel.loc[:, var_cols]
 
@@ -326,7 +326,7 @@ def transform_pr_gen_fuel():
             or "fuel_mmbtu_per_unit" in colname
         ):
             pr_gen_fuel[colname] = pr_gen_fuel[colname].astype("float64")
-            
+
     # Handle EIA null values
     pr_plant_frame = pr_plant_frame.replace(to_replace = ".", value = pd.NA)
 
@@ -358,7 +358,7 @@ def transform_pr_gen_fuel():
     # Plant 62410 has two 2020 data entries but one is null
     # Drop the bad row
     pr_gen_fuel_final = pr_gen_fuel_clean.loc[
-        ~((pr_gen_fuel_clean.plant_id_eia == 62410) 
+        ~((pr_gen_fuel_clean.plant_id_eia == 62410)
         & (pr_gen_fuel_clean.date.dt.year == 2020)
         & (pr_gen_fuel_clean.fuel_consumed_for_electricity_mmbtu.isnull()))
     ]
@@ -441,7 +441,7 @@ def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFram
     """
     # set up shared index
     index_cols = ["plant_id_eia", "plant_name_eia", "report_year", "prime_mover_code", "energy_source_code", "fuel_unit"]
-    
+
     var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
     var_df = pr_gen_fuel.loc[:, var_cols]
 
