@@ -1,7 +1,7 @@
 ---
 title: "Visual Data Exploration"
-teaching: 55
-exercises: 25
+teaching: 75
+exercises: 35
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions
