@@ -301,6 +301,30 @@
 </div>
 <!--/div.accordion-flush-->
 
+<div class="accordion accordion-flush" id="accordionFlush7">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading7">
+        <a href="assumptions.html">6. Making assumptions about your data</a>
+    </div>
+<!--/div.accordion-header-->
+
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
+<div class="accordion accordion-flush" id="accordionFlush8">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading8">
+        <a href="coming-soon.html">7. More Topics Coming Soon</a>
+    </div>
+<!--/div.accordion-header-->
+
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
                 </div>
               </div>
             </div>
@@ -480,6 +504,35 @@ gas, plant-by-plant, in Puerto Rico from 2020-2023?”</label></li>
 <hr>
 <br></section><section id="scraping-data"><h2 class="section-heading"><a href="scraping-data.html">Scraping Data</a></h2>
 <hr class="half-width"></section><section id="visual-data-exploration"><h2 class="section-heading"><a href="visual-data-exploration.html">Visual Data ExplorationPut it into practice<a class="anchor" aria-label="anchor" href="#put-it-into-practice"></a></a></h2>
+<hr class="half-width"></section><section id="assumptions"><h2 class="section-heading"><a href="assumptions.html">Making assumptions about your data</a></h2>
+<hr class="half-width">
+<h3 id="assumptions-headingInstructor1">
+<a href="assumptions.html#headingInstructor1">Instructor Note</a><a class="anchor" aria-label="anchor" href="#assumptions-headingInstructor1"></a>
+</h3>
+<p>Put these in a Google doc that you share with the class.</p>
+<p>Some examples, if students are feeling a little quiet:</p>
+<ul>
+<li>the net generation data is actually in MWh and not a mix of
+units</li>
+<li>for a given generator in a given time period, NAs mean there was no
+data reported at all (all measured values are NA or none are)</li>
+<li>the net generation of batteries is strictly less than the fuel
+consumed in MWh</li>
+<li>all energy source codes correspond to the set in the
+documentation</li>
+<li>a plant ID corresponds to only one plant name per year</li>
+<li>every generator has at least one reporting period for which they
+have non-zero generation</li>
+<li>electricity generation heat rates are close to known averages for
+their prime mover / energy source</li>
+<li>if a value is reported, it is correct and reflects reality</li>
+<li>if a generator reports all null values for a specific time period,
+it was non-operational during that time period; if a generator reports 0
+generation for a specific time period, it was operational, but not
+dispatched</li>
+</ul>
+<hr>
+<br></section><section id="coming-soon"><h2 class="section-heading"><a href="coming-soon.html">More Topics Coming Soon</a></h2>
 <hr class="half-width"></section></section>
 </div>
     </main>
