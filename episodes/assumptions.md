@@ -215,6 +215,9 @@ Can you identify one that would be easy to test, and one that would be hard to t
 
 If you have time, write some code to verify the easy assumption!
 
+When we finish,
+we will share some examples of easy and hard assumptions to test with the rest of the group.
+
 ::::
 
 
@@ -264,6 +267,9 @@ Can you come up with use cases where this assumption's failure will:
 * quietly affect the use case
 * loudly affect the use case?
 
+When we finish,
+we will share some examples of how different use cases affect the impact of failure with the rest of the group.
+
 ::::
 
 ## Likelihood
@@ -300,6 +306,9 @@ Imagine scenarios in which they are individually broken.
 Do they both seem plausible? Does one seem more plausible than the other?
 
 Finally, can you find an assumption where failure seems particularly implausible?
+
+When we finish,
+we will share some plausible and implausible stories about how assumptions might be broken.
 
 ::::
 
