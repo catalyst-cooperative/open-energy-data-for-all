@@ -53,6 +53,9 @@ so in this lesson we'll talk about:
 * simple tools for testing these assumptions
 * prioritizing assumptions for testing
 
+Afterwards, you'll be able to
+have your code automatically check that the important assumptions haven't been broken.
+
 While faulty assumptions lurk everywhere,
 we'll focus here on assumptions about your *data*.
 
@@ -312,6 +315,15 @@ we will share some plausible and implausible stories about how assumptions might
 
 ::::
 
+We've thought a bunch about assumptions and how to test them.
+What can we do with this?
+
+The most straightforwardly useful thing is to add checks to your data processing code,
+to make sure that your inputs and outputs are behaving as you expect.
+This protects you from surprising changes in new data,
+or surprising behavior of changes you make to your code.
+
+Hopefully that saves you from some hair-pulling debugging sessions in the future!
 
 :::: keypoints
 
