@@ -340,7 +340,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Making assumptions about your data</h1>
-        <p>Last updated on 2025-09-09 |
+        <p>Last updated on 2025-09-10 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/assumptions.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -354,6 +354,21 @@
 
         
 
+<div id="accordionInstructor1" class="accordion instructor-note accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
+  <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
+</button>
+<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div class="accordion-body">
+<p>Prep list:</p>
+<ul><li>make a Google Doc that people can put in their assumptions</li>
+<li>clean out the example notebook so that you can type everything out
+again</li>
+</ul></div>
+</div>
+</div>
+</div>
 <div class="overview card">
 <h2 class="card-header">Overview</h2>
 <div class="row g-0">
@@ -396,8 +411,16 @@ lesson we’ll talk about:</p>
 <ul><li>identifying and articulating assumptions about a dataset</li>
 <li>simple tools for testing these assumptions</li>
 <li>prioritizing assumptions for testing</li>
-</ul><p>While faulty assumptions lurk everywhere, we’ll focus here on
+</ul><p>Afterwards, you’ll be able to have your code automatically check that
+the important assumptions haven’t been broken.</p>
+<p>While faulty assumptions lurk everywhere, we’ll focus here on
 assumptions about your <em>data</em>.</p>
+<p>Speaking of data, we have a dataset at
+<code>data/pr_gen_fuel_monthly.parquet</code>, which we’ll be using for
+concrete examples through the rest of the lesson. It contains fuel
+consumption and electricity generation information, split out by
+generation unit and reported monthly, for all of Puerto Rico. This data
+was collected by the EIA in form EIA 923.</p>
 </section><section><h2 class="section-heading" id="what-is-an-assumption-anyways">What is an assumption anyways?<a class="anchor" aria-label="anchor" href="#what-is-an-assumption-anyways"></a></h2>
 <hr class="half-width"><p>In this context, an <em>assumption</em> can be any property you think
 is true about the data.</p>
@@ -422,19 +445,22 @@ assumptions of our own!</p>
 <h3 class="callout-title">Challenge: identifying assumptions</h3>
 <div class="callout-content">
 <p>Take 5 minutes to list out as many assumptions as you can about the
-EIA 923 Puerto Rico data in the <a href="data/">data directory</a>.</p>
+EIA 923 Puerto Rico data (<code>pr_gen_fuel_monthly.parquet</code>) in
+the <a href="data/">data directory</a>.</p>
+<p>Please put them in the shared Google doc that your instructor
+prepared for you.</p>
 <p>The goal is to get past the obvious ones and start thinking of some
 un-obvious assumptions - no need to limit yourself to ‘realistic’ ones
 at this stage.</p>
 </div>
 </div>
 </div>
-<div id="accordionInstructor1" class="accordion instructor-note accordion-flush">
+<div id="accordionInstructor2" class="accordion instructor-note accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
-  <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
+<button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor2" aria-expanded="false" aria-controls="collapseInstructor2">
+  <h3 class="accordion-header" id="headingInstructor2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor2" class="accordion-collapse collapse" aria-labelledby="headingInstructor2" data-bs-parent="#accordionInstructor2">
 <div class="accordion-body">
 <p>Put these in a Google doc that you share with the class.</p>
 <p>Some examples, if students are feeling a little quiet:</p>
@@ -517,9 +543,9 @@ Let’s dig in to see what’s going on.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>fuel_consumed_mmbtu[<span class="op">~</span>(fuel_consumed_mmbtu <span class="op">&gt;=</span> <span class="dv">0</span>)]</span></code></pre>
 </div>
-<p>Huh! We get a bunch of not-a-number values. That is expected, too, I
-suppose. Let’s tweak our assumption to: “If fuel consumption in MMBtu is
-reported at all, it should be non-negative.”</p>
+<p>Huh! We get a bunch of not-a-number values. That is expected, too, so
+let’s tweak our assumption to: “If fuel consumption in MMBtu is reported
+at all, it should be non-negative.”</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -557,6 +583,8 @@ well.</p>
 <p>Can you identify one that would be easy to test, and one that would
 be hard to test?</p>
 <p>If you have time, write some code to verify the easy assumption!</p>
+<p>When we finish, we will share some examples of easy and hard
+assumptions to test with the rest of the group.</p>
 </div>
 </div>
 </div>
@@ -586,7 +614,7 @@ failure, depending on the specifics of the system.</li>
 <ul><li>Use case: aggregate analysis of all plants in Puerto Rico</li>
 <li>Assumption: a specific plant reports net generation data for all
 years it was active.</li>
-<li>Impact of faulty assumption there are data gaps for that specific
+<li>Impact of faulty assumption: there are data gaps for that specific
 plant, but the aggregate values are not heavily affected. This would
 probably lead to no effect or a quiet failure.</li>
 </ul><p>We see that the same assumption can lead to different impacts due to
@@ -599,10 +627,14 @@ the use cases we apply them to.</p>
 <div id="challenge-evaluating-impact" class="callout-inner">
 <h3 class="callout-title">Challenge: evaluating impact</h3>
 <div class="callout-content">
-<p>Look at the list of assumptions.</p>
-<p>Can you come up with use cases where this assumption’s failure will:
-* not affect the use case * quietly affect the use case * loudly affect
-the use case?</p>
+<p>Look at the list of assumptions and choose one.</p>
+<p>Can you come up with use cases where this assumption’s failure
+will:</p>
+<ul><li>not affect the use case</li>
+<li>quietly affect the use case</li>
+<li>loudly affect the use case?</li>
+</ul><p>When we finish, we will share some examples of how different use
+cases affect the impact of failure with the rest of the group.</p>
 </div>
 </div>
 </div>
@@ -621,7 +653,7 @@ scan of a handwritten form, and there was some automatic character
 recognition involved, you could totally end up with some wonky values in
 here.</li>
 </ul></li>
-<li>The data is not intentionally incorrect
+<li>The data is being filled out in good faith
 <ul><li>This seems implausible to be broken: in theory, people are not lying
 to the EIA about the amount of electricity they generated, and the EIA
 is still considered a trustworthy organization.</li>
@@ -634,13 +666,25 @@ is still considered a trustworthy organization.</li>
 <div id="challenge-evaluating-likelihood" class="callout-inner">
 <h3 class="callout-title">Challenge: evaluating likelihood</h3>
 <div class="callout-content">
-<p>Look at the list of assumptions and imagine a scenario in which they
-would not be true.</p>
-<p>Can you identify an example scenario that: * seem very plausible? *
-seems very implausible?</p>
+<p>Look at the list of assumptions and pick two.</p>
+<p>Imagine scenarios in which they are individually broken.</p>
+<p>Do they both seem plausible? Does one seem more plausible than the
+other?</p>
+<p>Finally, can you find an assumption where failure seems particularly
+implausible?</p>
+<p>When we finish, we will share some plausible and implausible stories
+about how assumptions might be broken.</p>
 </div>
 </div>
 </div>
+<p>We’ve thought a bunch about assumptions and how to test them. What
+can we do with this?</p>
+<p>The most straightforwardly useful thing is to add checks to your data
+processing code, to make sure that your inputs and outputs are behaving
+as you expect. This protects you from surprising changes in new data, or
+surprising behavior of changes you make to your code.</p>
+<p>Hopefully that saves you from some hair-pulling debugging sessions in
+the future!</p>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
@@ -719,7 +763,7 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/assumptions.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/assumptions.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2025-09-09",
+  "dateModified": "2025-09-10",
   "datePublished": "2025-09-10"
 }
 
