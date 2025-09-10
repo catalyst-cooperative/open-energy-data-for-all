@@ -76,9 +76,6 @@ First, we would want to run the code.
 Then, we would want to read the `fuel_consumption_units` column from the output of the code.
 Finally, we'd want to assert that those values are 0 for sun, wind, and water.
 
-Unfortunately, the `transform_pr_gen_fuel` function directly writes out 
-
-**TODO** make sure this code actually works with the shape of the output from previous episode
 
 ```python
 import pandas as pd
@@ -97,6 +94,8 @@ def test_renewables_fuel_units():
 ```
 
 It's kind of nice to not have to do that setup for extracting the renewable data within your pipeline code itself!
+
+**TODO**: "it is annoying, though, to read from a file on disk, what if you change the output file location, or you want to run this test without overwriting the actual output file? let's refactor
 
 We need to add the test function to the `if __name__ == "__main__":` block in order for it to run.
 
