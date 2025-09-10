@@ -4,6 +4,15 @@ teaching: 30
 exercises: 20
 ---
 
+:::: instructor
+
+Prep list:
+
+- make a Google Doc that people can put in their assumptions
+- clean out the example notebook so that you can type everything out again
+
+::::
+
 :::::::::::::::::::::::::::::::::::::: questions
 
 - Exploratory data analysis was fun, but what did I learn?
@@ -47,6 +56,14 @@ so in this lesson we'll talk about:
 While faulty assumptions lurk everywhere,
 we'll focus here on assumptions about your *data*.
 
+Speaking of data,
+we have a dataset at `data/pr_gen_fuel_monthly.parquet`,
+which we'll be using for concrete examples through the rest of the lesson.
+It contains fuel consumption and electricity generation information,
+split out by generation unit and reported monthly,
+for all of Puerto Rico.
+This data was collected by the EIA in form EIA 923.
+
 ## What is an assumption anyways?
 
 In this context, an *assumption* can be any property you think is true about the data.
@@ -66,11 +83,14 @@ With that in mind, let's try to come up with some assumptions of our own!
 
 ### Challenge: identifying assumptions
 
-Take 5 minutes to list out as many assumptions as you can about the EIA 923 Puerto Rico data in the [data directory](../data/).
+Take 5 minutes to list out as many assumptions as you can about the EIA 923 Puerto Rico data (`pr_gen_fuel_monthly.parquet`) in the [data directory](../data/).
+
+Please put them in the shared Google doc that your instructor prepared for you.
 
 The goal is to get past the obvious ones and start thinking of some un-obvious assumptions - no need to limit yourself to 'realistic' ones at this stage.
 
 :::::::: instructor
+
 Put these in a Google doc that you share with the class.
 
 
@@ -153,8 +173,7 @@ fuel_consumed_mmbtu[~(fuel_consumed_mmbtu >= 0)]
 ```
 
 Huh! We get a bunch of not-a-number values.
-That is expected, too, I suppose.
-Let's tweak our assumption to:
+That is expected, too, so let's tweak our assumption to:
 "If fuel consumption in MMBtu is reported at all, it should be non-negative."
 
 ```python
@@ -225,7 +244,7 @@ Consider the following:
 #### Case 2
 * Use case: aggregate analysis of all plants in Puerto Rico
 * Assumption: a specific plant reports net generation data for all years it was active.
-* Impact of faulty assumption
+* Impact of faulty assumption:
   there are data gaps for that specific plant,
   but the aggregate values are not heavily affected.
   This would probably lead to no effect or a quiet failure.
@@ -237,9 +256,10 @@ due to the use cases we apply them to.
 
 ### Challenge: evaluating impact
 
-Look at the list of assumptions.
+Look at the list of assumptions and choose one.
 
 Can you come up with use cases where this assumption's failure will:
+
 * not affect the use case
 * quietly affect the use case
 * loudly affect the use case?
@@ -273,11 +293,13 @@ Some example assumptions:
 
 ### Challenge: evaluating likelihood
 
-Look at the list of assumptions and imagine a scenario in which they would not be true.
+Look at the list of assumptions and pick two.
 
-Can you identify an example scenario that:
-* seem very plausible?
-* seems very implausible?
+Imagine scenarios in which they are individually broken.
+
+Do they both seem plausible? Does one seem more plausible than the other?
+
+Finally, can you find an assumption where failure seems particularly implausible?
 
 ::::
 
