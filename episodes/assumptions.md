@@ -289,7 +289,7 @@ Some example assumptions:
     this comes from a scan of a handwritten form,
     and there was some automatic character recognition involved,
     you could totally end up with some wonky values in here.
-* The data is not intentionally incorrect
+* The data is being filled out in good faith
   * This seems implausible to be broken:
     in theory,
     people are not lying to the EIA about the amount of electricity they generated,
