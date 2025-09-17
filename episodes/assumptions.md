@@ -102,7 +102,7 @@ Some prompts to get you started:
   what are some things you learned about the data then?
 * what are other people writing, does that trigger new thoughts about what to add?
 
-When we return, we'll talk about which things worked. 
+When we return, we'll talk about which things worked.
 
 ::::
 
