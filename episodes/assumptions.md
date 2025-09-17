@@ -104,11 +104,9 @@ Some prompts to get you started:
 
 When we return, we'll talk about which things worked. 
 
+::::
 
-:::::::: instructor
-
-Put these in a Google doc that you share with the class.
-
+:::: instructor
 
 Some examples, if students are feeling a little quiet:
 
@@ -127,11 +125,20 @@ Some examples, if students are feeling a little quiet:
 * if a value is reported, it is correct and reflects reality
 * if a generator reports all null values for a specific time period, it was non-operational during that time period; if a generator reports 0 generation for a specific time period, it was operational, but not dispatched
 
-::::::::
+By the end of this we want at least one assumption that fits each of these categories:
+
+* easy to test
+* hard to test
+* hard to test programmatically, but easy to eyeball
+* high impact (probably crashes your system)
+* moderate impact (probably makes bad analysis)
+* low impact (probably doesn't do anything)
+* high likelihood
+* low likelihood
 
 ::::
 
-### How to test your assumptions
+## How to test your assumptions
 
 Let's take a look at one of the example assumptions and see how we'd test it:
 
@@ -165,8 +172,8 @@ fuel_consumed_mmbtu = monthly_pr_gen_fuel["fuel_consumed_mmbtu"]
 assert (fuel_consumed_mmbtu >= 0).all(), "The reported fuel consumption in MMBtu should be non-negative"
 ```
 
-Oho! We find that the assertion is not true!
-This is pretty common.
+Oh no! We find that the assertion is not true!
+This is actually pretty common.
 Let's dig in to see what's going on.
 
 ```python
