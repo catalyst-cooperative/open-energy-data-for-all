@@ -527,26 +527,43 @@ Note that if you quit, you get this `BdbQuit` error in the console. That's total
 
 ### Challenge: using the interactive debugger
 
-If your function failed your test, throw a breakpoint in the function & go check it out! Can you figure out what's going on?
-
-You can also copy this function & test code if your function already works perfectly:
+Let's use the debugger! Here's a test that tests the `get_heat_rates` function.
+As is, it is broken - try throwing a breakpoint in there and seeing what's going on!
 
 ```python
-def foo():
-    breakpoint()
-    ...
+
+def get_heat_rates(monthly, source_codes):
+    filtered = monthly.loc[monthly.energy_source_code.isin(source_codes)]
+    generation_kwh = filtered["net_generation_mwh"] * 1_000
+    consumption_btu = filtered["fuel_consumed_mmbtu"] * 1_000_000
+    heat_rate = consumption_btu.sum() / generation_kwh.sum()
+    return heat_rate
 
 
-def bar():
+def test_heat_rates(monthly_clean):
+    """Compare heat rates between fosil fuels and renewables. 
 
-    # bug should be in here
-    ...
+    Before 2022, the EIA used the "fossil fuel equivalency" methodology to
+    calculate fuel_consumed_per_mmbtu for non-combustible renwables - which assumes
+    that the *heat rate* of renewables is the same as that of fossil fuels.
 
-def test_foo():
-    observed = foo()
-    expected = ...
-    assert observed == expected
+    Let's check that assumption.
+
+    Heat rates are typically represented as BTU per kWh.
+    """
+    fossil_source_codes = {"DFO", "RFO", "NG", "BIT"}
+    renewable_source_codes = {"SUN", "WND", "WAT"}
+    years_to_check = [2017, 2018, 2019, 2020, 2021]
+    for year in years_to_check:
+        one_year_gen_fuel = monthly_clean.loc[monthly_clean.date.dt.year == year]
+        fossil_fuel_heat_rates = get_heat_rates(one_year_gen_fuel, fossil_source_codes)
+        renewable_heat_rates = get_heat_rates(one_year_gen_fuel, renewable_source_codes)
+
+        assert fossil_fuel_heat_rates == renewable_heat_rates
 ```
+
+There are lots of paths to go down here.
+We'll do this for about 8 minutes and then reconvene to discuss what we all tried and learned.
 
 ::::
 
