@@ -37,7 +37,7 @@ function in a Jupyter notebook or make four exploratory plots, you'll ultimately
 you're running the code you need for your final transformation process, and *only* that code. Moving
 to modules helps us distinguish between our exploration process and our final code.
 - **Reuse code:** Rather than copy-pasting a useful snippet or function into each notebook you're working in,
-you can store essential functions in one place and reuse them across your code, just like you'd import any other
+you can store essential functions in one place and reuse them across your code, similar to how you'd import a
 Python package.
 - **Test your code:** We'll cover this next! In short, using scripts and modules unlocks a world of tools
 you can use to test, debug and correct your code.
@@ -484,7 +484,7 @@ an `if __name__ == "__main__":` block.
 #### Importing your code into a notebook
 
 Now that we've created our `utils.py` file, we can use it in a Jupyter notebook
-just like any other package by importing it.
+by importing it.
 
 ```shell
 uv run jupyter notebook transform.ipynb
@@ -509,24 +509,26 @@ into a cell at the top - nice!
 The same is true in our `main.py` file.
 
 ::: challenge
-From `utils`, import our helper functions into `main.py`. Test that this works by re-running
+Import our helper functions from `utils.py` into `main.py`. Test that this works by re-running
 the script using uv.
 :::
 
 Now, when you make a tweak to `handle_data_types()`, that tweak will be applied across
 all of your code immediately. No more copy-pasting!
 
-As your code grows, you can use modules and imports to reorganize your project into
-multiple files in folders and subfolders, as makes sense to you. Here are but a few options:
+:::: callout
+As your code grows in complexity, you might find yourself wanting to reorganize your scripts into folders, call additional commands from the command-line, or even distribute your code so anyone else can install it using tools like `uv`. If so, you'll likely want to re-organize your code into a package.
 
-- One script per dataset (e.g., `eia923_pr.py`, `eia860_pr.py`, `eia923_nonpr.py`), with a general `utils.py` file
-- One folder per step of the data transformation process (e.g., `extract`, `transform`, `load`)
+Running `uv init --package your-project-name` will create the skeleton for a Python package, just as `uv init pr-gen-fuel` created our project template above. See the [uv docs](https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications) for more detail.
+
+For more on Python packages, see these [Python docs](https://docs.python.org/3/tutorial/modules.html#packages) and this [explainer](https://docs.astral.sh/uv/concepts/projects/config/#project-packaging) from uv.
+::::
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - Jupyter is great for data exploration and visualization, but working with scripts
 and modules is preferable for reusability, legibility and collaboration
-- `uv` bundles packages into a virtual environment, and helps us move our code into
+- `uv` bundles scripts into a virtual environment, and helps us move our code into
 a codebase
 - Reorganizing code into multiple modules can help us reuse code in multiple places and
 keep our project organized.
