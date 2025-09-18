@@ -64,44 +64,52 @@ or take some parameters to test a variety of scenarios,
 you can avoid those pain points.
 You can think of it sort of like the modularized version of writing in-line assertions in your code.
 
-Let's do an example in `tests/test_pipeline.py` in our project.
-Take the transformation pipeline from the last episode,
-which takes the raw Puerto Rico data and does some cleaning and reshaping.
+Let's do an example in our project!
+You can get a copy of the project by unzipping the `making-sure-your-system-is-behaving-start.zip` file in the `checkpoints` folder of the course repository.
+
+This project takes the raw Puerto Rico data and does some cleaning and reshaping.
+It's very slightly reorganized from the output of the previous episode - we've split out the parts that read input files and write output files, so the transformation function takes `DataFrame`s for inputs and produces them as outputs.
 One thing we expect from the output is that
 there's a `fuel_consumption_units` column and that its value is 0 for sun, wind, and water.
 
 How would we test that?
 
-First, we would want to run the code.
+First, we need to read in the raw data.
+Then, we need to run the transformation code.
 Then, we would want to read the `fuel_consumption_units` column from the output of the code.
 Finally, we'd want to assert that those values are 0 for sun, wind, and water.
 
+Let's create a new file, `test_main.py`.
+Because of the simple way we've set things up,
+we need to keep it in the same directory as `main.py` and `utils.py`.
+
+Then let's do those steps:
 
 ```python
 import pandas as pd
-from pr_gen_fuel.main import transform_pr_gen_fuel
+from main import extract_pr_gen_fuel, transform_pr_gen_fuel
 
 
 def test_renewables_fuel_units():
-    transform_pr_gen_fuel()
-    pr_gen_fuel = pd.read_parquet("data/pr_gen_fuel_monthly.parquet")
+    # Read in the raw data...
+    raw_pr_gen_fuel, raw_pr_plant_frame = extract_pr_gen_fuel()
+    # Then run the code...
+    pr_gen_fuel = transform_pr_gen_fuel(raw_pr_gen_fuel, raw_pr_plant_frame)[0]
+    # Then pull out the subset we care about...
     renewable_codes = {"SUN", "WND", "WAT"}
     renewable_gen_fuels = pr_gen_fuel[
         pr_gen_fuel["energy_source_code"].isin(renewable_codes)
     ]
     renewable_fuel_units = renewable_gen_fuels["fuel_consumed_units"]
+    # Finally, assert something!
     assert (renewable_fuel_units.dropna() == 0).all()
 ```
-
-It's kind of nice to not have to do that setup for extracting the renewable data within your pipeline code itself!
-
-**TODO**: "it is annoying, though, to read from a file on disk, what if you change the output file location, or you want to run this test without overwriting the actual output file? let's refactor
 
 We need to add the test function to the `if __name__ == "__main__":` block in order for it to run.
 
 ```python
 if __name__ == "__main__":
-    test_fuel_consumption_units_for_renewables()
+    test_renewables_fuel_units()
     # future tests get added here too
 ```
 
@@ -110,6 +118,7 @@ if __name__ == "__main__":
 ```
 
 Hooray! No errors.
+It's nice to not have that setup for extracting the renewable data cluttering or slowing down your processing code!
 
 Now it's your turn.
 
@@ -117,23 +126,26 @@ Now it's your turn.
 
 ### Writing a test function
 
-Think about the data pipeline we wrote in the last exercise in the modularization episode.
+Think about the data processing code in `main.py`.
 
 What is a property that you expect the output to have?
 
 You can pick from this list, or come up with your own:
 
-* all plants report non-null values for net generation
+* all plants report some non-null values for net generation
 * all fuel consumption units are non-negative
 * the heat rate of combined cycle plants is roughly 7,000 Btu/kWh (this one will require a bunch of processing to calculate the heat rate!)
 
-Write a function in `test_pipeline.py` that tests this property by filling out the following skeleton:
+Write a function in `test_main.py` that tests this property by filling out the following skeleton:
 
 ```python
 def test_cool_output_property():
-    input_data = pd.read_parquet("../data/pr_gen_fuel_monthly.parquet")
-    output = process_monthly(input_data)
-    # make some assertions about the data
+    # Read in the raw data...
+    raw_pr_gen_fuel, raw_pr_plant_frame = extract_pr_gen_fuel()
+    # Then run the code...
+    pr_gen_fuel = transform_pr_gen_fuel(raw_pr_gen_fuel, raw_pr_plant_frame)[0]
+    # Then pull out the subset we care about...
+    # Finally, assert something!
 ```
 
 Don't forget to add it to the `if __name__ == "__main__":` block so you can run it!
@@ -153,12 +165,14 @@ How would you approach reducing this duplication?
 ## Automated test runners
 
 As we write more tests,
-we're starting to run into some of the problems with our `if __name__ == "__main__":...` strategy:
+we're starting to run into some problems:
 
 - The boilerplate is annoying and it's easy to forget to add a test. Then you'll think your code works when it doesn't.
 - Shared test setup can get complicated quickly
 - If you have lots of tests & want to break them into multiple files, you now have to run all these other files too
-- If one test breaks it immediately exits with an `AssertionError` and now you don't know what else broke
+- If one test breaks, it immediately exits with an `AssertionError` and the rest of the tests are skipped. Now you don't know what else broke!
+  - This mirrors one of the problems with peppering your processing code with `assert` statements -
+    sometimes you don't want the whole process to come crashing down in the middle because of one assertion failure!
 
 What would be nice is some tool that
 automatically finds testing code,
@@ -178,7 +192,7 @@ First we need to install `pytest`:
 Then we can run our tests:
 
 ```bash
-% uv run pytest tests
+% uv run pytest
 ```
 
 **TODO** paste some output!
@@ -194,7 +208,7 @@ What `pytest` is doing is:
 
 ### Challenge: try `pytest`
 
-Try installing `pytest`, then running `uv run pytest tests/` in your own project and see if it's picking up your tests!
+Try installing `pytest`, then running `uv run pytest` in your own project and see if it's picking up your tests!
 
 ::::
 
@@ -213,32 +227,40 @@ To use them, we first extract some shared setup into a function -
 let's use the example test skeleton from before:
 
 ```python
+
 def test_cool_output_property():
-    input_data = pd.read_parquet("../data/pr_gen_fuel_monthly.parquet")
-    output = process_monthly(input_data)
-    # make some assertions about the data
+    # Read in the raw data...
+    raw_pr_gen_fuel, raw_pr_plant_frame = extract_pr_gen_fuel()
+    # Then run the code...
+    pr_gen_fuel = transform_pr_gen_fuel(raw_pr_gen_fuel, raw_pr_plant_frame)[0]
+    # Then pull out the subset we care about...
+    # Finally, assert something!
 ```
 
 Let's extract that setup into a function called `monthly_clean`:
 
 ```python
 def monthly_clean():
-    input_data = pd.read_parquet("../data/pr_gen_fuel_monthly.parquet")
-    output = process_monthly(input_data)
-    return output
+    # Read in the raw data...
+    raw_pr_gen_fuel, raw_pr_plant_frame = extract_pr_gen_fuel()
+    # Then run the code...
+    pr_gen_fuel = transform_pr_gen_fuel(raw_pr_gen_fuel, raw_pr_plant_frame)[0]
+    # Then pull out the subset we care about...
+    return pr_gen_fuel
 ```
 
 Now, if we add the `@pytest.fixture` decorator,
-we can use `monthly_clean` in multiple tests.
-Crucially, `pytest` knows enough to only run the function once, so
+we can use `monthly_clean` in multiple tests by adding it as a parameter to the test.
 
 ```python
-
 @pytest.fixture
 def monthly_clean():
-    input_data = pd.read_parquet("../data/pr_gen_fuel_monthly.parquet")
-    output = process_monthly(input_data)
-    return output
+    # Read in the raw data...
+    raw_pr_gen_fuel, raw_pr_plant_frame = extract_pr_gen_fuel()
+    # Then run the code...
+    pr_gen_fuel = transform_pr_gen_fuel(raw_pr_gen_fuel, raw_pr_plant_frame)[0]
+    # Then pull out the subset we care about...
+    return pr_gen_fuel
 
 
 def test_one(monthly_clean):
@@ -249,11 +271,42 @@ def test_two(monthly_clean):
     ...
 ```
 
+Crucially, `pytest` knows enough to only run the function once and save the output.
+That lets you share the setup between multiple tests!
+
+::::
+
+### Challenge: fixtures
+
+Imagine you wanted to write a few tests that checked properties of the raw data.
+
+The `monthly_clean` fixture doesn't help you because it doesn't expose the raw data!
+
+How would you deal with this?
+
+Write two tests:
+
+* one that asserts that the raw data is not empty
+* one that asserts that the `plant_id_eia` column is present in the raw data
+
+We'll go over a few different ways to do this once everyone's given it a shot.
+
+::::
+
+:::: instructor
+
+The ways we'll go over:
+
+* anything people tried to do
+* just call extract_pr_gen_fuel() in the two tests
+* make a new fixture that just does the raw data - `raw_data`
+* make a new fixture that does the raw data, *and* make `monthly_clean` depend on `raw_data`
+
+
 ::::
 
 As your software gets more complicated, testing it can also get more complicated.
-`pytest` offers a lot more beyond the functions we've already seen
-(automatically finding your test functions & running them separately for you).
+`pytest` offers a lot more beyond the functions we've already seen.
 Check out the [official documentation](https://docs.pytest.org/en/stable/index.html) for more info!
 
 ## The debugger
