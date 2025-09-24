@@ -589,7 +589,7 @@ def get_heat_rates(monthly, source_codes):
 
 
 def test_heat_rates(monthly_clean):
-    """Compare heat rates between fosil fuels and renewables. 
+    """Compare heat rates between fosil fuels and renewables.
 
     Before 2022, the EIA used the "fossil fuel equivalency" methodology to
     calculate fuel_consumed_per_mmbtu for non-combustible renwables - which assumes
