@@ -1,0 +1,80 @@
+#------------------------------------------------------------
+# Values for this lesson.
+#------------------------------------------------------------
+
+# Which carpentry is this (swc, dc, lc, or cp)?
+# swc: Software Carpentry
+# dc: Data Carpentry
+# lc: Library Carpentry
+# cp: Carpentries (to use for instructor training for instance)
+# incubator: The Carpentries Incubator
+#
+# This option supports custom types so lessons can be branded
+# and themed with your own logo and alt-text (see `carpentry_description`)
+# See https://carpentries.github.io/sandpaper-docs/editing.html#adding-a-custom-logo
+carpentry: 'incubator'
+
+# Alt-text description of the lesson.
+carpentry_description: 'Foundational data and software skills for energy data analysis.'
+
+# Overall title for pages.
+title: 'Open Energy Data For All'
+
+# Date the lesson was created (YYYY-MM-DD, this is empty by default)
+created: 2024-10-23
+
+# Comma-separated list of keywords for the lesson
+keywords: 'software, data, lesson, energy, PUDL, catalyst'
+
+# Life cycle stage of the lesson
+# possible values: pre-alpha, alpha, beta, stable
+life_cycle: 'pre-alpha'
+
+# License of the lesson
+license: 'CC-BY 4.0'
+
+# Link to the source repository for this lesson
+source: 'https://github.com/catalyst-cooperative/open-energy-data-for-all'
+
+# Default branch of your lesson
+branch: 'main'
+
+# Who to contact if there are any issues
+contact: 'hello@catalyst.coop'
+
+# Navigation ------------------------------------------------
+#
+# Use the following menu items to specify the order of
+# individual pages in each dropdown section. Leave blank to
+# include all pages in the folder.
+
+# Order of episodes in your lesson
+episodes:
+# chapter 1. ingestion
+- introduction.md
+- working-with-diverse-filetypes.md
+- accessing-remote-data.md
+- scraping-data.md
+# chapter 2. making sense of your data
+- visual-data-exploration.md
+- assumptions.md
+# chapter 3. robustness/rigor
+#- modularization.md
+#- escape from jupyter
+#- data-validation.md
+#- debugging.md
+- coming-soon.md
+
+# Information for Learners
+learners:
+
+# Information for Instructors
+instructors:
+
+# Learner Profiles
+profiles:
+
+# Customisation ---------------------------------------------
+#
+# This space below is where custom yaml items (e.g. pinning
+# sandpaper and varnish versions) should live
