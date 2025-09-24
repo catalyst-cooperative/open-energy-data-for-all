@@ -100,7 +100,7 @@ Some prompts to get you started:
 * what problems have you run into in previous datasets?
 * if you were here for the data exploration episode,
   what are some things you learned about the data then?
-* what are other people writing, does that trigger new thoughts about what to add?
+* how can I build on others' suggestions in the doc?
 
 When we return, we'll talk about which things worked.
 
@@ -204,7 +204,7 @@ Here are three dimensions to consider in a rudimentary prioritization framework:
 * How easy it is to test the assumption:
   the less you have to work for this test,
   the more likely it is to be worth it.
-* The impact on your system:
+* The impact on your code:
   what's the goal of the system you've built up?
   What happens to that goal if your assumption is violated?
 * The likelihood the assumption is violated:
@@ -220,7 +220,7 @@ Some examples:
     I will probably end up with numbers that are off in some way.
   * high likelihood - all it takes is a typo, which happens all the time.
 
-* NA values correspond to periods of inactivity for the generator
+* NA values reflect periods of inactivity for the generator
   * quite hard to test - we would have to find another source for month-to-month generator activity status and then cross-reference.
   * high impact - assuming we're looking at any subset of the data that includes NA values,
     if those don't actually correspond to the activity of the generator we are going to be heavily misled.
@@ -229,7 +229,7 @@ Some examples:
 
 * there is at least one row of data in the report
   * easy to test!
-  * high impact - an empty dataset will certainly impact downstream usage
+  * high impact - any cleaning and analysis requires data to work on
   * moderate likelihood - some file transfer failure could easily make this fail.
 
 :::: challenge
@@ -240,9 +240,9 @@ Now it's time to try out that prioritization framework!
 
 Let's start by looking at the list of assumptions we came up with.
 
-Take a few minutes to put a `+` emoji reaction next to 3-5 assumptions that feel important to test.
+Take a few minutes to put a `+` next to 3-5 assumptions that feel important to test.
 
-We'll then discuss a few assumptions with many `+` reacts and how they fit into the framework above.
+We'll then discuss a few assumptions with many `+`s and how they fit into the framework above.
 
 ::::
 
