@@ -512,7 +512,9 @@ data?<a class="anchor" aria-label="anchor" href="#what-is-a-good-general-strateg
 </h3>
 <p>Prep list:</p>
 <ul>
-<li>make a Google Doc that people can put in their assumptions</li>
+<li>
+<a href="https://www.docs.new" class="external-link">make a Google Doc</a> that people can
+put their assumptions in; make it editable by all who have the link</li>
 <li>clean out the example notebook so that you can type everything out
 again</li>
 </ul>
@@ -520,18 +522,25 @@ again</li>
 <br><h3 id="assumptions-headingInstructor2">
 <a href="assumptions.html#headingInstructor2">Instructor Note</a><a class="anchor" aria-label="anchor" href="#assumptions-headingInstructor2"></a>
 </h3>
-<p>Put these in a Google doc that you share with the class.</p>
 <p>Some examples, if students are feeling a little quiet:</p>
 <ul>
 <li>the net generation data is actually in MWh and not a mix of
 units</li>
-<li>for a given generator in a given time period, NAs mean there was no
-data reported at all (all measured values are NA or none are)</li>
 <li>the net generation of batteries is strictly less than the fuel
 consumed in MWh</li>
+<li>the net generation of each individual plant is “reasonable” -
+i.e. there are no reports of a generator producing more power than the
+Sun</li>
+<li>the reported dates are all within the last decade</li>
+<li>the fuel mix matches what we know of physical reality</li>
+<li>the total generation matches what we expect for Puerto Rican
+electricity demand</li>
 <li>all energy source codes correspond to the set in the
 documentation</li>
 <li>a plant ID corresponds to only one plant name per year</li>
+<li>a given plant ID always corresponds to the same plant name</li>
+<li>plant IDs are distributed in chronological order of
+construction</li>
 <li>every generator has at least one reporting period for which they
 have non-zero generation</li>
 <li>electricity generation heat rates are close to known averages for
@@ -541,6 +550,18 @@ their prime mover / energy source</li>
 it was non-operational during that time period; if a generator reports 0
 generation for a specific time period, it was operational, but not
 dispatched</li>
+</ul>
+<p>By the end of this we want at least one assumption that fits each of
+these categories:</p>
+<ul>
+<li>easy to test</li>
+<li>hard to test</li>
+<li>hard to test programmatically, but easy to eyeball</li>
+<li>high impact (probably crashes your system)</li>
+<li>moderate impact (probably makes bad analysis)</li>
+<li>low impact (probably doesn’t do anything)</li>
+<li>high likelihood</li>
+<li>low likelihood</li>
 </ul>
 <hr>
 <br></section><section id="coming-soon"><h2 class="section-heading"><a href="coming-soon.html">More Topics Coming Soon</a></h2>
@@ -592,8 +613,8 @@ dispatched</li>
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/instructor-notes.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/instructor-notes.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2025-09-23",
-  "datePublished": "2025-09-23"
+  "dateModified": "2025-09-24",
+  "datePublished": "2025-09-24"
 }
 
   </script><script>

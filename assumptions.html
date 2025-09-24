@@ -263,10 +263,9 @@
       <div class="accordion-body">
         <ul><li><a href="#intro">Intro</a></li>
 <li><a href="#what-is-an-assumption-anyways">What is an assumption anyways?</a></li>
+<li><a href="#how-to-test-your-assumptions">How to test your assumptions</a></li>
 <li><a href="#which-assumptions-are-worth-testing">Which assumptions are worth testing?</a></li>
-<li><a href="#testability">Testability</a></li>
-<li><a href="#impact">Impact</a></li>
-<li><a href="#likelihood">Likelihood</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
         </ul></div><!--/div.accordion-body-->
     </div><!--/div.accordion-collapse-->
 
@@ -340,7 +339,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Making assumptions about your data</h1>
-        <p>Last updated on 2025-09-10 |
+        <p>Last updated on 2025-09-24 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/assumptions.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -420,11 +419,11 @@ not words or strings of random characters</li>
 they were obvious to you, then you probably were already working around
 them in some way. With that in mind, let’s try to come up with some
 assumptions of our own!</p>
-<div id="challenge-identifying-assumptions" class="callout challenge">
+<div id="challenge-identifying-assumptions" class="callout discussion">
 <div class="callout-square">
-<i class="callout-icon" data-feather="zap"></i>
+<i class="callout-icon" data-feather="message-circle"></i>
 </div>
-<span class="callout-header">Challenge</span>
+<span class="callout-header">Discussion</span>
 <div id="challenge-identifying-assumptions" class="callout-inner">
 <h3 class="callout-title">Challenge: identifying assumptions</h3>
 <div class="callout-content">
@@ -432,31 +431,24 @@ assumptions of our own!</p>
 EIA 923 Puerto Rico data (<code>pr_gen_fuel_monthly.parquet</code>) in
 the <a href="data/">data directory</a>.</p>
 <p>Please put them in the shared Google doc that your instructor
-prepared for you.</p>
+prepared for you. This will serve as a foundation for future challenges
+in this lesson.</p>
 <p>The goal is to get past the obvious ones and start thinking of some
 un-obvious assumptions - no need to limit yourself to ‘realistic’ ones
 at this stage.</p>
+<p>Some prompts to get you started:</p>
+<ul><li>what problems have you run into in previous datasets?</li>
+<li>if you were here for the data exploration episode, what are some
+things you learned about the data then?</li>
+<li>how can I build on others’ suggestions in the doc?</li>
+</ul><p>When we return, we’ll talk about which things worked.</p>
 </div>
 </div>
 </div>
 
-</section><section><h2 class="section-heading" id="which-assumptions-are-worth-testing">Which assumptions are worth testing?<a class="anchor" aria-label="anchor" href="#which-assumptions-are-worth-testing"></a></h2>
-<hr class="half-width"><p>All assumptions take some effort to test. While it’s useful to test
-many assumptions, the reality is that we have limited time to work on
-our projects and need to prioritize the assumptions that are “worth” the
-investment of testing them.</p>
-<p>What makes assumptions worth testing?</p>
-<ul><li>how easy it is to test the assumption</li>
-<li>the impact on your system if the assumption turns out to not be
-true</li>
-<li>the likelihood the assumption is violated</li>
-</ul><p>Let’s look at each of these dimensions one by one.</p>
-</section><section><h2 class="section-heading" id="testability">Testability<a class="anchor" aria-label="anchor" href="#testability"></a></h2>
-<hr class="half-width"><div class="section level3">
-<h3 id="how-to-test-your-assumptions">How to test your assumptions<a class="anchor" aria-label="anchor" href="#how-to-test-your-assumptions"></a></h3>
-<p>It’s hard to imagine how easy it is to test an assumption without
-having seen any examples of assumptions being tested! Let’s take a look
-at one of the example assumptions and see how we’d test it:</p>
+</section><section><h2 class="section-heading" id="how-to-test-your-assumptions">How to test your assumptions<a class="anchor" aria-label="anchor" href="#how-to-test-your-assumptions"></a></h2>
+<hr class="half-width"><p>Let’s take a look at one of the example assumptions and see how we’d
+test it:</p>
 <blockquote>
 <p>the reported fuel consumption in MMBtu is always non-negative.</p>
 </blockquote>
@@ -490,8 +482,8 @@ a little nicer:</p>
 <span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># finally make that assertion!</span></span>
 <span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="cf">assert</span> (fuel_consumed_mmbtu <span class="op">&gt;=</span> <span class="dv">0</span>).<span class="bu">all</span>(), <span class="st">"The reported fuel consumption in MMBtu should be non-negative"</span></span></code></pre>
 </div>
-<p>Oho! We find that the assertion is not true! This is pretty common.
-Let’s dig in to see what’s going on.</p>
+<p>Oh no! We find that the assertion is not true! This is actually
+pretty common. Let’s dig in to see what’s going on.</p>
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -506,137 +498,88 @@ at all, it should be non-negative.”</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="cf">assert</span> (fuel_consumed_mmbtu.dropna() <span class="op">&gt;=</span> <span class="dv">0</span>).<span class="bu">all</span>(), <span class="st">"If fuel consumption in MMBtu is reported at all, it should be non-negative."</span></span></code></pre>
 </div>
 <p>Which passes with little fanfare.</p>
-<p>Now that your imagination is primed, we can evaluate assumptions for
-whether they’d be easy or hard to test. There’s no hard and fast rule
-here - a useful heuristic is, “Can I imagine a snippet of code that
-would verify this assumption?”</p>
-<p>Let’s go through some examples.</p>
-<p>The assumption we just tested, “the reported fuel consumption in
-MMBtu is always non-negative”, is not so bad - we just imagined that
-snippet of code together above.</p>
-<p>One that might be a bit harder would be “for renewables after 2022,
-the reported fuel consumption in MMBtu is equivalent to the net
-generation in MWh.” This is a little trickier because of two
-reasons:</p>
-<ul><li>we have to do some unit conversions to even compare these</li>
-<li>we need to think about “how close is close enough?” due to different
-precision, and the loss of precision from unit conversions</li>
-</ul><p>One that might be quite hard to test would be “There were no mistakes
-in the data entry.” That would require some sort of cross-checking with
-a different reputable source, and likely some communication with EIA as
-well.</p>
-<div id="challenge-evaluating-testability" class="callout discussion">
-<div class="callout-square">
-<i class="callout-icon" data-feather="message-circle"></i>
-</div>
-<span class="callout-header">Discussion</span>
-<div id="challenge-evaluating-testability" class="callout-inner">
-<h3 class="callout-title">Challenge: evaluating testability</h3>
-<div class="callout-content">
-<p>Look at the list of assumptions.</p>
-<p>Can you identify one that would be easy to test, and one that would
-be hard to test?</p>
-<p>If you have time, write some code to verify the easy assumption!</p>
-<p>When we finish, we will share some examples of easy and hard
-assumptions to test with the rest of the group.</p>
-</div>
-</div>
-</div>
-</div>
-</section><section><h2 class="section-heading" id="impact">Impact<a class="anchor" aria-label="anchor" href="#impact"></a></h2>
-<hr class="half-width"><p>Let’s talk about impact!</p>
-<p>We can’t evaluate the impact of a faulty assumption without a
-corresponding use case to be impacted. And different use cases will lead
-to different impact for the same faulty assumption.</p>
-<p>One way to think about the severity of impact is a three-level
-system:</p>
-<ul><li>no effect: nothing bad happens to your use case.</li>
-<li>quiet failure: your system produces incorrect outputs</li>
-<li>loud failure: your system doesn’t produce outputs at all</li>
-</ul><p>Consider the following:</p>
-<div class="section level4">
-<h4 id="case-1">Case 1<a class="anchor" aria-label="anchor" href="#case-1"></a></h4>
-<ul><li>Use case: longitudinal analysis of one specific plant</li>
-<li>Assumption: this specific plant reports net generation data for all
-years it was active.</li>
-<li>Impact of faulty assumption: there are data gaps in the net
-generation data. In this case it would probably cause a quiet or loud
-failure, depending on the specifics of the system.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="case-2">Case 2<a class="anchor" aria-label="anchor" href="#case-2"></a></h4>
-<ul><li>Use case: aggregate analysis of all plants in Puerto Rico</li>
-<li>Assumption: a specific plant reports net generation data for all
-years it was active.</li>
-<li>Impact of faulty assumption: there are data gaps for that specific
-plant, but the aggregate values are not heavily affected. This would
-probably lead to no effect or a quiet failure.</li>
-</ul><p>We see that the same assumption can lead to different impacts due to
-the use cases we apply them to.</p>
-<div id="challenge-evaluating-impact" class="callout discussion">
-<div class="callout-square">
-<i class="callout-icon" data-feather="message-circle"></i>
-</div>
-<span class="callout-header">Discussion</span>
-<div id="challenge-evaluating-impact" class="callout-inner">
-<h3 class="callout-title">Challenge: evaluating impact</h3>
-<div class="callout-content">
-<p>Look at the list of assumptions and choose one.</p>
-<p>Can you come up with use cases where this assumption’s failure
-will:</p>
-<ul><li>not affect the use case</li>
-<li>quietly affect the use case</li>
-<li>loudly affect the use case?</li>
-</ul><p>When we finish, we will share some examples of how different use
-cases affect the impact of failure with the rest of the group.</p>
-</div>
-</div>
-</div>
-</div>
-</section><section><h2 class="section-heading" id="likelihood">Likelihood<a class="anchor" aria-label="anchor" href="#likelihood"></a></h2>
-<hr class="half-width"><p>Evaluating likelihood can be difficult: you are guessing at the
-future based on your experience of the past. A heuristic is “Can I
-imagine a situation where this assumption would be false? How improbable
-is that situation?” You’ll build up a more nuanced intuition over
-time.</p>
-<p>Some example assumptions:</p>
-<ul><li>The “year” column only contains numbers, not words or strings of
-random characters
-<ul><li>this seems somewhat plausible: if, for example, this comes from a
-scan of a handwritten form, and there was some automatic character
-recognition involved, you could totally end up with some wonky values in
-here.</li>
+</section><section><h2 class="section-heading" id="which-assumptions-are-worth-testing">Which assumptions are worth testing?<a class="anchor" aria-label="anchor" href="#which-assumptions-are-worth-testing"></a></h2>
+<hr class="half-width"><p>As we’ve just seen, assumptions take some effort to test. While it’s
+useful to test many assumptions, the reality is that we have limited
+time to work on our projects and need to prioritize the assumptions that
+are “worth” the investment of testing them.</p>
+<p>What makes assumptions worth testing? Here are three dimensions to
+consider in a rudimentary prioritization framework:</p>
+<ul><li>How easy it is to test the assumption: the less you have to work for
+this test, the more likely it is to be worth it.</li>
+<li>The impact on your code: what’s the goal of the system you’ve built
+up? What happens to that goal if your assumption is violated?</li>
+<li>The likelihood the assumption is violated: what are some ways this
+could go wrong? Do they feel plausible or implausible?</li>
+</ul><p>Some examples:</p>
+<ul><li>the reported fuel consumption in MMBtu is always non-negative
+<ul><li>pretty easy to test - we didn’t have to do <em>too</em> much work
+above</li>
+<li>moderate impact - though this depends on the goals of my system, if
+I do any analysis that touches the negative fuel consumption I will
+probably end up with numbers that are off in some way.</li>
+<li>high likelihood - all it takes is a typo, which happens all the
+time.</li>
 </ul></li>
-<li>The data is being filled out in good faith
-<ul><li>This seems implausible to be broken: in theory, people are not lying
-to the EIA about the amount of electricity they generated, and the EIA
-is still considered a trustworthy organization.</li>
+<li>NA values reflect periods of inactivity for the generator
+<ul><li>quite hard to test - we would have to find another source for
+month-to-month generator activity status and then cross-reference.</li>
+<li>high impact - assuming we’re looking at any subset of the data that
+includes NA values, if those don’t actually correspond to the activity
+of the generator we are going to be heavily misled.</li>
+<li>moderate likelihood - it seems easy for some plant administrator to
+just forget to report data for a month or two, but there’s likely
+<em>some</em> enforcement from the EIA.</li>
 </ul></li>
-</ul><div id="challenge-evaluating-likelihood" class="callout discussion">
+<li>there is at least one row of data in the report
+<ul><li>easy to test!</li>
+<li>high impact - any cleaning and analysis requires data to work
+on</li>
+<li>moderate likelihood - some file transfer failure could easily make
+this fail.</li>
+</ul></li>
+</ul><div id="challenge-prioritizing-assumptions" class="callout discussion">
 <div class="callout-square">
 <i class="callout-icon" data-feather="message-circle"></i>
 </div>
 <span class="callout-header">Discussion</span>
-<div id="challenge-evaluating-likelihood" class="callout-inner">
-<h3 class="callout-title">Challenge: evaluating likelihood</h3>
+<div id="challenge-prioritizing-assumptions" class="callout-inner">
+<h3 class="callout-title">Challenge: prioritizing assumptions</h3>
 <div class="callout-content">
-<p>Look at the list of assumptions and pick two.</p>
-<p>Imagine scenarios in which they are individually broken.</p>
-<p>Do they both seem plausible? Does one seem more plausible than the
-other?</p>
-<p>Finally, can you find an assumption where failure seems particularly
-implausible?</p>
-<p>When we finish, we will share some plausible and implausible stories
-about how assumptions might be broken.</p>
+<p>Now it’s time to try out that prioritization framework!</p>
+<p>Let’s start by looking at the list of assumptions we came up
+with.</p>
+<p>Take a few minutes to put a <code>+</code> next to 3-5 assumptions
+that feel important to test.</p>
+<p>We’ll then discuss a few assumptions with many <code>+</code>s and
+how they fit into the framework above.</p>
 </div>
 </div>
 </div>
-<p>We’ve thought a bunch about assumptions and how to test them. What
+<div id="challenge-testing-an-assumption" class="callout discussion">
+<div class="callout-square">
+<i class="callout-icon" data-feather="message-circle"></i>
+</div>
+<span class="callout-header">Discussion</span>
+<div id="challenge-testing-an-assumption" class="callout-inner">
+<h3 class="callout-title">Challenge: testing an assumption</h3>
+<div class="callout-content">
+<p>Now that we have our list of high-priority testing targets, we can go
+ahead and write some tests for them!</p>
+<p>Pick one of the assumptions identified as high-priority in the last
+challenge, and write some code to test whether it’s true or false.</p>
+<p>When we finish, we’ll talk about challenges we ran into in writing
+these tests.</p>
+</div>
+</div>
+</div>
+</section><section><h2 class="section-heading" id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a></h2>
+<hr class="half-width"><p>We’ve thought a bunch about assumptions and how to test them. What
 can we do with this?</p>
-<p>The most straightforwardly useful thing is to add checks to your data
-processing code, to make sure that your inputs and outputs are behaving
-as you expect. This protects you from surprising changes in new data, or
-surprising behavior of changes you make to your code.</p>
+<p>The most important is to add checks to your data processing code, to
+make sure that your inputs and outputs are behaving as you expect, every
+time the code runs. This protects you from surprising changes in new
+data, or surprising behavior of changes you make to your code.</p>
 <p>Hopefully that saves you from some hair-pulling debugging sessions in
 the future!</p>
 <div id="keypoints1" class="callout keypoints">
@@ -648,10 +591,11 @@ the future!</p>
 <div class="callout-content">
 <ul><li>you’re always making assumptions about your data, and many of them
 are likely to be wrong</li>
+<li>you can prioritize assumptions by thinking about their impact,
+likelihood, and testability</li>
 <li>you can use <code>assert</code> statements to tell you if an
-assumption is wrong</li>
-<li>you can evaluate the usefulness of assumptions by thinking about
-their impact, likelihood, and testability.</li>
+assumption is wrong <em>every time you run the code</em>
+</li>
 </ul></div>
 </div>
 </div>
@@ -717,8 +661,8 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/assumptions.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/assumptions.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2025-09-10",
-  "datePublished": "2025-09-23"
+  "dateModified": "2025-09-24",
+  "datePublished": "2025-09-24"
 }
 
   </script><script>
