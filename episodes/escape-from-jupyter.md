@@ -517,7 +517,7 @@ Now, when you make a tweak to `handle_data_types()`, that tweak will be applied 
 all of your code immediately. No more copy-pasting!
 
 :::: callout
-As your code grows in complexity, you might find yourself wanting to reorganize your scripts into folders, call additional commands from the command-line, or even distribute your code so anyone else can install it using tools like `uv`. If so, you'll likely want to re-organize your code into a package.
+As your code grows in complexity, you might find yourself wanting to reorganize your scripts into folders, call custom commands from the command-line, or even distribute your code so anyone else can install it using tools like `uv`. If so, you'll likely want to re-organize your code into a package.
 
 Running `uv init --package your-project-name` will create the skeleton for a Python package, just as `uv init pr-gen-fuel` created our project template above. See the [uv docs](https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications) for more detail.
 
@@ -528,7 +528,7 @@ For more on Python packages, see these [Python docs](https://docs.python.org/3/t
 
 - Jupyter is great for data exploration and visualization, but working with scripts
 and modules is preferable for reusability, legibility and collaboration
-- `uv` bundles scripts into a virtual environment, and helps us move our code into
+- `uv` bundles packages into a virtual environment, and helps us move our code into
 a codebase
 - Reorganizing code into multiple modules can help us reuse code in multiple places and
 keep our project organized.
