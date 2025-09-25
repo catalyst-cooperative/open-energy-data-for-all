@@ -51,27 +51,19 @@ contact: 'hello@catalyst.coop'
 # Order of episodes in your lesson
 episodes:
 # chapter 1. ingestion
-- introduction.md # hmm.
+- introduction.md
 - working-with-diverse-filetypes.md
 - accessing-remote-data.md
 - scraping-data.md
-# chapter 2. visualization/reusability
+# chapter 2. making sense of your data
 - visual-data-exploration.md
-# - coming-soon.md
-#- data-validation.md
+- assumptions.md
+# chapter 3. robustness/rigor
 #- modularization.md
 - escape-from-jupyter.md
-#- modularization.md
-#- automated-testing.md
-# chapter 3. when things go wrong
+#- data-validation.md
 #- debugging.md
-#- big-data.md
-#- other-options.md # maybe cut? / roll into "here's more resources" section of big-data.md
-# chapter 4. collaboration
-#- python-environments.md # https://carpentries-incubator.github.io/python-intermediate-development/12-virtual-environments.html
-#- data-environments.md
-#- documentation.md
-#- hot-takes.md
+- coming-soon.md
 
 # Information for Learners
 learners:
