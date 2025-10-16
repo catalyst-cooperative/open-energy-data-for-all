@@ -20,96 +20,185 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+
+:::: instructor
+
+Prep checklist:
+
+* [ ] make a [google doc](https://www.docs.new) for challenges
+
+::::
+
 ## Intro
 
-So we just wrote a bunch of code... how do we know if it works?
+If you have a bunch of code, how do you know if it works?
 
-First, we should know what "it works" means.
-Think about what you expect from the system - what do you think the output should look like?
-This is sort of the mirror image of those assumptions you made about the data inputs earlier.
-Then we should figure out if the system actually works.
-We can use that same `assert` statement from before.
+Let's start with an example - follow along on your computer!
 
-If, somehow, we find that our system doesn't work, what do we do?
+So we're all on the same page,
+let's unzip the `making-sure-your-system-is-behaving-start.zip` file in the `checkpoints` folder of the course repository.
 
-Well, the system is a chain of sub-systems,
-each of which take some input and make some output.
-If the last part of the system produced a bad output,
-either (a) there is a problem in that part or (b) it got bad input.
-We can apply that same two-step process from above to the subsystems as well:
-figure out what success means, then check to see if it's happening.
+:::: instructor
 
-Once we find the problem sub-system,
-we can continue fractally drilling down until we find the piece of code we need to change.
+Do this in the file manager, not the terminal!
 
-We'll introduce some tools that help make this process go smoothly:
+::::
 
-- *test functions* tell you if your system is functioning as expected
-- an *automated test runner* makes it easy to run all your tests at once so you don't have to remember/manually execute all the steps
-- a *debugger* lets you zoom in even further to your system to figure out what exactly is happening
+The first thing we need to know is what "it works" means.
+This project takes the raw Puerto Rico data and does some cleaning and reshaping,
+but what does that really mean?
 
-## Test functions
+Let's open up `main.py` and see what's inside.
+We've got a few functions which describe what they do - nice!
 
-Writing assertions in various places can absolutely work to tell you if your system is functioning as expected.
+:::: callout
+Make sure you open this with a text editor or a code-specific program -
+VSCode, PyCharm, Notebook, TextEdit, etc. will all work.
+Microsoft Word, LibreOffice,
+or anything that lets you bold/italicize/underline text will not.
+::::
+
+The `extract` function reads in some raw data and turns it into `DataFrame`s.
+The `transform` function does a bunch of cleaning for those `DataFrame`s.
+The `load` function writes the cleaned data back out to files on disk.
+
+We can run the code with:
+
+```bash
+$ uv run main.py
+```
+
+And then we will have output files in
+`data/pr_gen_fuel_monthly.parquet` and `data/pr_plant_frame.parquet`
+which we can look at using `pandas.read_parquet()`.
+
+First, open a Python interpreter in your terminal:
+
+```bash
+$ uv run python
+Python 3.13.7 (main, Aug 14 2025, 00:00:00) [GCC 15.2.1 20250808 (Red Hat 15.2.1-1)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+```
+
+This is sort of like a notebook in your terminal -
+you can type Python code and it will execute once you hit Enter.
+
+```python
+>>> import pandas as pd
+>>> pr_gen_fuel_monthly = pd.read_parquet("data/pr_gen_fuel_monthly.parquet")
+>>> pr_gen_fuel_monthly
+
+      plant_id_eia            plant_name_eia prime_mover_code energy_source_code  ... fuel_consumed_mmbtu  fuel_consumed_units  net_generation_mwh       date
+0            61014  Pattern Santa Isabel LLC               WT                WND  ...            101260.0                  0.0             10991.0 2017-04-01
+1            61034              EcoElectrica               CA                 NG  ...                 0.0                  0.0             86494.0 2017-04-01
+2            61034              EcoElectrica               CT                 NG  ...           1976130.0            1976130.0            189669.0 2017-04-01
+3            61036               AES ILUMINA               PV                SUN  ...             31886.0                  0.0              3461.0 2017-04-01
+4            61082           AES Puerto Rico               ST                BIT  ...           3258736.0             150103.0            310975.0 2017-04-01
+...            ...                       ...              ...                ...  ...                 ...                  ...                 ...        ...
+5362         61149           Palo Seco Plant               GT                DFO  ...            332108.0              57260.0             25652.0 2024-09-01
+5363         61149           Palo Seco Plant               ST                RFO  ...           1041201.0             165270.0             98601.0 2024-09-01
+5364         61150          Cambalache Plant               GT                DFO  ...            633760.0             109269.0             51293.0 2024-09-01
+5365         61151            Mayaguez Plant               GT                DFO  ...            526019.0              90693.0             48201.0 2024-09-01
+5366         61225                 Caonillas               HY                WAT  ...                 0.0                  0.0                 0.0 2024-09-01
+
+[5058 rows x 11 columns]
+```
+
+We can use these two
+- the code and the actual output -
+to figure out what we think the system *should* do.
+This is sort of the mirror image to the input assumptions
+we were making in the assumptions lesson earlier.
+Let's try it!
+
+:::: challenge
+
+Take 10 minutes to skim through `main.py` and explore the output data.
+As you're doing so, keep track of things that should be true about the output data!
+
+Write them in the Google Doc that your instructor should have given you by this point.
+
+Afterwards we'll talk about what we noticed!
+
+::::
+
+:::: instructor
+
+* all plants report some non-null values for net generation
+* all fuel consumption units are non-negative
+* the heat rate of combined cycle plants is roughly 7,000 Btu/kWh
+
+::::
+
+Now that we have some idea of what the system is supposed to do,
+we should figure out if that's all actually true.
+We can use the `assert` statement we introduced in the assumptions lesson -
+maybe throw them in at the end of `transform`.
+That can absolutely work to tell you if your system is functioning as expected.
 But there are some common situations that can make it a little painful:
 
 * sometimes there's a bunch of weird setup to even make that assertion, and you'd like to keep that out of your actual pipeline
 * sometimes you want to test that something works in a variety of situations, but the assertions need to change based on the situation
 * sometimes your *full* pipeline takes forever but there's a subsetted version of your pipeline that will expose most of the problems anyways, so you want to run the same checks on both
 * when an assertion fails, your whole pipeline stops running - so if there are multiple problems you only know about the first one.
+* if your assertion fails and it really seems like it shouldn't have, it can be hard to figure out what's going on
 
-Test functions, together with an automated test runner, can help.
-By writing small functions that do that setup for you,
-or take some parameters to test a variety of scenarios,
-you can avoid those pain points.
-You can think of it sort of like the modularized version of writing in-line assertions in your code.
+"Figuring out what's wrong with your system" is a huge topic,
+so we'll only get to dip our toes in in this episode.
+We'll introduce a few tools that help you deal with these pain points:
 
-Let's do an example in our project!
-You can get a copy of the project by unzipping the `making-sure-your-system-is-behaving-start.zip` file in the `checkpoints` folder of the course repository.
+* *test functions* and *automated test runners* help you organize and run tests in a variety of different scenarios
+* an *interactive debugger* will help you when you need to investigate something about the code, whether it's the data processing code or the testing code.
 
-This project takes the raw Puerto Rico data and does some cleaning and reshaping.
-It's reorganized a bit from the output of the previous episode:
-we've split out the parts that read input files and write output files,
-so the transformation function takes `DataFrame`s for inputs and produces them as outputs.
 
-One thing we expect from the output is that
-there's a `fuel_consumption_units` column and that its value is 0 for sun, wind, and water.
+## Test functions
 
-How would we test that?
+Let's try writing a test function for one of our expectations.
+This pulls the testing logic out of the actual data processing code,
+which allows us to run it separately and use automated test runners in the future.
+Think of it as modularizing your test code.
 
-First, we need to read in the raw data.
-Then, we need to run the transformation code.
-Then, we would want to read the `fuel_consumption_units` column from the output of the code.
-Finally, we'd want to assert that those values are 0 for sun, wind, and water.
+Along the way, we'll also introduce the *debugger*,
+which can be a massive help in all of your coding activities.
 
-Let's create a new file, `test_main.py`.
-Feel free to use any text or code editor you'd like for this (VSCode, Notepad, TextEdit, gedit, etc.) -
-just avoid programs like Word or LibreOffice that automatically capitalize text or let you format things for print.
+:::: instructor
+
+Encourage people to really follow along on their own, something like:
+
+"The tools we use here are *very* interactive,
+so it will be a lot easier to learn if you are *literally* typing out the commands with your fingers
+instead of trying to remember all the things I'm doing.
+If you need a minute to get set up, or fall behind,
+throw up the NO react in Zoom and we'll give you time to catch up."
+
+::::
+
+Start by creating a new file, `test_main.py`.
+Make sure it starts with `test_` - that will let the automated test runner find it later.
 Because of how we've set up the package structure,
 we need to keep it in the same directory as `main.py` and `utils.py`.
 
-Then let's do those steps:
+Next we need to pick something to test.
+One thing we expect from the output is that
+there's a `fuel_consumption_units` column and that its value is 0 for sun, wind, and water.
+
+Let's start writing the test.
+We start with an `assert False` to make sure we will notice if the test fails:
+
 
 ```python
-import pandas as pd
-from main import extract_pr_gen_fuel, transform_pr_gen_fuel
-
-
 def test_renewables_fuel_units():
-    # Read in the raw data...
-    raw_pr_gen_fuel, raw_pr_plant_frame = extract_pr_gen_fuel()
-    # Then run the code...
-    pr_gen_fuel = transform_pr_gen_fuel(raw_pr_gen_fuel, raw_pr_plant_frame)[0]
-    # Then pull out the subset we care about...
-    renewable_codes = {"SUN", "WND", "WAT"}
-    renewable_gen_fuels = pr_gen_fuel[
-        pr_gen_fuel["energy_source_code"].isin(renewable_codes)
-    ]
-    renewable_fuel_units = renewable_gen_fuels["fuel_consumed_units"]
-    # Finally, assert something!
-    assert (renewable_fuel_units.dropna() == 0).all()
+    assert False
 ```
 
+Now let's run it:
+
+```
+$ uv run test_main.py
+```
+
+Hmm... no assertion error shows up, something's fishy.
 We need to add the test function to the `if __name__ == "__main__":` block in order for it to run.
 
 ```python
@@ -118,12 +207,94 @@ if __name__ == "__main__":
     # future tests get added here too
 ```
 
-```bash
-% uv run tests/test_pipeline.py
+Now if we run it we'll get an `AssertionError`. Hooray!
+Always good to know that the test code will actually yell at you if it fails.
+
+Now let's actually write the test - we need to take the following steps:
+
+```python
+def test_renewables_fuel_units():
+    # Read in the raw data...
+    # Then run the code...
+    # Then pull out the subset we care about...
+    # Finally, assert something!
+    assert False
 ```
 
-Hooray! No errors.
-It's nice to not have that setup for extracting the renewable data cluttering or slowing down your processing code!
+This can get a little confusing since we haven't worked with the data much yet.
+It sure would be nice if we could investigate each step interactively,
+sort of like what we'd do in a Jupyter noteboook.
+
+
+### Debugger introduction
+
+We can use the Python debugger, `pdb`, to do exactly that.
+Let's try it out!
+
+The first thing we need to do is add a *breakpoint* to the code,
+a place where we are going to pause our code and mess around inside it.
+We do this with the `breakpoint()` function:
+
+TODO add
+
+```python
+from main import extract_pr_gen_fuel, transform_pr_gen_fuel
+
+def test_renewables_fuel_units():
+    breakpoint()
+    # Read in the raw data...
+    raw_pr_gen_fuel, raw_pr_plant_frame = extract_pr_gen_fuel()
+    # Then run the code...
+    pr_gen_fuel, pr_plant_frame = transform_pr_gen_fuel(
+        raw_pr_gen_fuel, raw_pr_plant_frame
+    )
+    # Then pull out the subset we care about...
+    # Finally, assert something!
+    assert False
+```
+
+Running this drops you into this cryptic situation:
+
+```bash
+% uv run test_main.py
+> /home/daz/work/open-energy-data-for-all/checkpoints/making-sure-your-system-is-behaving-start/test_main.py(5)test_renewables_fuel_units()
+-> breakpoint()
+(Pdb)
+```
+
+If you're seeing that, you've successfully hit the breakpoint.
+In hacker parlance, "you're in."
+That `(Pdb)` is a prompt for further commands.
+
+A good first command is `list`
+(or `l` - most of the common commands have one-letter abbreviations):
+
+TODO show output
+
+This shows some context around where the code execution has been paused.
+The arrow at line 5 shows the line of code that's *about* to run.
+
+Note that if you type `list` again it will keep scanning down through the file
+until it hits the end of the file (`EOF`):
+
+TODO show output
+
+Now that we know where we are, what else can we do here?
+We can:
+
+* run the next step of the code as written and see what happens
+* type some new code and see the results
+
+TODO: show the following
+* `next` (gets extracted stuff into scope)
+* evaluating expressions (show the extracted stuff & call methods on it)
+* show that the next line hasn't executed yet and you get a name error
+* `step`/`return` to get the transforms in
+* a bunch of variable assignment to get the subset we want & the assertion we care about
+* `quit`
+* paste the assertion code into the test function and run again
+* this time, hit `continue` to continue execution
+* hooray it works!
 
 Now it's your turn.
 
@@ -131,17 +302,11 @@ Now it's your turn.
 
 ### Writing a test function
 
-Think about the data processing code in `main.py`.
+Think about the data processing code in `main.py` and the output expectations we came up with.
 
-What is a property that you expect the output to have?
+Pick one of those expectations and write a function in `test_main.py` that tests it. Start with the following skeleton:
 
-You can pick from this list, or come up with your own:
-
-* all plants report some non-null values for net generation
-* all fuel consumption units are non-negative
-* the heat rate of combined cycle plants is roughly 7,000 Btu/kWh (this one will require a bunch of processing to calculate the heat rate!)
-
-Write a function in `test_main.py` that tests this property by filling out the following skeleton:
+TODO check if this still works with the new ETL
 
 ```python
 def test_cool_output_property():
@@ -149,11 +314,10 @@ def test_cool_output_property():
     raw_pr_gen_fuel, raw_pr_plant_frame = extract_pr_gen_fuel()
     # Then run the code...
     pr_gen_fuel = transform_pr_gen_fuel(raw_pr_gen_fuel, raw_pr_plant_frame)[0]
+    breakpoint()
     # Then pull out the subset we care about...
     # Finally, assert something!
 ```
-
-Don't forget to add it to the `if __name__ == "__main__":` block so you can run it!
 
 It's OK if the test fails when you run it.
 The point of writing tests is to find out when things are broken!
@@ -223,21 +387,7 @@ What `pytest` is doing is:
 While it doesn't make a big difference with just one file with a small number of tests,
 this can quickly become indispensable as your testing suite grows.
 
-:::: challenge
-
-### Challenge: try `pytest`
-
-Try installing `pytest`, then running `uv run pytest` in your own project and see if it's picking up your tests!
-
-::::
-
 ### Example: fixtures
-
-:::: instructor
-
-If we are low on time, can skip this example and just mention that there's a lot more to `pytest`.
-
-::::
 
 Another key feature of `pytest` is ["test fixtures"](https://docs.pytest.org/en/stable/how-to/fixtures.html).
 These are a way of organizing and reusing test setup steps.
@@ -321,332 +471,23 @@ The ways we'll go over:
 * make a new fixture that just does the raw data - `raw_data`
 * make a new fixture that does the raw data, *and* make `monthly_clean` depend on `raw_data`
 
-
 ::::
 
 As your software gets more complicated, testing it can also get more complicated.
 `pytest` offers a lot more beyond the functions we've already seen.
 Check out the [official documentation](https://docs.pytest.org/en/stable/index.html) for more info!
 
-## The debugger
-
-Suppose we have a test that fails.
-Now we know that a subsystem isn't working right.
-How do we figure out why it's broken?
-
-At this point, we have a few options:
-- break the function down into smaller parts and write more tests:
-  this can totally work,
-  but is often tedious and breaks up your code into unnecessarily small chunks
-- throw in a bunch of `print(f"value of something is {something}")` statements:
-  super easy, but annoying to keep going back and adding more.
-  Plus then you have to delete them later to not clutter your output.
-- use an **interactive debugger**: avoids both of these problems!
-
-An interactive debugger pauses your program at a specific spot (a "breakpoint"),
-at which point you get to go in and poke around.
-Let's look at how to use `pdb`, the built-in Python debugger.
-
-:::: instructor
-
-Probably encourage people to really follow along on their own, something like:
-
-"This tool is *very* interactive so it will be a lot easier to learn if you are
-*literally* typing out the commands with your fingers instead of trying to remember all the things I'm doing.
-If you need a minute to get set up, or fall behind,
-throw up the NO react in Zoom and we'll give you time to catch up."
-
-::::
-
-:::: callout
-Programs like VSCode often come with their own debuggers, which can be very powerful.
-
-We're using `pdb` since it's available to everyone,
-and the basic concepts apply for all debuggers.
-::::
-
-First, how to start the debugger at all: `breakpoint()`.
-If you decide you want to figure out what's going on in a certain part of your code,
-add the `breakpoint()` statement right where you want to pause the execution.
-When you call your code from the CLI (or from a Jupyter notebook), it will pause right there.
-Here's an example:
-
-```python
-# debugger_example.py
-
-def inner_func(x, y):
-    return f"({x}, {y})"
-
-
-def outer_func():
-    x = 1
-    breakpoint()
-    y = x + 1
-    z = inner_func(x, y)
-    return z
-
-
-if __name__ == "__main__":
-    outer_func()
-```
-
-```bash
-% python debugger_example.py
-```
-
-This will drop you into the debugger,
-at which point you'll be greeted with this terse situation:
-
-```
--> breakpoint()
-(Pdb)
-```
-
-`l` or `list` shows the code around where your execution is paused.
-The `->` denotes the line that is *about* to run.
-
-```
-(Pdb) l
-  2         return f"({x}, {y})"
-  3
-  4
-  5     def outer_func():
-  6         x = 1
-  7  ->     breakpoint()
-  8         y = x + 1
-  9         z = inner_func(x, y)
- 10         return z
- 11
- 12
-(Pdb) l
- 13     if __name__ == "__main__":
- 14         outer_func()
-[EOF]
-(Pdb) list
-[EOF]
-```
-
-If you call it multiple times in a row,
-it tries to keep reading out more lines of the file.
-Our file is very short, so this quickly reaches the end of the file (`[EOF]`).
-
-To take a look at variable values, we can use `p` (short for "print"), or omit the command entirely:
-
-```
-(Pdb) p x
-1
-(Pdb) x
-1
-```
-
-We can also print out an expression value to check that something behaves the way we expect:
-
-```
-(Pdb) x+1
-2
-```
-
-We can also slowly step through the code using `next`/`n`:
-```
-(Pdb) next
-> /home/daz/scratch/foo.py(8)outer_func()
--> y = x + 1
-```
-
-At this point, we are about to execute `y = x + 1`, which means that `x` should be defined as 1, but `y` is not defined yet:
-```
-(Pdb) x
-1
-(Pdb) y
-*** NameError: name 'y' is not defined
-```
-
-But if we use `next` to move to the next line, we expect `y` to have the value 2:
-```
-(Pdb) n
-> /home/daz/scratch/foo.py(9)outer_func()
--> z = inner_func(x, y)
-(Pdb) y
-2
-```
-
-Now we're about to call `inner_func()`. If we run `next` we'll run `z = inner_func(x, y)`:
-
-```
-(Pdb) n
-> /home/daz/scratch/foo.py(10)outer_func()
--> return z
-(Pdb) z
-'(1, 2)'
-```
-
-But if we call `step` or `s` instead, we can go into that `inner_func` call:
-
-```
-(Pdb) step
---Call--
-> /home/daz/scratch/foo.py(1)inner_func()
--> def inner_func(x, y):
-```
-
-This drops you in right at the beginning of the function call,
-where you can continue using your other commands:
-
-```
-(Pdb) l
-  1  -> def inner_func(x, y):
-  2         return f"({x}, {y})"
-  3
-  4
-  5     def outer_func():
-  6         x = 1
-  7         breakpoint()
-  8         y = x + 1
-  9         z = inner_func(x, y)
- 10         return z
- 11
-(Pdb) n
-> /home/daz/scratch/foo.py(2)inner_func()
--> return f"({x}, {y})"
-```
-
-It will pause you before you return a value as well:
-```
-(Pdb) next
---Return--
-> /home/daz/scratch/foo.py(2)inner_func()->'(1, 2)'
--> return f"({x}, {y})"
-(Pdb) l
-  1     def inner_func(x, y):
-  2  ->     return f"({x}, {y})"
-  3
-  4
-  5     def outer_func():
-  6         x = 1
-  7         breakpoint()
-  8         y = x + 1
-  9         z = inner_func(x, y)
- 10         return z
- 11
-```
-
-And a further `next` drops you back into the original calling function:
-```
-(Pdb) next
-> /home/daz/scratch/foo.py(10)outer_func()
--> return z
-(Pdb) z
-'(1, 2)'
-```
-
-Finally, to quit your session, you can use `q`:
-```
-(Pdb) q
-Traceback (most recent call last):
-  File "/home/daz/scratch/foo.py", line 14, in <module>
-    outer_func()
-    ~~~~~~~~~~^^
-  File "/home/daz/scratch/foo.py", line 10, in outer_func
-    return z
-           ^
-  File "/usr/lib64/python3.13/bdb.py", line 102, in trace_dispatch
-    return self.dispatch_line(frame)
-           ~~~~~~~~~~~~~~~~~~^^^^^^^
-  File "/usr/lib64/python3.13/bdb.py", line 129, in dispatch_line
-    if self.quitting: raise BdbQuit
-                      ^^^^^^^^^^^^^
-bdb.BdbQuit
-```
-
-Note that if you quit, you get this `BdbQuit` error in the console. That's totally normal.
-
-:::: challenge
-
-### Challenge: using the interactive debugger
-
-Let's use the debugger! Here's a test that tests the `get_heat_rates` function.
-As is, it is broken.
-
-Let's add it to `test_main.py` and throw a breakpoint in there.
-Then if you run `pytest` it will pause at the breakpoint.
-Take some time to explore what's going on in the code!
-
-If you're lost, try thinking about:
-
-* Are the variables currently the values you expect?
-* If not, what creates the bad values?
-  Did it get the correct input (and, therefore, cause the problem itself),
-  or was the input to *that* also wrong?
-
-```python
-
-def get_heat_rates(monthly, source_codes):
-    filtered = monthly.loc[monthly.energy_source_code.isin(source_codes)]
-    generation_kwh = filtered["net_generation_mwh"] * 1_000
-    consumption_btu = filtered["fuel_consumed_mmbtu"] * 1_000_000
-    heat_rate = consumption_btu.sum() / generation_kwh.sum()
-    return heat_rate
-
-
-def test_heat_rates(monthly_clean):
-    """Compare heat rates between fosil fuels and renewables.
-
-    Before 2022, the EIA used the "fossil fuel equivalency" methodology to
-    calculate fuel_consumed_per_mmbtu for non-combustible renwables - which assumes
-    that the *heat rate* of renewables is the same as that of fossil fuels.
-
-    Let's check that assumption.
-
-    Heat rates are typically represented as BTU per kWh.
-    """
-    fossil_source_codes = {"DFO", "RFO", "NG", "BIT"}
-    renewable_source_codes = {"SUN", "WND", "WAT"}
-    years_to_check = [2017, 2018, 2019, 2020, 2021]
-    for year in years_to_check:
-        one_year_gen_fuel = monthly_clean.loc[monthly_clean.date.dt.year == year]
-        fossil_fuel_heat_rates = get_heat_rates(one_year_gen_fuel, fossil_source_codes)
-        renewable_heat_rates = get_heat_rates(one_year_gen_fuel, renewable_source_codes)
-
-        assert fossil_fuel_heat_rates == renewable_heat_rates
-```
-
-There are lots of paths to go down here.
-We'll do this for about 8 minutes and then reconvene to discuss what we all tried and learned.
-
-::::
-
-:::: instructor
-
-We should hammer home the "is this variable value what we expect? if not, why? walk backwards" loop when discussing.
-
-::::
-
-Those are the basics of how to use the interactive debugger.
-Some additional tips:
-
-- When running tests in `pytest`, you can automatically drop into a debugger whenever a test fails or errors - run `pytest --pdb`.
-- The libraries you use are mostly Python code as well, which means you can `step` your way into them. This is a great way to understand the details of how that library code works!
-- Type `help` while in a `(Pdb)` prompt to see what other things the debugger can do for you.
-
-::::::::::::::::::::::::::::::::::::: keypoints
-
-- Use `breakpoint()` to get into a debugger interface
-- Use `l`/`list` to look around,
-  `n`/`next` and `s`/`step` to control execution,
-  and `p` to observe what's happening at each point.
-
-::::::::::::::::::::::::::::::::::::::::::::::::
 
 ## Conclusion
 
 "How to find what's going wrong with your system" is an extremely deep topic,
 with lots and lots of tools that people have worked on through the years.
-We've just started exploring this, through the basic strategy of:
+We've just started exploring this, through the basic strategy applies everywhere:
 
 * identify bad outputs of your system
 * investigate the subsystems that produced the bad outputs - are they flawed or did they get fed bad inputs?
 * repeat
 
-We hope that you're able to leverage the tools of
-automated testing and the interactive debugger
-to go through that process more effectively and fix your systems more quickly in the future.
+We introduced some tools to help with this strategy:
+an automated test runner and the test functions that go with it make the loop go much more smoothly;
+a debugger lets you investigate your system much more effectively.
