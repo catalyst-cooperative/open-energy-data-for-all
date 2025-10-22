@@ -61,9 +61,8 @@ episodes:
 # chapter 3. robustness/rigor
 #- modularization.md
 - escape-from-jupyter.md
-#- data-validation.md
-#- debugging.md
-- coming-soon.md
+- automated-testing.md
+# - coming-soon.md
 
 # Information for Learners
 learners:
