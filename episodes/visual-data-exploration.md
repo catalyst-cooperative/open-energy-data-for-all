@@ -34,10 +34,10 @@ Plots aren't just for papers!
 
 Data problems come in many different forms, and how you respond to them will depend on the source of the problem and what kind of impact it will have on the kinds of modeling and analysis you want to do.
 
-* **Problems introduced by the respondent** - typos and other data entry errors - These can be fixed if they're simple, or can be a reason to exclude certain rows if correct values can't be reconstructed.
-* **Problems introduced by the data aggregator** - disagreement between documentation you received and the actual forms filled out by respondents; a bad choice of data format that doesn't preserve relationships within the data - These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes not.
-* **"Problems" introduced by external forces** - natural disasters, policy change - You may choose to retain or exclude these depending on your exact area of research.
-* **Problems we created for ourselves** - We'll talk about this in a later session.
+* **Problems introduced by the respondent,** such as typos and other data entry errors. These can be fixed if they're simple, or can be a reason to exclude certain rows if the correct values can't be reconstructed.
+* **Problems introduced by the data aggregator,** such as disagreement between the documentation you received and the actual forms filled out by respondents; a bad choice of data format that doesn't preserve relationships within the data. These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes not.
+* **"Problems" introduced by external forces,** such as natural disasters and policy change. You may choose to retain or exclude these depending on your exact area of research.
+* **Problems we created for ourselves.** We'll talk about this in a later session.
 
 Data problems can occur in a single column, or in the relationship between columns, or even in the relationship between tables.
 
@@ -79,8 +79,7 @@ raw_file = "../data/raw_eia923__puerto_rico_generation_fuel.parquet"
 monthly_file = "../data/pr_gen_fuel_monthly.parquet"
 ```
 
-(Your predecessor also left you their source code,
-but we'll start with the data and take a look at the code in another session.
+(We'll start with the data, and take a look at the code that produced it in another session.
 Reading the code will be easier if we are more familiar with the data.)
 
 We will ask ourselves:
@@ -95,6 +94,7 @@ We will ask ourselves:
 Let's load the processed file and see what's in there.
 
 ```python
+import pandas as pd
 pr_gen_fuel_monthly = pd.read_parquet(monthly_file)
 pr_gen_fuel_monthly
 ```
@@ -207,7 +207,8 @@ How does this help us?
   a log of fuel consumption and electricity generation, with only one point for each month.
 
 Since this was annoying to figure out, we should make a note of it in our research diary.
-If we have to put this down for a while, future-us will appreciate being able to get a jumpstart when we pick it back up.
+If we have to put this project down for a while,
+future-us will appreciate being able to get a jumpstart when we pick it back up.
 For this workshop, I'm making a new document, but I usually keep one running doc for each research project.
 
 ```text
@@ -253,6 +254,8 @@ If the value of a categorical column is not a member of the restricted set, it i
 and likely resulted from a typo or similar error.
 
 Let's take a closer look at `energy_source_code` as an example of categorical data.
+The `energy_source_code` column has already been converted to a pandas `category` dtype for us,
+but this technique will work just as well on categorical data that has a string or integer dtype.
 
 We can use `.value_counts()` to quickly see what values appear in the column.
 
@@ -515,19 +518,27 @@ To learn more about the actual fuel mix and generation in PR,
 we can bring in the the `date` column and start looking at these measurements as time series.
 Time series data lends itself to plotting especially well!
 
-Most people are familiar with putting plots in reports, research papers, and presentation slides, where they're useful as evidence supporting your argument.
-To be effective, those plots need to -- essentially -- look nice:
-clear labels and titles,
-appropriate units and limits,
-good color separation for print or screen,
-tidy legends,
-minimizing extraneous data.
-The goal is to communicate your point.
+Most people are familiar with putting plots in reports, research papers, and presentation slides,
+where they are useful as evidence supporting your argument.
+To be effective, presentation plots need to -- essentially -- look nice:
 
-When you're in the exploratory phase, you don't know what the point is yet, and you're communicating with yourself, now and future-you.
-To be effective, exploratory plots need to tell you something you don't already know,
-and ideally they should do that quickly, so you don't lose track of what you're doing.
-We can skip a lot of the presentation refinements, so long as a plot is not _actively confusing_.
+* clear labels and titles,
+* appropriate units and limits,
+* good color separation for print or screen,
+* tidy legends,
+* minimizing extraneous data.
+
+The goal of presentation plotting is to communicate your point.
+
+When you're in the exploratory phase, you don't know what the point is yet,
+and you're communicating with yourself, now and future-you.
+To be effective, exploratory plots need to:
+
+* tell you something you don't already know,
+* do it quickly, so you don't lose track of what you're doing.
+
+In exploratory plotting, we can skip a lot of the presentation refinements,
+so long as a plot is not _actively confusing_.
 
 Pandas has great support for exploratory plotting, since it doesn't require much extra setup,
 and the options for presentation refinements are extremely limited,
