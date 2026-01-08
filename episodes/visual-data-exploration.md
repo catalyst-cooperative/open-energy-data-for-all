@@ -216,12 +216,12 @@ For this workshop, I'm making a new document, but I usually keep one running doc
 
 Primary key: ["plant_id_eia", "plant_name_eia", "prime_mover_code", "energy_source_code", "date"]
 
-- you need both prime mover and energy source, because some plants do multiples in both
+- you need both prime mover and energy source, because neither is enough to uniquely identify each record
 ```
 
 ### Zoom in on `energy_source_code`
 
-Let's take a brief detour to talk about data types.
+Let's take a brief moment to talk about data types.
 
 ```python
 pr_gen_fuel_monthly.dtypes
@@ -306,6 +306,8 @@ WND: Wind.
 A few additional energy source codes are also visible, including BLQ, TDF, and WO."}
 
 Okay! We found all the codes in the documentation, so there are no typos.
+We got lucky this time, but it's always worth checking -- 
+projects like [PUDL](https://github.com/catalyst-cooperative/pudl) spend hundreds of lines of code locating and repairing typos in categorical columns.
 
 ```python
 # what we found: no typos
@@ -633,7 +635,7 @@ or any time you want to designate certain columns for quickly selecting blocks o
 But our sum is looking much better. Now plot!
 
 ```python
-pr_gen_fuel_monthly.set_index(monthly_index_columns).groupby("date").sum().plot()
+pr_gen_fuel_monthly.set_index(primary_key_columns).groupby("date").sum().plot()
 ```
 
 Check: does this plot show us everything we need from it?
@@ -989,7 +991,7 @@ Renewables drop suddenly in 2022 and stay low -- probably a policy change:
 - Renewables all show same heat rate, updated each year, then constant starting 2022
 - where does this heat rate come from?
 - there are a bunch of stragglers that don't use the common heat rate. maybe exclude those plants or points?
-- :x: definitely exclude renewables from heat rate analyses involving combustibles
+- definitely exclude renewables from heat rate analyses involving combustibles
 ```
 
 ::::::::::::::::::::::::::::::::::::: keypoints
