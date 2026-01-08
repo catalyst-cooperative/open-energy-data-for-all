@@ -965,6 +965,9 @@ we can drop the colormap and focus on the stragglers.
 ```
 
 Are those individual plants or some other effect?
+We can color the plot by `plant_name_eia` to find out.
+We were able to use `energy_source_code` to color the plot before because it had a category dtype,
+but `plant_name_eia` is just a string, so we have to convert it first:
 
 ```python
 (
