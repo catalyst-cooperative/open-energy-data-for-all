@@ -306,7 +306,7 @@ WND: Wind.
 A few additional energy source codes are also visible, including BLQ, TDF, and WO."}
 
 Okay! We found all the codes in the documentation, so there are no typos.
-We got lucky this time, but it's always worth checking -- 
+We got lucky this time, but it's always worth checking --
 projects like [PUDL](https://github.com/catalyst-cooperative/pudl) spend hundreds of lines of code locating and repairing typos in categorical columns.
 
 ```python
