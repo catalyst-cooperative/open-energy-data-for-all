@@ -35,7 +35,7 @@ Plots aren't just for papers!
 Data problems come in many different forms, and how you respond to them will depend on the source of the problem and what kind of impact it will have on the kinds of modeling and analysis you want to do.
 
 * **Problems introduced by the respondent,** such as typos and other data entry errors. These can be fixed if they're simple, or can be a reason to exclude certain rows if the correct values can't be reconstructed.
-* **Problems introduced by the data aggregator,** such as disagreement between the documentation you received and the actual forms filled out by respondents; a bad choice of data format that doesn't preserve relationships within the data. These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes not.
+* **Problems introduced by the data aggregator,** such as disagreement between the documentation you received and the actual forms filled out by respondents, or a bad choice of data format that doesn't preserve relationships within the data. These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes not.
 * **"Problems" introduced by external forces,** such as natural disasters and policy change. You may choose to retain or exclude these depending on your exact area of research.
 * **Problems we created for ourselves.** We'll talk about this in a later session.
 
@@ -54,7 +54,7 @@ There is a pattern to this:
 
 When we first start out, our expectations will be quite general, often based on data type -- whether the data is numeric, categorical, or free text.
 As we become more familiar with the data, our expectations will become more sophisticated.
-Sometimes the data defies our expectations in ways that reveal new research questions instead of, or even because of, new data problems.
+Sometimes the data defies our expectations in ways that reveal new research questions.
 Keep an open mind, and keep your research diary handy!
 
 ## Put it into practice
