@@ -303,28 +303,9 @@ Now in two months, when you return to your code and wonder what it does, you can
 help(melt_monthly_vars)
 ```
 
-### Type hints
-
-In our docstring, we're already implying some things about what we should and shouldn't
-be able to pass into our variables (for example, should we be able to pass a number in as `melted_var`?).
-**Type hints** help us know exactly what data types our functions take. We can specify one or more datatypes expected as the input and output of the code as follows:
-
-```python
-def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFrame:
-```
-
-In this case, take a Pandas DataFrame and a string and return another Pandas DataFrame.
-Multiple types can be formatted as follows:
-
-```python
-def my_cool_function(list_of_ints: list[int], str_or_int_or_none: str|int|None) -> list[int|str]:
-```
-
-While Python won't raise an error if you pass a different datatype in, this provides a helpful form of documentation to yourself and others about what types of data you expect to work with this function, and what the format of the output is intended to be. Other tools (e.g., code editors like VSCode) will warn you when your data doesn't conform to its expected type.
-
 Putting this all together, our new function should look something like:
 ```python
-def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFrame:
+def melt_monthly_vars(pr_gen_fuel, melted_var):
     """Melt many columns of monthly data for a single variable into a month column and a value column.
 
     This code takes a table with data stored in one column per month and stacks all the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
