@@ -56,7 +56,7 @@ so this lesson will focus on:
 * a framework for evaluating and prioritizing assumptions
 
 Afterwards, you'll be able to
-have your code automatically check that the important assumptions haven't been broken.
+put those skills together to identify high-priority assumptions to check programmatically.
 
 While faulty assumptions lurk everywhere,
 we'll focus here on assumptions about your *data*.
@@ -173,7 +173,7 @@ assert (fuel_consumed_mmbtu >= 0).all(), "The reported fuel consumption in MMBtu
 Oh no! We find that the assertion is not true!
 It's actually very common to find that,
 once you start writing down your assumptions,
-that they're wrong in some subtle way.
+that they're incomplete in some subtle way.
 Let's dig in to see what's going on.
 
 ```python
@@ -191,8 +191,8 @@ assert (fuel_consumed_mmbtu.dropna() >= 0).all(), "If fuel consumption in MMBtu 
 
 Which passes with little fanfare.
 
-We'll practice this skill in a bit.
-For now let's move on to the assumption evaluation framework.
+We'll practice this skill in a bit,
+after we talk about which assumptions might be good to practice with.
 
 ## Which assumptions are worth testing?
 
@@ -218,7 +218,7 @@ Here are three dimensions to consider in a rudimentary prioritization framework:
   Do they feel plausible or implausible?
 
 You'll build up an intuition for these,
-especiallly likelihood,
+especially likelihood,
 as you see more and more issues pop up over time.
 
 Some examples:
@@ -268,7 +268,10 @@ and write some code that checks if it's true or not.
 Let's take 10 minutes for this.
 Since this is a small amount of time for open-ended coding work,
 we don't expect everything to be perfect or even working.
-The point is to start practicing these skills.
+The point is to get some practice --
+not just at translating assumptions into code,
+but at finding the places where our initial assumptions were incomplete,
+and refining them to be more effective.
 
 If you're unsure of which assumption to pick,
 the instructor will pick one for everyone to go over together after the time is up -
@@ -295,3 +298,11 @@ every time the code runs.
 This protects you from surprises about your code down the line,
 letting you make changes without worrying that
 some foundation of your work has shifted while you weren't looking.
+
+:::: keypoints
+
+- you're always making assumptions about your data, and many of them are likely to be wrong
+- you can prioritize assumptions by thinking about their impact, likelihood, and testability
+- you can use `assert` statements to tell you if an assumption is wrong *every time you run the code*
+
+::::
