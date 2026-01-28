@@ -14,11 +14,31 @@ exercises: 35
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
+- Identify a primary key and explain its significance
 - Examine data for anomalies using summarization and visualization
 - Articulate the difference between refining plots for exploration and refining plots for presentation
-- Execute strategies for locating the cause and extent of anomalies
+- Execute a repeatable strategy for locating the cause and extent of anomalies
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::: instructor
+
+Prep:
+
+* Start a spreadsheet application but do not open anything in it yet
+* Share whole screen or screen region with the following (overlapping is fine):
+
+  * Web browser with slides for the intro
+  * Terminal window open to the course repo
+  * File browser open to the course repo
+
+* Unshared screen or region:
+
+  * Course website instructor view or raw episode file
+
+* Adapt intro to whether workshop is part of the full series or running
+  as part of the VisEx+Assumptions standalone.
+::::
 
 Now that you have some raw data, how do you get from there to actually doing research with it?
 
@@ -32,14 +52,26 @@ Plots aren't just for papers!
 
 ## What kinds of data problems are common in energy data?
 
-Data problems come in many different forms, and how you respond to them will depend on the source of the problem and what kind of impact it will have on the kinds of modeling and analysis you want to do.
+Data problems come in many different forms:
 
-* **Problems introduced by the respondent,** such as typos and other data entry errors. These can be fixed if they're simple, or can be a reason to exclude certain rows if the correct values can't be reconstructed.
-* **Problems introduced by the data aggregator,** such as disagreement between the documentation you received and the actual forms filled out by respondents, or a bad choice of data format that doesn't preserve relationships within the data. These can sometimes be "fixed" by working out logically what the definition of a column should actually be, but sometimes not.
-* **"Problems" introduced by external forces,** such as natural disasters and policy change. You may choose to retain or exclude these depending on your exact area of research.
-* **Problems we created for ourselves.** We'll talk about this in a later session.
+* **Problems introduced by the respondent,** such as typos and other data entry errors.
+* **Problems introduced by the data aggregator,** such as confusing or inconsistent documentation,
+  or a bad choice of data format that doesn't preserve relationships within the data.
+* **"Problems" introduced by external forces,** such as natural disasters and policy change.
 
 Data problems can occur in a single column, or in the relationship between columns, or even in the relationship between tables.
+
+How you respond to them will depend on the source of the problem
+and what kind of impact it will have on the kinds of modeling and analysis you want to do.
+For example,
+
+* Simple typos can often be fixed, but if the correct values can't be reconstructed,
+  you may need to exclude the affected rows from your analysis.
+* If the data doesn't seem to match the documentation published with it,
+  you can sometimes track down the instructions respondents were given
+  and use that to work out what's supposed to be there.
+* Irregular data from a natural disaster may be exactly what you're studying,
+  but might need to be excluded from analyses focused on steady-state behavior.
 
 ## What is a good general strategy for finding problems in unfamiliar data?
 
@@ -49,17 +81,20 @@ There is a pattern to this:
 
 * Carve off a chunk of data small enough to reason about
 * Identify what we expect to see from that data
-* Check whether that is actually true or not (sometimes nontrivial)
+* Check whether that is actually true or not
 * Justify or explain any differences between what we expect and what is actually there
 
-When we first start out, our expectations will be quite general, often based on data type -- whether the data is numeric, categorical, or free text.
+When we first start out, our expectations will be quite general, often based on data type --
+whether the data is numeric, categorical, or free text.
 As we become more familiar with the data, our expectations will become more sophisticated.
 Sometimes the data defies our expectations in ways that reveal new research questions.
-Keep an open mind, and keep your research diary handy!
+Keep an open mind, and be sure to leave yourself good notes as you go!
 
 ## Put it into practice
 
 Let's take a look at how these ideas apply to real data.
+We'll build up some practice with our problem-hunting strategy by starting with summary statistics.
+Then once the strategy feels comfortable, we'll bring in visualization.
 
 Fire up Jupyter notebook:
 
@@ -69,7 +104,7 @@ $ uv run jupyter notebook
 
 & open `notebooks/5-visual-data-exploration.ipynb`
 
-We're looking at form EIA-923, which covers electricity generation and fuel consumption by plant and prime mover on a monthly and annual basis.
+We'll be looking at form EIA-923, which records electricity generation and fuel consumption for power plants that serve the United States.
 
 You have a raw file for EIA-923 data from Puerto Rico, and a processed file which was prepared by your predecessor.
 The paths are already in the notebook for you:
@@ -79,9 +114,6 @@ raw_file = "../data/raw_eia923__puerto_rico_generation_fuel.parquet"
 monthly_file = "../data/pr_gen_fuel_monthly.parquet"
 ```
 
-(We'll start with the data, and take a look at the code that produced it in another session.
-Reading the code will be easier if we are more familiar with the data.)
-
 We will ask ourselves:
 
 * What kinds of data are there? Can I look at just one kind at a time?
@@ -89,7 +121,7 @@ We will ask ourselves:
 * What do I actually see?
 * Can I justify or explain any differences between what I expect and what I actually see?
 
-### Primary keys & index columns
+### Primary keys
 
 Let's load the processed file and see what's in there.
 
@@ -104,7 +136,7 @@ To better reason about this data frame, it is important to identify its **primar
 What columns, taken together, uniquely identify each row of data?
 What does each row represent?
 
-If we were familiar with EIA 923 from other research, we might know that already.
+If we were familiar with EIA-923 from other research, we might know that already.
 If not, we can check the dataset documentation.
 
 The EIA website is a good place to check first for all EIA forms.
@@ -121,7 +153,7 @@ First, we'll grab just the columns we think define the primary key.
 
 ```python
 # carve off a chunk: what is the primary key?
-# collect plant ids, prime mover, and date
+#    maybe: plant ids, prime mover, and date
 primary_key_columns = ["plant_id_eia", "plant_name_eia", "prime_mover_code", "date"]
 pr_gen_fuel_monthly[primary_key_columns]
 ```
@@ -130,7 +162,12 @@ Next, identify what we expect.
 For a primary key to do its job, it needs to be unique from row to row.
 We expect each set of plant id, name, prime mover, and date values in the data frame to only appear once.
 
-There are lots of ways we could check whether this is really true or not.
+```python
+# what do we expect: each set of values only occurs once
+```
+
+Now we need to check whether our expectation is true in the data.
+There are lots of ways we could do that.
 `.value_counts()` is a great function for this situation -- it works on single columns, but also on multiple columns taken together.
 
 ```python
@@ -199,29 +236,27 @@ How does this help us?
 
 * Before, we didn't really know what each measurement corresponded to.
   Fuel consumed, sure, but consumed by what?
-  an entire power plant? a single generator? what would that even mean?
+  an entire power plant? a single generator?
   Now we know exactly how everything is aggregated.
-* Because each key only appears once, we know that each (plant, prime mover, energy source)
-  (the primary key, minus `date`)
+* Because each key only appears once, we know that each
+  (plant, prime mover, energy source) combination
   yields a single time series --
   a log of fuel consumption and electricity generation, with only one point for each month.
 
-Since this was annoying to figure out, we should make a note of it in our research diary.
+Since this was annoying to figure out, we should make a note of how we got here.
 If we have to put this project down for a while,
 future-us will appreciate being able to get a jumpstart when we pick it back up.
-For this workshop, I'm making a new document, but I usually keep one running doc for each research project.
 
-```text
-# EIA-923 Puerto Rico data
-
-Primary key: ["plant_id_eia", "plant_name_eia", "prime_mover_code", "energy_source_code", "date"]
-
-- you need both prime mover and energy source, because neither is enough to uniquely identify each record
+```python
+# you need *both* prime mover and energy source, because
+# prime mover isn't enough to uniquely identify each record on its own
+primary_key_columns = ["plant_id_eia", "plant_name_eia", "prime_mover_code", "energy_source_code", "date"]
 ```
 
-### Zoom in on `energy_source_code`
+### Data types
 
-Let's take a brief moment to talk about data types.
+Now that we've seen one way to summarize primary key information,
+let's take a moment to talk about data types.
 
 ```python
 pr_gen_fuel_monthly.dtypes
@@ -246,22 +281,16 @@ Primary key columns are often:
 * Categories - used for classification among a restricted set of available values
 * Dates or times - used for time series records and logs
 
-Categorical data is of special interest when it comes to data problems,
-because we need that data to be absolutely pristine to be able to use it in our analyses --
-records that use synonyms, creative abbreviations, or have spelling errors won't match with their category-mates.
-Thankfully, mistakes are easy to identify.
-If the value of a categorical column is not a member of the restricted set, it is invalid,
-and likely resulted from a typo or similar error.
+`.value_counts()` is a good summarization tool for all four of these data types.
+We've already seen how we can use it to check our expections of how often a value or set of values appears in the data frame.
+It can also be useful at building basic familiarity with the data.
 
-Let's take a closer look at `energy_source_code` as an example of categorical data.
-The `energy_source_code` column has already been converted to a pandas `category` dtype for us,
-but this technique will work just as well on categorical data that has a string or integer dtype.
-
+Let's take a closer look at `energy_source_code` as an example.
 We can use `.value_counts()` to quickly see what values appear in the column.
 
 ```python
 # carve off a chunk: just energy_source_code
-# what we expect: a restricted set of values, no typos
+# what we expect: ...learning
 pr_gen_fuel_monthly.energy_source_code.value_counts()
 ```
 
@@ -278,20 +307,20 @@ BIT      98
 Name: count, dtype: int64
 ```
 
-Does this match our expectation?
-It's certainly a restricted set of values.
-But how will we know if there are no typos?
-Are DFO and RFO different energy sources, or did someone's finger slip...548 times?
+In this case there are a handful of different possible energy source codes.
+We could make better sense of them if we knew what each code stood for, though.
+We can use any existing domain knowledge we have to make a reasonable guess at some of them.
 
-This is an example of an underspecified expectation.
-To refine it, we need more domain knowledge:
-if we knew what values were permissable for this column,
-we would be able to evaluate whether RFO is a typo or not.
-We can look up what values the EIA says are okay for this column.
+* `SUN` is probably solar
+* `NG` is probably natural gas
+* Any other guesses?
+
+To verify our guesses, we can look up how the EIA defines these codes.
 Code definitions are almost always in the documentation somewhere.
-Digging through the docs
-(the grandfather of this data frame is an EIA Excel file; it's in the course repo under `data/eia923_pr.xlsx`)
-we find a table of energy source codes and their descriptions:
+The EIA frequently publishes their code definitions alongside the raw data, as an extra tab of the spreadsheet.
+
+The raw EIA Excel file for this data set is in the course repo under `data/eia923_pr.xlsx`.
+In it, we find a table of energy source codes and their descriptions:
 
 ![Excel screenshot showing tab Page 7 File Layout of data/eia923_pr.xlsx](fig/ep-5/eia923-energy-source-code.png){alt="Excel screenshot showing tab Page 7 File Layout of data/eia923_pr.xlsx.
 Energy source code definitions for the codes we found in our data frame are:
@@ -305,16 +334,12 @@ WAT: Water at a conventional hydroelectric turbine and [other applications];
 WND: Wind.
 A few additional energy source codes are also visible, including BLQ, TDF, and WO."}
 
-Okay! We found all the codes in the documentation, so there are no typos.
-We got lucky this time, but it's always worth checking --
-projects like [PUDL](https://github.com/catalyst-cooperative/pudl) spend hundreds of lines of code locating and repairing typos in categorical columns.
+Now we know two things:
 
-```python
-# what we found: no typos
-```
+* How to get from an energy source code to its definition
+* The EIA tracks a much larger set of energy sources than are used in Puerto Rico!
 
-But there's something else we can check with the `.value_counts()` output,
-and that's how often each code appears in the data frame.
+The frequency information in `.value_counts()` output can also help us become more familiar with the data.
 What do you notice about that information?
 Does the frequency of each energy source defy any of your expectations?
 
@@ -350,7 +375,7 @@ What could it mean for an energy source code to have high frequency?
 * A smaller number of plants that have operated for a very long time (many months)
 
 We're starting to generate more questions than we can reasonably answer all at once,
-so it's a good time to put some notes in our research diary.
+so it's a good time to step back and think about where to go next.
 
 ```text
 Energy source frequency table:
@@ -365,9 +390,9 @@ WAT     170
 BIT      98
 Name: count, dtype: int64
 
-- Why so much oil and solar?
-- Why so little coal?
-- Does the fuel mix of the grid match?
+- Oil and solar very common
+- Coal very rare
+- Does the fuel mix of the grid match the distribution of records?
 - Are the oil and solar plants tiny but many?
 - Are the coal plants huge but few?
 ```
@@ -425,7 +450,7 @@ max	4.701353e+06	4.701353e+06
 ```
 
 For each column, we get a stack of summary statistics.
-We might have expectations for those statistics, or not.
+The expectations we have for these statistics are not particularly sophisticated -- we're just looking for big obvious problems here.
 
 * count: the number of non-null values in the column.
   If this is less than the length of the data frame, we know there are nulls in the column.
@@ -445,73 +470,25 @@ len(pr_gen_fuel_monthly)
 5058
 ```
 
-Okay, so we've got ~100 nulls in these columns.
-It could be a coincidence that they all have the same number of nulls,
-but it seems more likely that the nulls occur in the same places in both columns.
-We can make a note of that, in case we need to confirm it later.
-
-```text
-- fuel_consumed cols both have like 100 nulls; will this matter?
-```
+Okay, so we've got ~100 nulls in these columns, or 2%.
+Both columns have the same number of nulls,
+so it's likely that the nulls occur in the same places in both columns.
+This is not a big problem; we'll just need to keep in mind that not every record has a proper value,
+and some pandas functions will drop those records automatically.
 
 The means look basically plausible, in that they're positive and large enough to believably support a few million people (if less than in the rest of the U.S.).
 
 The standard deviations seem a bit big, since they're larger than the means.
 
-This gets confirmed in the quartiles.
+The suspiciously large spread is confirmed in the quartiles.
 These columns are more than 1/4 zeros,
 which means the outliers at the other extreme have to be really huge in order to push the mean up as high as it is.
-So we know fuel consumption is dominated by a few really heavy producers.
+So we know fuel consumption is dominated by a few really heavy users.
 
 ```python
 # what we found: some nulls; large standard deviations; quartiles show a ton of skew
 # explain why: mostly small producers with some huge ones dominating overall fuel consumption
 # bonus expectation update: patterns we found in record counts unlikely to be reproduced in the actual fuel mix
-```
-
-::: challenge
-
-Run `.describe()` on the `net_generation` column.
-What do you expect?
-What do you find?
-How do you explain any differences?
-
-:::: solution
-
-```python
-pr_gen_fuel_monthly[[
-    "net_generation_mwh",
-]].describe()
-```
-
-```output
-net_generation_mwh
-count	4948.000000
-mean	27637.307140
-std	63891.379411
-min	-535.000000
-25%	0.478000
-50%	538.045500
-75%	9808.756000
-max	413447.810000
-```
-
-There's a similar story for net generation,
-with the added bonus that the outliers on the bottom end are negative.
-Negative numbers are allowed for net generation, but they should be fairly rare,
-so it's good to see that the 25th percentile is above zero, if only barely.
-Again, the outliers at the other extreme are simply enormous relative to the majority of records in this data frame,
-so we know net generation is also dominated by a few really heavy producers.
-
-::::
-
-:::
-
-We had something in our research diary about this -- let's update it.
-
-```text
-- Does the fuel mix of the grid match?
-  - probably not: fuel consumed distribution is mostly small values with a small number of huge ones
 ```
 
 ### Visualizing numeric data
@@ -622,7 +599,8 @@ dtype: object
 
 `.sum()` told it to sum all the columns, but we only want to sum the measurement columns,
 and leave the primary key columns alone.
-We can tell pandas to separate the measurement columns from the primary key by setting an index:
+There are lots of ways to tell pandas to do this,
+but the one I want to show you to day is to set an index:
 
 ```python
 pr_gen_fuel_monthly.set_index(primary_key_columns).groupby("date").sum()
@@ -654,6 +632,15 @@ Does the plot make anything visible that we didn't even think to list as an expe
 # can we explain it? hurricane Maria
 ```
 
+Recall that one of the kinds of problems we are hunting for comes from
+_external_ forces, like natural disasters -- this one had quite an effect!
+If we make a note of the approximate scope of the affected data,
+we'll be able to focus on it or hold it out from our research models later.
+
+```text
+Hurricane Maria data extends from late 2017 to early 2019.
+```
+
 #### Compare energy source breakdown over time
 
 Let's dive in further and look at the actual fuel mix of the grid.
@@ -664,7 +651,7 @@ Restart the cycle again.
 ```python
 # carve off a chunk: fuel consumed, by energy source, for all of PR
 # what we expect:
-# does it match plant mix? high oil, high-ish solar, low coal
+# does it match record mix? high oil, high-ish solar, low coal
 ```
 
 How do we check this?
@@ -687,15 +674,21 @@ where each row is the sum for one month.
 )
 ```
 
+::: instructor
+
+`unstack` is a bit of a brain warp, so take extra time here to check that students are with you.
+
+:::
+
 Check: does this plot show us everything we need from it?
 Do we have a line for each energy source, and one value per month?
 Yes, though it's pretty busy.
-<!--We may need to split it up to see some elements more clearly.-->
+We may need to split it up to see some elements more clearly.
 
 ::: challenge
 
 Use this plot to determine whether what we expected to find is actually true.
-how does the fuel mix of the grid compare with the frequency of different energy source codes we found in the data frame?
+How does the fuel mix of the grid compare with the frequency of different energy source codes we found in the data frame?
 
 Are there any surprises?
 
@@ -730,24 +723,22 @@ or do some of them continue for long periods of time?
 # And why do all renewables drop suddenly in 2022 and never come back?
 ```
 
-Some of these point not to data problems, but to possible research questions.
-Let's drop those in our research diary as well:
+Some of these point not to data problems, but to possible research questions:
 
 ```text
 Potential research projects
 - Do oil and ng trade off dominance due to price or some other factor?
 - Hurricane recovery differs by energy source
-
-Weird stuff
-- Why do renewables even have fuel consumed
-- Renewables fuel consumed drops in 2022 and never recovers to previous levels; real or no?
 ```
 
 ::::
 
 :::
 
-Renewables is a puzzle, and that drop in 2022 looks pretty serious.
+Our first priority though is problem-hunting,
+and that suggests we focus on places where data might be missing or misplaced.
+
+That makes the drop in renewables in 2022 incredibly suspicious.
 Depending on the cause, it could definitely affect any research we'd do with this data.
 We should investigate further.
 
@@ -983,11 +974,12 @@ If we wanted to figure out exactly which ones, we could split the data by year, 
 We'll leave that for future research!
 
 In the meantime, let's review:
-We were able to use timeseries plots to identify a weird effect in the data, and then use two other visualizations to narrow down the cause and extent of the weirdness.
-We now know that any models that make use of fuel consumed or heat rate will need to account for the changes in how renewables were handled in pre- and post-2022 data.
-Any models that compare or rely on differences in heat rates between plants will probably need to exclude renewables entirely.
 
-One last update for the diary:
+- We were able to use timeseries plots to identify a weird effect in the data, and then use two other visualizations to narrow down the cause and extent of the weirdness.
+- We now know that any models that make use of fuel consumed or heat rate will need to account for the changes in how renewables were handled in pre- and post-2022 data.
+- Any models that compare or rely on differences in heat rates between plants will probably need to exclude renewables entirely.
+
+Let's take some notes for ourselves so we can pick this back up later:
 
 ```text
 Renewables drop suddenly in 2022 and stay low -- probably a policy change:
