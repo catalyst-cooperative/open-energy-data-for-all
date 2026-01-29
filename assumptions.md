@@ -30,31 +30,33 @@ Prep list:
 ## Intro
 
 As we explore a dataset we naturally start to make assumptions about it.
+
 We also constantly find new evidence that our initial assumptions are incorrect.
+
 We zoom in a little closer to a suspiciously low value,
 or we notice that a certain column has more null values than we expected,
-or we see that certain values seem to be duplicated in a confusing way,
+or we see that certain values seem to be duplicated when they shouldn't be,
 and suddenly our understanding of the data is irrevocably changed.
 
-This can understandably have impact on your work!
+This can have an impact on your work!
 Depending on what you are using the data for,
 these shifts will impact your work differently.
 Some will not actually affect your output
-- maybe you weren't using that column anyways -
+- maybe you weren't using that data anyways -
 but others will mean you have to make changes to your code,
 your conclusions,
 your methodology section,
 or the way you answer a question when presenting at a conference.
 
-It's nice to at least try to see these things coming,
-so in this lesson we'll talk about:
+It's nice to not be *surprised* by these changes,
+so this lesson will focus on:
 
 * identifying and articulating assumptions about a dataset
-* simple tools for testing these assumptions
-* prioritizing assumptions for testing
+* programmatically checking assumptions
+* a framework for evaluating and prioritizing assumptions
 
 Afterwards, you'll be able to
-have your code automatically check that the important assumptions haven't been broken.
+put those skills together to identify high-priority assumptions to check programmatically.
 
 While faulty assumptions lurk everywhere,
 we'll focus here on assumptions about your *data*.
@@ -125,20 +127,13 @@ Some examples, if students are feeling a little quiet:
 * if a value is reported, it is correct and reflects reality
 * if a generator reports all null values for a specific time period, it was non-operational during that time period; if a generator reports 0 generation for a specific time period, it was operational, but not dispatched
 
-By the end of this we want at least one assumption that fits each of these categories:
-
-* easy to test
-* hard to test
-* hard to test programmatically, but easy to eyeball
-* high impact (probably crashes your system)
-* moderate impact (probably makes bad analysis)
-* low impact (probably doesn't do anything)
-* high likelihood
-* low likelihood
-
 ::::
 
 ## How to test your assumptions
+
+Now that we have some assumptions,
+we'll introduce a tool we can use to check them programmatically,
+before talking about a framework for evaluating and prioritizing assumptions.
 
 Let's take a look at one of the example assumptions and see how we'd test it:
 
@@ -146,7 +141,7 @@ Let's take a look at one of the example assumptions and see how we'd test it:
 
 How would we verify that? We can use an `assert` statement to verify the assumption.
 
-`assert` basically says, "if this next part is True, great! Nothing happens. If it's false, we'll raise an error."
+`assert` basically says, "if this next part is True, great! Nothing happens. If it's False, we'll raise an error."
 
 ```python
 assert 1 == 1
@@ -159,21 +154,26 @@ We can include a message in the statement as well, to make the error a little ni
 assert 1 == 2, "Expected 1 to be equal to 2."
 ```
 
+Note that, for weird historic reasons, there are no parentheses here - Python will warn you about this:
+
+```python
+assert(1 == 2, "Expected 1 to be equal to 1.")
+```
+
 So let's assert our assumption is true.
 
 ```python
-# read in the data
-monthly_gen_fuel = pd.read_parquet("../data/pr_gen_fuel_monthly.parquet")
-
 # pull out the piece we're interested in
-fuel_consumed_mmbtu = monthly_pr_gen_fuel["fuel_consumed_mmbtu"]
+fuel_consumed_mmbtu = gen_fuel["fuel_consumed_mmbtu"]
 
 # finally make that assertion!
 assert (fuel_consumed_mmbtu >= 0).all(), "The reported fuel consumption in MMBtu should be non-negative"
 ```
 
 Oh no! We find that the assertion is not true!
-This is actually pretty common.
+It's actually very common to find that,
+once you start writing down your assumptions,
+that they're incomplete in some subtle way.
 Let's dig in to see what's going on.
 
 ```python
@@ -181,7 +181,8 @@ fuel_consumed_mmbtu[~(fuel_consumed_mmbtu >= 0)]
 ```
 
 Huh! We get a bunch of not-a-number values.
-That is expected, too, so let's tweak our assumption to:
+That's expected, since we know that some values aren't reported,
+so let's tweak our assumption to:
 "If fuel consumption in MMBtu is reported at all, it should be non-negative."
 
 ```python
@@ -189,6 +190,9 @@ assert (fuel_consumed_mmbtu.dropna() >= 0).all(), "If fuel consumption in MMBtu 
 ```
 
 Which passes with little fanfare.
+
+We'll practice this skill in a bit,
+after we talk about which assumptions might be good to practice with.
 
 ## Which assumptions are worth testing?
 
@@ -204,6 +208,8 @@ Here are three dimensions to consider in a rudimentary prioritization framework:
 * How easy it is to test the assumption:
   the less you have to work for this test,
   the more likely it is to be worth it.
+  This is not an *objective* measure -
+  this is about how easy it would be for whoever is going to be doing the work.
 * The impact on your code:
   what's the goal of the system you've built up?
   What happens to that goal if your assumption is violated?
@@ -211,7 +217,17 @@ Here are three dimensions to consider in a rudimentary prioritization framework:
   what are some ways this could go wrong?
   Do they feel plausible or implausible?
 
+You'll build up an intuition for these,
+especially likelihood,
+as you see more and more issues pop up over time.
+
 Some examples:
+
+:::: instructor
+
+Put this up on the screen! Using *markdown cells*.
+
+::::
 
 * the reported fuel consumption in MMBtu is always non-negative
   * pretty easy to test - we didn't have to do *too* much work above
@@ -220,29 +236,22 @@ Some examples:
     I will probably end up with numbers that are off in some way.
   * high likelihood - all it takes is a typo, which happens all the time.
 
-* NA values reflect periods of inactivity for the generator
-  * quite hard to test - we would have to find another source for month-to-month generator activity status and then cross-reference.
-  * high impact - assuming we're looking at any subset of the data that includes NA values,
-    if those don't actually correspond to the activity of the generator we are going to be heavily misled.
-  * moderate likelihood - it seems easy for some plant administrator to just forget to report data for a month or two,
-    but there's likely *some* enforcement from the EIA.
-
-* there is at least one row of data in the report
-  * easy to test!
-  * high impact - any cleaning and analysis requires data to work on
-  * moderate likelihood - some file transfer failure could easily make this fail.
-
 :::: challenge
 
 ### Challenge: prioritizing assumptions
 
-Now it's time to try out that prioritization framework!
+Now it's time to try out that framework!
 
 Let's start by looking at the list of assumptions we came up with.
 
-Take a few minutes to put a `+` next to 3-5 assumptions that feel important to test.
+Take a few minutes to evaluate the assumptions along those three axes:
 
-We'll then discuss a few assumptions with many `+`s and how they fit into the framework above.
+* add a thumbs up emoji (👍) to 3-5 that seem easy to test.
+* add a scream emoji (😱) to 3-5 that seem like they would have high impact on your work.
+
+* add a clover emoji (🍀) to 3-5 that seem like they have a high chance of being broken.
+
+This will serve as the basis of the next exercise.
 
 ::::
 
@@ -250,30 +259,45 @@ We'll then discuss a few assumptions with many `+`s and how they fit into the fr
 
 ### Challenge: testing an assumption
 
-Now that we have our list of high-priority testing targets,
+Now that we have evaluated potential testing targets,
 we can go ahead and write some tests for them!
 
-Pick one of the assumptions identified as high-priority in the last challenge,
-and write some code to test whether it's true or false.
+Pick an assumption from the list we generated above,
+and write some code that checks if it's true or not.
 
-When we finish,
-we'll talk about challenges we ran into in writing these tests.
+Let's take 10 minutes for this.
+Since this is a small amount of time for open-ended coding work,
+we don't expect everything to be perfect or even working.
+The point is to get some practice --
+not just at translating assumptions into code,
+but at finding the places where our initial assumptions were incomplete,
+and refining them to be more effective.
+
+If you're unsure of which assumption to pick,
+the instructor will pick one for everyone to go over together after the time is up -
+we invite you to try doing that one!
+
 
 ::::
 
 
 ## Conclusion
 
-We've thought a bunch about assumptions and how to test them.
+We've now practiced some crucial skills:
+
+* identifying and articulating assumptions about your data
+* evaluating which assumptions are most valuable to check
+* checking those assumptions
+
 What can we do with this?
 
 The most important is to add checks to your data processing code,
 to make sure that your inputs and outputs are behaving as you expect,
 every time the code runs.
-This protects you from surprising changes in new data,
-or surprising behavior of changes you make to your code.
 
-Hopefully that saves you from some hair-pulling debugging sessions in the future!
+This protects you from surprises about your code down the line,
+letting you make changes without worrying that
+some foundation of your work has shifted while you weren't looking.
 
 :::: keypoints
 
