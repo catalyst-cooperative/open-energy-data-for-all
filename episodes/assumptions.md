@@ -8,66 +8,45 @@ exercises: 20
 
 Prep list:
 
-- [make a Google Doc](https://www.docs.new) that people can put their assumptions in; make it editable by all who have the link
-- clean out the example notebook so that you can type everything out again
+- [make a Google Doc](https://www.docs.new) that people can put their assumptions in; make it editable by all who have the link; zoom in to 150%
 
 ::::
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-- Exploratory data analysis was fun, but what did I learn?
+- How can I be sure that what I learned about my data is actually true?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Articulate assumptions about a dataset
-- Programmatically verify those assumptions
 - Prioritize which assumptions are worth verifying
+- Programmatically verify those assumptions
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ## Intro
 
-As we explore a dataset we naturally start to make assumptions about it.
+When exploring a dataset,
+you can learn lots of things!
+But then, as good scientists, doubt starts to creep in.
 
-We also constantly find new evidence that our initial assumptions are incorrect.
+How do you know what you learned is true?
+Or that it will *stay* true as the data gets updated?
 
-We zoom in a little closer to a suspiciously low value,
-or we notice that a certain column has more null values than we expected,
-or we see that certain values seem to be duplicated when they shouldn't be,
-and suddenly our understanding of the data is irrevocably changed.
-
-This can have an impact on your work!
-Depending on what you are using the data for,
-these shifts will impact your work differently.
-Some will not actually affect your output
-- maybe you weren't using that data anyways -
-but others will mean you have to make changes to your code,
-your conclusions,
-your methodology section,
-or the way you answer a question when presenting at a conference.
-
-It's nice to not be *surprised* by these changes,
-so this lesson will focus on:
+We'll focus on a few skills that, together, will help you feel a little more confident in your work.
 
 * identifying and articulating assumptions about a dataset
-* programmatically checking assumptions
 * a framework for evaluating and prioritizing assumptions
-
-Afterwards, you'll be able to
-put those skills together to identify high-priority assumptions to check programmatically.
+* programmatically checking assumptions
 
 While faulty assumptions lurk everywhere,
 we'll focus here on assumptions about your *data*.
 
-Speaking of data,
-we have a dataset at `data/pr_gen_fuel_monthly.parquet`,
-which we'll be using for concrete examples through the rest of the lesson.
-It contains fuel consumption and electricity generation information,
-split out by generation unit and reported monthly,
-for all of Puerto Rico.
-This data was collected by the EIA in form EIA 923.
+For this lesson,
+we'll keep using the Puerto Rico electricity data from the previous lesson,
+located at `data/pr_gen_fuel_monthly.parquet`.
 
 ## What is an assumption anyways?
 
@@ -80,16 +59,23 @@ Some examples:
 - data types are consistent: the "year" column only contains numbers, not words or strings of random characters
 - and many more!
 
-The sneakiest assumptions are the ones that are hard to think of.
-If they were obvious to you, then you probably were already working around them in some way.
-With that in mind, let's try to come up with some assumptions of our own!
+Your work is based on these assumptions!
+Which means that your work can suffer if:
+
+* an assumption's not true
+* it not being true impacts your work
+* you don’t know that it's not true
+* you don’t know that it impacts your work
+
+It's good to defend ourselves against these.
+The first step is to identify assumptions you've already made about your data.
 
 :::: challenge
 
 ### Challenge: identifying assumptions
 
-Take 5 minutes to list out as many assumptions as you can about the
-EIA 923 Puerto Rico data (`pr_gen_fuel_monthly.parquet`) in the [data directory](../data/).
+Take 5 minutes to list out as many assumptions as you can **about the
+EIA 923 Puerto Rico data** (`pr_gen_fuel_monthly.parquet`) in the [data directory](../data/).
 
 Please put them in the shared Google doc that your instructor prepared for you.
 This will serve as a foundation for future challenges in this lesson.
@@ -161,16 +147,18 @@ assert(1 == 2, "Expected 1 to be equal to 1.")
 ```
 
 So let's assert our assumption is true.
+You'll notice this flow is pretty similar to the flow in data exploration.
+The main difference being that we have the *computer* evaluate whether the expectation is true.
 
 ```python
-# pull out the piece we're interested in
+# carve off the data we need
 fuel_consumed_mmbtu = gen_fuel["fuel_consumed_mmbtu"]
 
-# finally make that assertion!
-assert (fuel_consumed_mmbtu >= 0).all(), "The reported fuel consumption in MMBtu should be non-negative"
+# assert our expectation is true
+assert (fuel_consumed_mmbtu >= 0).all(), "We thought all fuel consumption would be non-negative."
 ```
 
-Oh no! We find that the assertion is not true!
+Oh no! We find that the expectation is not true!
 It's actually very common to find that,
 once you start writing down your assumptions,
 that they're incomplete in some subtle way.
@@ -190,6 +178,10 @@ assert (fuel_consumed_mmbtu.dropna() >= 0).all(), "If fuel consumption in MMBtu 
 ```
 
 Which passes with little fanfare.
+
+This is somewhat divorced from its context for clarity.
+When you put this kind of assertion in a long data transformation pipeline,
+it can help you shed light on where things are going wrong.
 
 We'll practice this skill in a bit,
 after we talk about which assumptions might be good to practice with.
@@ -262,10 +254,14 @@ This will serve as the basis of the next exercise.
 Now that we have evaluated potential testing targets,
 we can go ahead and write some tests for them!
 
-Pick an assumption from the list we generated above,
+In this challenge you'll pick an assumption from the list we generated above,
 and write some code that checks if it's true or not.
 
-Let's take 10 minutes for this.
+Please put your initials next to an assumption if you're working on it.
+Feel free to work on the same thing as someone else,
+this just helps us prepare for the discussion at the end.
+
+We'll take 10 minutes for this.
 Since this is a small amount of time for open-ended coding work,
 we don't expect everything to be perfect or even working.
 The point is to get some practice --
@@ -273,10 +269,13 @@ not just at translating assumptions into code,
 but at finding the places where our initial assumptions were incomplete,
 and refining them to be more effective.
 
-If you're unsure of which assumption to pick,
-the instructor will pick one for everyone to go over together after the time is up -
-we invite you to try doing that one!
+If you have questions during these 10 minutes,
+feel free to ask them in chat.
+At the end,
+we'll ask about problems you encountered.
 
+If someone is feeling particularly generous,
+they can share their code and we can try to work through their problem together.
 
 ::::
 
@@ -301,7 +300,7 @@ some foundation of your work has shifted while you weren't looking.
 
 :::: keypoints
 
-- you're always making assumptions about your data, and many of them are likely to be wrong
+- you're always making assumptions about your data, and many of them are likely to be wrong, so you need to check them
 - you can prioritize assumptions by thinking about their impact, likelihood, and testability
 - you can use `assert` statements to tell you if an assumption is wrong *every time you run the code*
 
