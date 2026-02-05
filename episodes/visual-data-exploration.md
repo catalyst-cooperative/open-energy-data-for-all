@@ -38,6 +38,10 @@ Prep:
 
 * Adapt intro to whether workshop is part of the full series or running
   as part of the VisEx+Assumptions standalone.
+
+* Setup instructions: https://docs.catalyst.coop/open-energy-data-for-all/index.html#setup
+* GitHub repo: https://github.com/catalyst-cooperative/open-energy-data-for-all/
+* Course website: https://docs.catalyst.coop/open-energy-data-for-all/visual-data-exploration.html
 ::::
 
 Now that you have some raw data, how do you get from there to actually doing research with it?
@@ -296,56 +300,28 @@ pr_gen_fuel_monthly.energy_source_code.value_counts()
 
 ```output
 energy_source_code
-DFO    2104
-SUN    1148
-RFO     548
-NG      538
-MWH     268
-WND     184
-WAT     170
-BIT      98
+distillate_fuel_oil    2104
+solar                  1148
+residual_fuel_oil       548
+natural_gas             538
+electricity_storage     268
+wind                    184
+water                   170
+bituminous_coal          98
 Name: count, dtype: int64
 ```
 
-In this case there are a handful of different possible energy source codes.
-We could make better sense of them if we knew what each code stood for, though.
-We can use any existing domain knowledge we have to make a reasonable guess at some of them.
-
-* `SUN` is probably solar
-* `NG` is probably natural gas
-* Any other guesses?
-
-To verify our guesses, we can look up how the EIA defines these codes.
-Code definitions are almost always in the documentation somewhere.
-The EIA frequently publishes their code definitions alongside the raw data, as an extra tab of the spreadsheet.
-
-The raw EIA Excel file for this data set is in the course repo under `data/eia923_pr.xlsx`.
-In it, we find a table of energy source codes and their descriptions:
-
-![Excel screenshot showing tab Page 7 File Layout of data/eia923_pr.xlsx](fig/ep-5/eia923-energy-source-code.png){alt="Excel screenshot showing tab Page 7 File Layout of data/eia923_pr.xlsx.
-Energy source code definitions for the codes we found in our data frame are:
-BIT: Bituminous Coal;
-DFO: Distillate fuel oil including diesel;
-MWH: Electricity used for energy storage;
-NG: Natural gas;
-RFO: Residual fuel oil;
-SUN: Solar;
-WAT: Water at a conventional hydroelectric turbine and [other applications];
-WND: Wind.
-A few additional energy source codes are also visible, including BLQ, TDF, and WO."}
-
-Now we know two things:
-
-* How to get from an energy source code to its definition
-* The EIA tracks a much larger set of energy sources than are used in Puerto Rico!
+In this case there are a handful of different possible energy sources.
 
 The frequency information in `.value_counts()` output can also help us become more familiar with the data.
-What do you notice about that information?
-Does the frequency of each energy source defy any of your expectations?
+Even without looking at the fuel consumed and electricity generated, it can help us start to understand the shape of the energy system in Puerto Rico.
+
+What do you notice about the frequency of each energy source?
+Does it defy any of your expectations?
 
 ::: challenge
 
-Write down three notable facts about the distribution of energy source codes in the data frame,
+Write down three observations about the distribution of energy source codes in the data frame,
 whether each seems normal or odd, and why.
 
 :::: hint
@@ -361,7 +337,7 @@ whether each seems normal or odd, and why.
 Here are a few:
 
 * Lots of oil. That's weird; oil is expensive.
-* Solar is surprisingly common. That's weird; solar is growing but like. Not **that** much.
+* Solar is surprisingly common. Is that weird? solar is growing but like. Not **that** much.
 * Wind and hydro are more rare, which seems normal.
 * Very few coal entries. Is that expected? Not sure.
 
@@ -378,18 +354,6 @@ We're starting to generate more questions than we can reasonably answer all at o
 so it's a good time to step back and think about where to go next.
 
 ```text
-Energy source frequency table:
-energy_source_code
-DFO    2104
-SUN    1148
-RFO     548
-NG      538
-MWH     268
-WND     184
-WAT     170
-BIT      98
-Name: count, dtype: int64
-
 - Oil and solar very common
 - Coal very rare
 - Does the fuel mix of the grid match the distribution of records?
@@ -426,11 +390,14 @@ The numeric data we want to look at next are in the columns with `float64` data 
 "Float" is short for "floating point", and basically just means a decimal fraction --
 it's how we encode continuous measurements on a computer.
 
+The expectations we have for these values are not particularly sophisticated -- we're just looking for big obvious problems here.
+
 Pandas has some built-in tools for summarizing numeric data like this.
 
 ```python
 # carve off a chunk: fuel consumption continuous measurement columns only
 # what we expect: basic good behavior
+# check: use .describe()
 pr_gen_fuel_monthly[[
     "fuel_consumed_for_electricity_mmbtu",
     "fuel_consumed_mmbtu",
@@ -450,7 +417,6 @@ max	4.701353e+06	4.701353e+06
 ```
 
 For each column, we get a stack of summary statistics.
-The expectations we have for these statistics are not particularly sophisticated -- we're just looking for big obvious problems here.
 
 * count: the number of non-null values in the column.
   If this is less than the length of the data frame, we know there are nulls in the column.
@@ -638,7 +604,7 @@ If we make a note of the approximate scope of the affected data,
 we'll be able to focus on it or hold it out from our research models later.
 
 ```text
-Hurricane Maria data extends from late 2017 to early 2019.
+# NB Hurricane Maria data extends from late 2017 to early 2019.
 ```
 
 #### Compare energy source breakdown over time
@@ -658,7 +624,7 @@ How do we check this?
 What needs to be in our plot?
 
 * just fuel consumed mmbtus
-* a different line for each energy source: DFO, SUN, NG, etc
+* a different line for each energy source: `distillate_fuel_oil`, `solar`, `natural_gas`, etc
 * one value for each month -- we'll sum across all the plants
 
 Now let's get pandas to show it to us.
@@ -739,7 +705,9 @@ Our first priority though is problem-hunting,
 and that suggests we focus on places where data might be missing or misplaced.
 
 That makes the drop in renewables in 2022 incredibly suspicious.
-Depending on the cause, it could definitely affect any research we'd do with this data.
+The line we made is a sum, so a big sustained drop like that could mean
+that a bunch of different plants stopped getting tracked properly.
+That could definitely affect any research we'd do with this data.
 We should investigate further.
 
 #### Focus on renewables
@@ -749,7 +717,7 @@ This is an appropriate time for refinement: the current graph settings aren't gi
 Let's put the renewables on their own plot so we can see them better.
 
 ```python
-renewables = ["SUN", "WND", "WAT"]
+renewables = ["solar", "wind", "water"]
 (
     pr_gen_fuel_monthly
     .loc[pr_gen_fuel_monthly.energy_source_code.isin(renewables)]
@@ -982,11 +950,11 @@ In the meantime, let's review:
 Let's take some notes for ourselves so we can pick this back up later:
 
 ```text
-Renewables drop suddenly in 2022 and stay low -- probably a policy change:
-- Renewables all show same heat rate, updated each year, then constant starting 2022
-- where does this heat rate come from?
-- there are a bunch of stragglers that don't use the common heat rate. maybe exclude those plants or points?
-- definitely exclude renewables from heat rate analyses involving combustibles
+# Renewables drop suddenly in 2022 and stay low -- probably a policy change:
+# - Renewables all show same heat rate, updated each year, then constant starting 2022
+# - where does this heat rate come from?
+# - there are a bunch of stragglers that don't use the common heat rate. maybe exclude those plants or points?
+# - definitely exclude renewables from heat rate analyses involving combustibles
 ```
 
 ::::::::::::::::::::::::::::::::::::: keypoints

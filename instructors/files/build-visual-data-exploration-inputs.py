@@ -2,9 +2,24 @@ import pandas as pd
 import numpy as np
 
 pr_gen_fuel = pd.read_parquet("data/raw_eia923__puerto_rico_generation_fuel.parquet")
+energy_source_codes = pd.read_parquet(
+    "s3://pudl.catalyst.coop/nightly/parquet/core_eia__codes_energy_sources.parquet"
+)
+energy_source_codes
 
 # Handle EIA null values
 pr_gen_fuel = pr_gen_fuel.replace(to_replace = ".", value = pd.NA)
+
+# Replace energy source codes with human-readable labels
+pr_gen_fuel = (
+    pr_gen_fuel.merge(
+        energy_source_codes[["code","label"]],
+        left_on="energy_source_code",
+        right_on="code",
+        how="left"
+    ).drop(columns=["energy_source_code"])
+    .rename(columns={"label": "energy_source_code"})
+)
 
 # Silence some warnings about deprecated Pandas behavior
 pd.set_option("future.no_silent_downcasting", True)
@@ -19,7 +34,6 @@ for colname in pr_gen_fuel.columns:
         or "fuel_mmbtu_per_unit" in colname
     ):
         pr_gen_fuel[colname] = pr_gen_fuel[colname].astype("float64")
-
 
 pr_gen_fuel["associated_combined_heat_power"] = (
     pr_gen_fuel["associated_combined_heat_power"]
