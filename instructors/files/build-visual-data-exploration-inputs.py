@@ -3,7 +3,7 @@ import numpy as np
 
 pr_gen_fuel = pd.read_parquet("data/raw_eia923__puerto_rico_generation_fuel.parquet")
 energy_source_codes = pd.read_parquet(
-    "s3://pudl.catalyst.coop/nightly/parquet/core_eia__codes_energy_sources.parquet"
+    "s3://pudl.catalyst.coop/stable/parquet/core_eia__codes_energy_sources.parquet"
 )
 energy_source_codes
 

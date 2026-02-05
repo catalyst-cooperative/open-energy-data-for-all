@@ -94,7 +94,7 @@ As we become more familiar with the data, our expectations will become more soph
 Sometimes the data defies our expectations in ways that reveal new research questions.
 Keep an open mind, and be sure to leave yourself good notes as you go!
 
-## Practice: Summarization
+## Explore using summarization
 
 Let's take a look at how these ideas apply to real data.
 We'll build up some practice with our problem-hunting strategy by starting with summary statistics.
@@ -337,7 +337,7 @@ whether each seems normal or odd, and why.
 Here are a few:
 
 * Lots of oil. That's weird; oil is expensive.
-* Solar is surprisingly common. Is that weird? solar is growing but like. Not **that** much.
+* Solar is surprisingly common. Is that weird? Solar is growing but like. Not **that** much.
 * Wind and hydro are more rare, which seems normal.
 * Very few coal entries. Is that expected? Not sure.
 
@@ -457,7 +457,7 @@ So we know fuel consumption is dominated by a few really heavy users.
 # bonus expectation update: patterns we found in record counts unlikely to be reproduced in the actual fuel mix
 ```
 
-## Practice: Visualization
+## Explore using visualization
 
 To learn more about the actual fuel mix and generation in PR,
 we can bring in the the `date` column and start looking at these measurements as time series.
@@ -604,7 +604,7 @@ If we make a note of the approximate scope of the affected data,
 we'll be able to focus on it or hold it out from our research models later.
 
 ```text
-# NB Hurricane Maria data extends from late 2017 to early 2019.
+# NOTE: Hurricane Maria data extends from late 2017 to early 2019.
 ```
 
 ### Compare energy source breakdown over time
