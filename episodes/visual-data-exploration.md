@@ -94,7 +94,7 @@ As we become more familiar with the data, our expectations will become more soph
 Sometimes the data defies our expectations in ways that reveal new research questions.
 Keep an open mind, and be sure to leave yourself good notes as you go!
 
-## Put it into practice
+## Practice: Summarization
 
 Let's take a look at how these ideas apply to real data.
 We'll build up some practice with our problem-hunting strategy by starting with summary statistics.
@@ -366,7 +366,7 @@ If we want to explore our expectations about the fuel mix of the grid, we'll nee
 ::::
 :::
 
-### Summarizing numeric data
+### Numeric data
 
 As a first step, let's look again at the data types in our data frame:
 
@@ -457,7 +457,7 @@ So we know fuel consumption is dominated by a few really heavy users.
 # bonus expectation update: patterns we found in record counts unlikely to be reproduced in the actual fuel mix
 ```
 
-### Visualizing numeric data
+## Practice: Visualization
 
 To learn more about the actual fuel mix and generation in PR,
 we can bring in the the `date` column and start looking at these measurements as time series.
@@ -503,7 +503,7 @@ or if the plot needs a refinement or two to show us everything we need.
 
 Let's look at an example.
 
-#### Plot all monthly variables
+### Plot all monthly variables
 
 Let's look at all the monthly variables at once, for a big-picture look at the energy generated in Puerto Rico as a whole.
 
@@ -607,7 +607,7 @@ we'll be able to focus on it or hold it out from our research models later.
 # NB Hurricane Maria data extends from late 2017 to early 2019.
 ```
 
-#### Compare energy source breakdown over time
+### Compare energy source breakdown over time
 
 Let's dive in further and look at the actual fuel mix of the grid.
 What does the energy source breakdown look like over time?
@@ -710,7 +710,7 @@ that a bunch of different plants stopped getting tracked properly.
 That could definitely affect any research we'd do with this data.
 We should investigate further.
 
-#### Focus on renewables
+### Focus on renewables
 
 This is an appropriate time for refinement: the current graph settings aren't giving us enough detail on the renewable energy sources.
 
@@ -764,7 +764,7 @@ No, not really :(
 
 :::
 
-#### Try a scatter plot
+### Try a scatter plot
 
 Okay, what else could it be?
 Maybe a big renewables plant opened or closed that did things differently than the others?
@@ -869,7 +869,7 @@ a coordinated change throughout Puerto Rico in how fuel consumption is reported 
 
 ::::
 
-#### Try plotting the heat rate
+### Try plotting the heat rate
 
 We've probably extracted all the information we can out of this scatter plot.
 Sometimes viewing the same data from another angle can reveal further insights.
