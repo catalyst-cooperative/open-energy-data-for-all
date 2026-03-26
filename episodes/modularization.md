@@ -1,7 +1,7 @@
 ---
 title: "Modularization"
 teaching: 30
-exercises: 0
+exercises: 15
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions
@@ -28,19 +28,18 @@ it into smaller chunks we can reuse, test, and combine to transform our data.
 
 :::::::: challenge
 ### Challenge 1: Identifying duplicated code
-Open `notebooks/etl.ipynb`. Do you see any code that performs this same task? What differences do you note between the code itself?
+Open `notebooks/etl.ipynb`. Do you see any code that performs the same task? What differences do you note between the code itself?
 
 :::: solution
-* Cell 2 replaces NAs twice.
-* Cells 3 and 5 are performing the same code assertion.
-* Cell 4 and 7 are doing the same unit conversion.
-* Cell 6 handles three bad values.
+- Cell 2 replaces NAs twice.
+- Cells 3 and 5 are performing the same code assertion.
+- Cell 4 and 7 are doing the same unit conversion.
+- Cell 6 handles three bad values.
 ::::
 
 ::::::::
 
-Even in this short notebook, we're already seeing a lot of duplication! What's the
-most efficient way to reorganize it?
+Even in this short notebook, we're already seeing a lot of duplication! How should we reorganize it?
 
 ## A plain language approach to code reorganization
 
@@ -126,9 +125,9 @@ D. only describes the name of the final output, but doesn't explain at all what 
 ::::::::
 
 A good plain language description should:
-    * explain what the code accomplishes in a few sentences
-    * describe the intent of the code (why did we write this?)
-    * give us important detail without needing to be completely rewritten every time we use our code in a similar context (e.g., on a new year of data).
+- explain what the code accomplishes in a few sentences
+- describe the intent of the code (why did we write this?)
+- give us important detail without needing to be completely rewritten every time we use our code in a similar context (e.g., on a new year of data).
 
 ### Identifying good candidates for modularization
 
@@ -157,17 +156,19 @@ Which parts of this code could be a good candidate for modularization?
 
 :::: solution
 Here are a few options:
-* Code mapping in cell 3: this is a multi-line task that we're performing more than once and
+
+- Code mapping in cell 3: this is a multi-line task that we're performing more than once and
 could imagine wanting to perform on additional columns in the future.
-* Duplicated data with a null value in cell 6: this seems to be a somewhat common
+- Duplicated data with a null value in cell 6: this seems to be a somewhat common
 reporting problem that we can imagine showing up in other timeframes or tables from the
 same source.
-* Thousands units in cell 4 and 7: both of these lines have the same intent and require
+- Thousands units in cell 4 and 7: both of these lines have the same intent and require
 some explanation.
 
 The following aren't great candidates:
-* Cell 2: There's no need to write a function, we can just pass both parameters to .replace()
-* All of cell 6: the last part has a different intent than the first two steps.
+
+- Cell 2: There's no need to write a function, we can just pass both parameters to .replace()
+- All of cell 6: the last part has a different intent than the first two steps.
 ::::
 
 Now that we've identified some promising candidates, it's time to write some code!
@@ -205,13 +206,29 @@ When we're taught how to write a function, lessons typically focus on the basics
 - A function can have an output (return something)
 - Function and variable names should be informative, but not unwieldy. `i` is bad, but so is `raw_puerto_rico_generation_fuel_data_from_eia_923`.
 
+Let's look at this code from the notebook:
+
+```python
+# convert codes to strings
+ENERGY_SOURCE_DICT = {'WND':'wind', 'NG':'natural_gas', 'SUN':'solar',
+    'BIT':'bituminous_coal', 'MWH':"electricity_for_energy_storage", 'DFO':'distillate_fuel_oil', 'RFO':'residual_fuel_oil', 'WAT':'hydro'}
+
+assert all([code in ENERGY_SOURCE_DICT for code in pr_gen_fuel['energy_source_code'].unique()]) # Check all codes present
+pr_gen_fuel['energy_source_code_full'] = pr_gen_fuel['energy_source_code'].replace(ENERGY_SOURCE_DICT)
+pr_gen_fuel = pr_gen_fuel.drop(columns='energy_source_code').rename(columns={'energy_source_code_full':'energy_source_code'})
+```
+
 :::: instructor
-Start with the code from cell 3. First, swap out the dictionary and column name for more generic variables.
+1. Start with the code from cell 3.
+2. Update existing comment into a plain language description (e.g., "Replace short-hand codes in a column with interpretable strings using a dictionary.") You can ask for suggestions here!
+3. Use description to name function.
+4. Then swap out the dictionary and column name for more generic variables.
 ::::
 
 We can generalize our code into a function that looks like this:
 
 ```python
+# Replace short-hand codes in a column with more easily interpretable strings using a dictionary
 def map_code_to_strings(df, mapped_col, code_dictionary):
     assert all([code in code_dictionary for code in df[mapped_col].unique()]) # Check all codes present
     df['code_name'] = df[mapped_col].replace(ENERGY_SOURCE_DICT)
@@ -238,12 +255,12 @@ def map_code_to_strings(df, mapped_col, code_dictionary):
     """Convert a column of codes into strings defined by a dictionary.
 
     This code takes a dataframe with a column of codes and returns a dataframe with the same column
-    as interpretable strings. The relationship between columns and strings is defined by a dictionary.
+    mapped to strings to prevent users from needing to consult a look-up table. The relationship between columns and strings is defined by a dictionary.
 
     Args:
         df: A Pandas DataFrame.
         mapped_col: The name of the column to be mapped.
-        code_dictionary: The dictionary containing code-string pairs.
+        code_dictionary: A dictionary containing code-string pairs.
     """
     assert all([code in code_dictionary for code in df[mapped_col].unique()]) # Check all codes present
     df['code_name'] = df[mapped_col].replace(ENERGY_SOURCE_DICT)
@@ -254,7 +271,7 @@ def map_code_to_strings(df, mapped_col, code_dictionary):
 Now in two months, when you return to your code and wonder what it does, you can simply call:
 
 ```python
-help(map_code_to_string)
+help(map_code_to_strings)
 ```
 
 :::::::: challenge
