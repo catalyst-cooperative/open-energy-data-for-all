@@ -26,99 +26,69 @@ it can get increasingly repetitive, confusing, and challenging to explain to oth
 In this lesson, we'll explore practical approaches to **modularizing** our code - breaking
 it into smaller chunks we can reuse, test, and combine to transform our data.
 
-## A plain language approach to code reorganization
-
-We can start by looking at a single cell of code from the `7-modularization.ipynb` notebook:
-
-```python
-# Pivot fuel_consumed_for_electricity MMBTU columns
-
-fuel_elec_mmbtu_cols = index_cols + [col for col in pr_gen_fuel.columns if "fuel_consumed_for_electricity_mmbtu" in col]
-fuel_elec_mmbtu = pr_gen_fuel.loc[:, fuel_elec_mmbtu_cols]
-
-## Melt the fuel_consumed columns
-fuel_elec_mmbtu_melt = fuel_elec_mmbtu.melt(
-    id_vars=index_cols,
-    var_name="month",
-    value_name="fuel_consumed_for_electricity_mmbtu"
-)
-fuel_elec_mmbtu_melt["month"] = fuel_elec_mmbtu_melt["month"].str.replace("fuel_consumed_for_electricity_mmbtu_", "")
-fuel_elec_mmbtu_melt = fuel_elec_mmbtu_melt.set_index(index_cols + ["month"])
-fuel_elec_mmbtu_melt
-```
-
-What does this code do? It transforms a table that looks like this:
-
-| plant_id_eia | plant_name_eia | report_year | prime_mover_code | fuel_consumed_for_electricity_mmbtu_january | fuel_consumed_for_electricity_mmbtu_february |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 61034 | EcoElectrica | 2017 | CA | 4773.0 | 0.0 |
-| 61034 | EcoElectrica | 2017 | CT | 2195139.0 | 2044214.0 |
-
-into a table that looks like this:
-
-|  | plant_id_eia | plant_name_eia | report_year | prime_mover_code | month | fuel_consumed_for_electricity_mmbtu |
-|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1801 | 61034 | EcoElectrica | 2017 | CA | january | 4773.0 |
-| 1351 | 61034 | EcoElectrica | 2017 | CA | february | 0.0 |
-| 1802 | 61034 | EcoElectrica | 2017 | CT | january | 2195139.0 |
-| 1352 | 61034 | EcoElectrica | 2017 | CT | february | 2044214.0 |
-
-Or, in words: this code takes a table with data stored in one column per month and stacks all the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
-order to make it easier to plot our data over time.
-
 :::::::: challenge
 ### Challenge 1: Identifying duplicated code
-Open `notebooks/7-modularization.ipynb`. Do you see any code that performs this same task? What differences do you note between the code itself?
+Open `notebooks/etl.ipynb`. Do you see any code that performs this same task? What differences do you note between the code itself?
 
 :::: solution
-Cells 6, 7, 8, and 9 all do the same thing. Note that each cell does this for a different variable (e.g., "fuel_consumed_units" instead of "fuel_consumed_for_electricity_mmbtu"). In cell 9, we also see that the way we're selecting the columns is different: `if col.startswith()` instead of `if x in col`.
+* Cell 2 replaces NAs twice.
+* Cells 3 and 5 are performing the same code assertion.
+* Cell 4 and 7 are doing the same unit conversion.
+* Cell 6 handles three bad values.
 ::::
 
 ::::::::
 
-We're doing *almost* the same thing five times! Imagine you find an error in your first code
-cell - now you have to copy paste the code into each cell where similar code appears. Or,
-image you want to do this for 25 columns rather than five. What if instead of repeating this code,
-we replaced it with single function we could re-use each time?
+Even in this short notebook, we're already seeing a lot of duplication! What's the
+most efficient way to reorganize it?
 
-We can imagine writing a function called `melt_monthly_vars` to replace our repetitive code. Then, our many lines of code might look something like this:
+## A plain language approach to code reorganization
 
-```python
-def melt_monthly_vars(df, melted_var):
-    #some code here
-    return df_melt
+As we think about how to organize our code into discrete and reusable steps (or to *modularize* it), it doesn't take long to run into these types of tricky questions. One strategy to help us figure out which code we can modularize is a **plain language approach**.
 
-fuel_elec_mmbtu_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_electricity_mmbtu")
-fuel_elec_units_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_electricity_units")
-fuel_mmbtu_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_mmbtu")
-...
-```
+Often, we start by writing our code first and adding comments or documentation at the end. However, language can be an important tool to guide code design and reorganization.
 
-Yet, as we just saw, this redundant code isn't *identical* across all variables: the cell working with `net_generation_mwh` selects
-cells differently than the others.
+A **plain language description** tells us what our code *should do*.
 
 ```python
-net_gen_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith("net_generation_mwh")]
+def double_x(df):
+    df['doubled_x'] = df['x'] * 2
+    return df
 ```
 
-*Should* it get combined into this `melt_monthly_vars`?
+This code creates a new column with values that are twice the value of X.
 
-### Introducing the plain language approach
+```python
+def two_x(df):
+    df['two_x'] = df['x'] + df['x']
+    return df
+```
 
-As we think about how to organize our code into discrete and reusable steps (or to *modularize* it), it doesn't take long to run into
-these types of tricky questions. One strategy to help us figure out which
-code we can modularize is a **plain language approach**.
+This code creates a new column with values that are also twice the value of X.
 
-Often, we start by writing our code first and adding comments or documentation at the end. In contrast, starting by briefly outlining what a piece of our code *should do* and *why* can be incredibly valuable.
+Even though the code is not identical, these two lines are performing an identical task
+and we could replace them with one shared function. Where these descriptions
+are very similar, we should consider combining the code into one shared function.
 
-Let's go back to the description we wrote earlier:
+However, not all similar code should be automatically reorganized together. A plain
+language description should also give us important context about *why* we've written
+this code:
 
-*"This code takes a table with data stored in one column per month and stacks all the fields for a single variable*
-*(fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in*
-*order to make it easier to plot our data over time."*
+```python
+def speed_limit():
+    return 35
+```
 
-Yes, the code definitely does this! Whatever code we use to write our `melt_monthly_vars`
-function, it should definitely work for this case.
+```python
+def age():
+    return 35
+```
+
+For instance, if we know that the first function returns the speed limit and the second returns someone's
+age, we **should not** combine them into one function, even if the underlying code is identical.
+Intent is a key component of a plain language description.
+
+Let's practice on some real code!
 
 :::::::: challenge
 
@@ -133,18 +103,15 @@ pr_gen_fuel_clean = pr_gen_fuel_clean.loc[
     & (pr_gen_fuel_clean.date.dt.year == 2020)
     & (pr_gen_fuel_clean.fuel_consumed_for_electricity_mmbtu.isnull()))
 ]
-
-# drop after 2025-03-01 (for now) as these values should not exist
-pr_gen_fuel_final = pr_gen_fuel_clean.loc[pr_gen_fuel_clean.date < pd.Timestamp("2025-03-01")]
 ```
 
-* A. Drop a known bad value, then drop all data reported with invalid timestamps.
+* A. Drop a duplicated entry with missing data.
 * B. Address some data problems and return a cleaner Pandas DataFrame.
-* C. Drop any rows with a null in the "value" column for plant ID 62410 in 2020, then drop all records after March 1st 2025.
-* D. Create ``pr_gen_fuel_final``.
+* C. Drop any rows with a null in the "value" column for plant ID 62410 in 2020.
+* D. Create ``pr_gen_fuel_clean``.
 
 :::: solution
-A. Drop a known bad value, then drop all data reported with invalid timestamps.
+A. Drop a duplicated entry with missing data.
 
 Why A.? Unlike B., A. describes the *intention* behind the code (e.g., we're dropping a
 value because we've subjectively decided that it is *bad*), while providing enough detail
@@ -158,18 +125,10 @@ D. only describes the name of the final output, but doesn't explain at all what 
 ::::
 ::::::::
 
-A good plain language description should give us important context about the intent of our code, without needing to be completely rewritten every time we use our code in a similar context (e.g., on a new year of data).
-
-:::::::: discussion
-Should these two lines be combined into one `drop_bad_values()` function?
-::::::::
-
-:::: solution
-Though both of these lines are dropping low-quality records, their intent is very different. The first line targets a very specific known bad value, while the second drops a potentially large number of records based on valid values in a single column. Though both may address "bad" data, they shouldn't get combined into a single function.
-::::
-
-As we saw in this challenge, understanding the intent of our code is necessary to effectively
-reorganizing it into discrete and reusable functions.
+A good plain language description should:
+    * explain what the code accomplishes in a few sentences
+    * describe the intent of the code (why did we write this?)
+    * give us important detail without needing to be completely rewritten every time we use our code in a similar context (e.g., on a new year of data).
 
 ### Identifying good candidates for modularization
 
@@ -189,17 +148,29 @@ When is code a *bad* candidate for modularization?
 
 - In plain language, it's actually more than one step (e.g., converting data types *and* dropping rows)
 - You never anticipate reusing it (e.g., a completely bespoke transformation step)
-- It's already a modularized function. For example, Pandas' .replace() method can already
+- It's already a modularized function. For example, Pandas' .drop() method can already
 take multiple input values flexibly, so there's no need to reproduce someone else's work here.
 
 :::: discussion
-What other part of this code could be a good candidate for modularization?
+Which parts of this code could be a good candidate for modularization?
 ::::
 
-:::: instructor
-The code that handles the data type transformations for both the plant frame and the generation
-fuel table can be modularized.
+:::: solution
+Here are a few options:
+* Code mapping in cell 3: this is a multi-line task that we're performing more than once and
+could imagine wanting to perform on additional columns in the future.
+* Duplicated data with a null value in cell 6: this seems to be a somewhat common
+reporting problem that we can imagine showing up in other timeframes or tables from the
+same source.
+* Thousands units in cell 4 and 7: both of these lines have the same intent and require
+some explanation.
+
+The following aren't great candidates:
+* Cell 2: There's no need to write a function, we can just pass both parameters to .replace()
+* All of cell 6: the last part has a different intent than the first two steps.
 ::::
+
+Now that we've identified some promising candidates, it's time to write some code!
 
 ## A plain language approach to function design
 
@@ -212,7 +183,7 @@ What makes a good function?:
 - It has one task
 - Someone other than the person who wrote it can understand what it does
 - It can be adaptable (e.g., we can run this transformation function on a new year of data).
-- It can be tested (we'll talk about this next module!)
+- It can be tested (we'll talk about this in a future module!)
 
 ::::
 
@@ -226,7 +197,6 @@ thing might help meet our goals better.
 - When our underlying data changes or we try to reuse our code in a different context,
 plain language descriptions can help us pay attention to what the code we've written
 can and can't be used to do.
-- Plain language helps provide important context about *why* we've written this code and what it does.
 
 When we're taught how to write a function, lessons typically focus on the basics:
 
@@ -236,35 +206,26 @@ When we're taught how to write a function, lessons typically focus on the basics
 - Function and variable names should be informative, but not unwieldy. `i` is bad, but so is `raw_puerto_rico_generation_fuel_data_from_eia_923`.
 
 :::: instructor
-Start with the code for the net generation melt. First, swap out the variable name for a variable
-that is called `melted_var`. Then, rename the variables to be more generic (as below). Check that the
-startwith() method works for all the columns by showing that all the other columns we're interested in also start
-with their variable names.
-
-We can use this to demonstrate that we can get the same method to work for all 5 cases with one additional variable.
+Start with the code from cell 3. First, swap out the dictionary and column name for more generic variables.
 ::::
 
-We can generalize our pivot code into a function that looks like this:
+We can generalize our code into a function that looks like this:
 
 ```python
-def melt_monthly_vars(pr_gen_fuel, melted_var):
-    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
-    var_df = pr_gen_fuel.loc[:, var_cols]
-
-    ## Melt the fuel_consumed columns
-    var_melt = var_df.melt(
-        id_vars=index_cols,
-        var_name="month",
-        value_name=melted_var
-    )
-    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
-    var_melt = var_melt.set_index(index_cols + ["month"])
-    return var_melt
+def map_code_to_strings(df, mapped_col, code_dictionary):
+    assert all([code in code_dictionary for code in df[mapped_col].unique()]) # Check all codes present
+    df['code_name'] = df[mapped_col].replace(ENERGY_SOURCE_DICT)
+    df = df.drop(columns=mapped_col).rename(columns={'code_name':mapped_col})
+    return df
 ```
+
+:::: instructor
+Demonstrate that the code works on cell 5 as well.
+::::
 
 ### Docstrings
 
-We can attach our plain language summary of the function directly to our code by using a docstring. Unlike an in-line comment which uses the hash symbol (e.g., `# melt the vars`), a docstring uses triple quotation marks and is written right after the definition of a function, module, method or class.
+We can attach our plain language summary of the function directly to our code by using a docstring. Unlike an in-line comment which uses the hash symbol (e.g., `# Check all codes present`), a docstring uses triple quotation marks and is written right after the definition of a function, module, method or class.
 
 A docstring can contain the following information:
 
@@ -273,68 +234,34 @@ A docstring can contain the following information:
 - A list of input arguments, and what they are expected to be
 
 ```python
-def melt_monthly_vars(pr_gen_fuel, melted_var):
-    """Melt many columns of monthly data for a single variable into a month column and a value column.
+def map_code_to_strings(df, mapped_col, code_dictionary):
+    """Convert a column of codes into strings defined by a dictionary.
 
-    This code takes a table with data stored in one column per month and stacks all the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
-    order to make it easier to plot our data over time. Note that this drops the other variables of data.
+    This code takes a dataframe with a column of codes and returns a dataframe with the same column
+    as interpretable strings. The relationship between columns and strings is defined by a dictionary.
 
     Args:
-        pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
-        melted_var: The variable to be melted.
+        df: A Pandas DataFrame.
+        mapped_col: The name of the column to be mapped.
+        code_dictionary: The dictionary containing code-string pairs.
     """
-    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startwith(melted_var)]
-    var_df = pr_gen_fuel.loc[:, var_cols]
-
-    ## Melt the fuel_consumed columns
-    var_melt = var_df.melt(
-        id_vars=index_cols,
-        var_name="month",
-        value_name=melted_var
-    )
-    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
-    var_melt = var_melt.set_index(index_cols + ["month"])
-    return var_melt
+    assert all([code in code_dictionary for code in df[mapped_col].unique()]) # Check all codes present
+    df['code_name'] = df[mapped_col].replace(ENERGY_SOURCE_DICT)
+    df = df.drop(columns=mapped_col).rename(columns={'code_name':mapped_col})
+    return df
 ```
 
 Now in two months, when you return to your code and wonder what it does, you can simply call:
 
 ```python
-help(melt_monthly_vars)
+help(map_code_to_string)
 ```
-
-Putting this all together, our new function should look something like:
-```python
-def melt_monthly_vars(pr_gen_fuel, melted_var):
-    """Melt many columns of monthly data for a single variable into a month column and a value column.
-
-    This code takes a table with data stored in one column per month and stacks all the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column and one value column for this variable in
-    order to make it easier to plot our data over time. Note that this drops the other variables of data.
-
-    Args:
-        pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
-        melted_var: The variable to be melted.
-    """
-    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
-    var_df = pr_gen_fuel.loc[:, var_cols]
-
-    ## Melt the fuel_consumed columns
-    var_melt = var_df.melt(
-        id_vars=index_cols,
-        var_name="month",
-        value_name=melted_var
-    )
-    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
-    var_melt = var_melt.set_index(index_cols + ["month"])
-    return var_melt
-```
-
 
 :::::::: challenge
 
 ### Challenge 3: putting it all together!
 
-In a group, identify one task in the `7-modularization.ipynb` that you think is a good candidate for modularization.
+In a group, identify one task in the `etl.ipynb` that you think is a good candidate for modularization.
 In plain language, identify what you want the function you're writing
 to accomplish. Then, try and write a generalizeable function that accomplishes that step.
 
