@@ -179,9 +179,9 @@ assert (fuel_consumed_mmbtu.dropna() >= 0).all(), "If fuel consumption in MMBtu 
 
 Which passes with little fanfare.
 
-This is somewhat divorced from its context for clarity.
-When you put this kind of assertion in a long data transformation pipeline,
-it can help you shed light on where things are going wrong.
+It is important to include plenty of context in the assert message.
+A good assert message sheds light on where things are going wrong,
+even when it is buried in a long data transformation pipeline.
 
 We'll practice this skill in a bit,
 after we talk about which assumptions might be good to practice with.
