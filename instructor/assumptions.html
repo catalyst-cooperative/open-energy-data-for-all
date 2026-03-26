@@ -340,7 +340,7 @@
       </div>
       <hr></nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Making assumptions about your data</h1>
-        <p>Last updated on 2026-01-29 |
+        <p>Last updated on 2026-03-26 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/assumptions.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -359,14 +359,13 @@
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Prep list:</p>
 <ul><li>
 <a href="https://www.docs.new" class="external-link">make a Google Doc</a> that people can
-put their assumptions in; make it editable by all who have the link</li>
-<li>clean out the example notebook so that you can type everything out
-again</li>
+put their assumptions in; make it editable by all who have the link;
+zoom in to 150%</li>
 </ul></div>
 </div>
 </div>
@@ -378,7 +377,8 @@ again</li>
 <div class="card-body">
 <div class="inner">
 <h3 class="card-title">Questions</h3>
-<ul><li>Exploratory data analysis was fun, but what did I learn?</li>
+<ul><li>How can I be sure that what I learned about my data is actually
+true?</li>
 </ul></div>
 </div>
 </div>
@@ -387,43 +387,28 @@ again</li>
 <div class="inner bordered">
 <h3 class="card-title">Objectives</h3>
 <ul><li>Articulate assumptions about a dataset</li>
-<li>Programmatically verify those assumptions</li>
 <li>Prioritize which assumptions are worth verifying</li>
+<li>Programmatically verify those assumptions</li>
 </ul></div>
 </div>
 </div>
 </div>
 </div>
 <section><h2 class="section-heading" id="intro">Intro<a class="anchor" aria-label="anchor" href="#intro"></a></h2>
-<hr class="half-width"><p>As we explore a dataset we naturally start to make assumptions about
-it.</p>
-<p>We also constantly find new evidence that our initial assumptions are
-incorrect.</p>
-<p>We zoom in a little closer to a suspiciously low value, or we notice
-that a certain column has more null values than we expected, or we see
-that certain values seem to be duplicated when they shouldn’t be, and
-suddenly our understanding of the data is irrevocably changed.</p>
-<p>This can have an impact on your work! Depending on what you are using
-the data for, these shifts will impact your work differently. Some will
-not actually affect your output - maybe you weren’t using that data
-anyways - but others will mean you have to make changes to your code,
-your conclusions, your methodology section, or the way you answer a
-question when presenting at a conference.</p>
-<p>It’s nice to not be <em>surprised</em> by these changes, so this
-lesson will focus on:</p>
+<hr class="half-width"><p>When exploring a dataset, you can learn lots of things! But then, as
+good scientists, doubt starts to creep in.</p>
+<p>How do you know what you learned is true? Or that it will
+<em>stay</em> true as the data gets updated?</p>
+<p>We’ll focus on a few skills that, together, will help you feel a
+little more confident in your work.</p>
 <ul><li>identifying and articulating assumptions about a dataset</li>
-<li>programmatically checking assumptions</li>
 <li>a framework for evaluating and prioritizing assumptions</li>
-</ul><p>Afterwards, you’ll be able to put those skills together to identify
-high-priority assumptions to check programmatically.</p>
-<p>While faulty assumptions lurk everywhere, we’ll focus here on
+<li>programmatically checking assumptions</li>
+</ul><p>While faulty assumptions lurk everywhere, we’ll focus here on
 assumptions about your <em>data</em>.</p>
-<p>Speaking of data, we have a dataset at
-<code>data/pr_gen_fuel_monthly.parquet</code>, which we’ll be using for
-concrete examples through the rest of the lesson. It contains fuel
-consumption and electricity generation information, split out by
-generation unit and reported monthly, for all of Puerto Rico. This data
-was collected by the EIA in form EIA 923.</p>
+<p>For this lesson, we’ll keep using the Puerto Rico electricity data
+from the previous lesson, located at
+<code>data/pr_gen_fuel_monthly.parquet</code>.</p>
 </section><section><h2 class="section-heading" id="what-is-an-assumption-anyways">What is an assumption anyways?<a class="anchor" aria-label="anchor" href="#what-is-an-assumption-anyways"></a></h2>
 <hr class="half-width"><p>In this context, an <em>assumption</em> can be any property you think
 is true about the data.</p>
@@ -435,10 +420,14 @@ ID correspond to the same plant</li>
 <li>data types are consistent: the “year” column only contains numbers,
 not words or strings of random characters</li>
 <li>and many more!</li>
-</ul><p>The sneakiest assumptions are the ones that are hard to think of. If
-they were obvious to you, then you probably were already working around
-them in some way. With that in mind, let’s try to come up with some
-assumptions of our own!</p>
+</ul><p>Your work is based on these assumptions! Which means that your work
+can suffer if:</p>
+<ul><li>an assumption’s not true</li>
+<li>it not being true impacts your work</li>
+<li>you don’t know that it’s not true</li>
+<li>you don’t know that it impacts your work</li>
+</ul><p>It’s good to defend ourselves against these. The first step is to
+identify assumptions you’ve already made about your data.</p>
 <div id="challenge-identifying-assumptions" class="callout discussion">
 <div class="callout-square">
 <i class="callout-icon" data-feather="message-circle"></i>
@@ -447,9 +436,10 @@ assumptions of our own!</p>
 <div id="challenge-identifying-assumptions" class="callout-inner">
 <h3 class="callout-title">Challenge: identifying assumptions</h3>
 <div class="callout-content">
-<p>Take 5 minutes to list out as many assumptions as you can about the
-EIA 923 Puerto Rico data (<code>pr_gen_fuel_monthly.parquet</code>) in
-the <a href="data/">data directory</a>.</p>
+<p>Take 5 minutes to list out as many assumptions as you can
+<strong>about the EIA 923 Puerto Rico data</strong>
+(<code>pr_gen_fuel_monthly.parquet</code>) in the <a href="data/">data
+directory</a>.</p>
 <p>Please put them in the shared Google doc that your instructor
 prepared for you. This will serve as a foundation for future challenges
 in this lesson.</p>
@@ -470,7 +460,7 @@ things you learned about the data then?</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor2" aria-expanded="false" aria-controls="collapseInstructor2">
   <h3 class="accordion-header" id="headingInstructor2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor2" class="accordion-collapse collapse" aria-labelledby="headingInstructor2" data-bs-parent="#accordionInstructor2">
+<div id="collapseInstructor2" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor2" aria-labelledby="headingInstructor2">
 <div class="accordion-body">
 <p>Some examples, if students are feeling a little quiet:</p>
 <ul><li>the net generation data is actually in MWh and not a mix of
@@ -536,17 +526,20 @@ a little nicer:</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="cf">assert</span>(<span class="dv">1</span> <span class="op">==</span> <span class="dv">2</span>, <span class="st">"Expected 1 to be equal to 1."</span>)</span></code></pre>
 </div>
-<p>So let’s assert our assumption is true.</p>
+<p>So let’s assert our assumption is true. You’ll notice this flow is
+pretty similar to the flow in data exploration. The main difference
+being that we have the <em>computer</em> evaluate whether the
+expectation is true.</p>
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># pull out the piece we're interested in</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># carve off the data we need</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>fuel_consumed_mmbtu <span class="op">=</span> gen_fuel[<span class="st">"fuel_consumed_mmbtu"</span>]</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># finally make that assertion!</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="cf">assert</span> (fuel_consumed_mmbtu <span class="op">&gt;=</span> <span class="dv">0</span>).<span class="bu">all</span>(), <span class="st">"The reported fuel consumption in MMBtu should be non-negative"</span></span></code></pre>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># assert our expectation is true</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="cf">assert</span> (fuel_consumed_mmbtu <span class="op">&gt;=</span> <span class="dv">0</span>).<span class="bu">all</span>(), <span class="st">"We thought all fuel consumption would be non-negative."</span></span></code></pre>
 </div>
-<p>Oh no! We find that the assertion is not true! It’s actually very
+<p>Oh no! We find that the expectation is not true! It’s actually very
 common to find that, once you start writing down your assumptions, that
 they’re incomplete in some subtle way. Let’s dig in to see what’s going
 on.</p>
@@ -565,6 +558,9 @@ non-negative.”</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="cf">assert</span> (fuel_consumed_mmbtu.dropna() <span class="op">&gt;=</span> <span class="dv">0</span>).<span class="bu">all</span>(), <span class="st">"If fuel consumption in MMBtu is reported at all, it should be non-negative."</span></span></code></pre>
 </div>
 <p>Which passes with little fanfare.</p>
+<p>It is important to include plenty of context in the assert message. A
+good assert message sheds light on where things are going wrong, even
+when it is buried in a long data transformation pipeline.</p>
 <p>We’ll practice this skill in a bit, after we talk about which
 assumptions might be good to practice with.</p>
 </section><section><h2 class="section-heading" id="which-assumptions-are-worth-testing">Which assumptions are worth testing?<a class="anchor" aria-label="anchor" href="#which-assumptions-are-worth-testing"></a></h2>
@@ -590,7 +586,7 @@ see more and more issues pop up over time.</p>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor3" aria-expanded="false" aria-controls="collapseInstructor3">
   <h3 class="accordion-header" id="headingInstructor3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor3" class="accordion-collapse collapse" aria-labelledby="headingInstructor3" data-bs-parent="#accordionInstructor3">
+<div id="collapseInstructor3" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor3" aria-labelledby="headingInstructor3">
 <div class="accordion-body">
 <p>Put this up on the screen! Using <em>markdown cells</em>.</p>
 </div>
@@ -639,17 +635,22 @@ chance of being broken.</p></li>
 <div class="callout-content">
 <p>Now that we have evaluated potential testing targets, we can go ahead
 and write some tests for them!</p>
-<p>Pick an assumption from the list we generated above, and write some
-code that checks if it’s true or not.</p>
-<p>Let’s take 10 minutes for this. Since this is a small amount of time
+<p>In this challenge you’ll pick an assumption from the list we
+generated above, and write some code that checks if it’s true or
+not.</p>
+<p>Please put your initials next to an assumption if you’re working on
+it. Feel free to work on the same thing as someone else, this just helps
+us prepare for the discussion at the end.</p>
+<p>We’ll take 10 minutes for this. Since this is a small amount of time
 for open-ended coding work, we don’t expect everything to be perfect or
 even working. The point is to get some practice – not just at
 translating assumptions into code, but at finding the places where our
 initial assumptions were incomplete, and refining them to be more
 effective.</p>
-<p>If you’re unsure of which assumption to pick, the instructor will
-pick one for everyone to go over together after the time is up - we
-invite you to try doing that one!</p>
+<p>If you have questions during these 10 minutes, feel free to ask them
+in chat. At the end, we’ll ask about problems you encountered.</p>
+<p>If someone is feeling particularly generous, they can share their
+code and we can try to work through their problem together.</p>
 </div>
 </div>
 </div>
@@ -673,7 +674,7 @@ work has shifted while you weren’t looking.</p>
 <div class="callout-inner">
 <div class="callout-content">
 <ul><li>you’re always making assumptions about your data, and many of them
-are likely to be wrong</li>
+are likely to be wrong, so you need to check them</li>
 <li>you can prioritize assumptions by thinking about their impact,
 likelihood, and testability</li>
 <li>you can use <code>assert</code> statements to tell you if an
@@ -746,8 +747,8 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/assumptions.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/assumptions.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2026-01-29",
-  "datePublished": "2026-03-24"
+  "dateModified": "2026-03-26",
+  "datePublished": "2026-03-26"
 }
 
   </script><script>
