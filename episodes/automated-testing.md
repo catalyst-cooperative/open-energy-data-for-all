@@ -31,25 +31,52 @@ Prep checklist:
 
 ## Intro
 
-If you have a bunch of code, how do you know if it works?
+With what we've learned so far,
+you are well on your way towards a robust and reproducible research system!
+But, as the system grows,
+it's easy for it to get out of hand.
 
-Let's start with an example - follow along on your computer!
+We've gone over some tools to manage the complexity:
 
-So we're all on the same page,
-let's unzip the `making-sure-your-system-is-behaving-start.zip` file in the `checkpoints` folder of the course repository.
+* enforcing important assumptions about your input data
+* organizing your code into manageable and reusable pieces
+* nailing down flexible notebooks into orderly Python scripts
+
+Even with these tools,
+not to mention the miracle of human intellect,
+things can still go wrong sometimes.
+In this lesson,
+we'll introduce some tools to help you *detect* when that happens
+and *diagnose* the problem.
+
+We'll start by looking at an example of a system-in-progress
+and forming some hypotheses about what it *should* be doing -
+what the inputs are, yes,
+but also what we expect the outputs to look like.
+
+Then we'll write some code that checks if the system is doing the right thing.
+Along the way, we'll get to play with the *debugger*,
+a tool that lets you pause your program and investigate what's going wrong.
+
+Finally, we'll introduce a library that helps you organize the testing code you just wrote,
+and deal with the painful parts of a growing test suite.
+
+
+## Inputs and outputs
+
+TODO
+"Let's look in checkpoints/... - there's a small python project in there, that reads the raw EIA923 PR input files, does some cleaning, and creates a new table with some analysis of the cleaned data. Let's specifically look at the do_analysis function."
+
+TODO
+* make some code that has a subtle bug in it that deals with eia 923 data from PR
+
+* have a docstring which describes the intent of the code
 
 :::: instructor
 
-Do this in the file manager, not the terminal!
+Use VS Code here.
 
 ::::
-
-The first thing we need to know is what "it works" means.
-This project takes the raw Puerto Rico data and does some cleaning and reshaping,
-but what does that really mean?
-
-Let's open up `main.py` and see what's inside.
-We've got a few functions which describe what they do - nice!
 
 :::: callout
 Make sure you open this with a text editor or a code-specific program -
@@ -58,109 +85,34 @@ Microsoft Word, LibreOffice,
 or anything that lets you bold/italicize/underline text will not.
 ::::
 
-The `extract` function reads in some raw data and turns it into `DataFrame`s.
-The `transform` function does a bunch of cleaning for those `DataFrame`s.
-The `load` function writes the cleaned data back out to files on disk.
-
-We can run the code with:
-
-```bash
-$ uv run main.py
-```
-
-And then we will have output files in
-`data/pr_gen_fuel_monthly.parquet` and `data/pr_plant_frame.parquet`
-which we can look at using `pandas.read_parquet()`.
-
-First, open a Python interpreter in your terminal:
-
-```bash
-$ uv run python
-Python 3.13.7 (main, Aug 14 2025, 00:00:00) [GCC 15.2.1 20250808 (Red Hat 15.2.1-1)] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>>
-```
-
-This is sort of like a notebook in your terminal -
-you can type Python code and it will execute once you hit Enter.
-
-```python
->>> import pandas as pd
->>> pr_gen_fuel_monthly = pd.read_parquet("data/pr_gen_fuel_monthly.parquet")
->>> pr_gen_fuel_monthly
-
-      plant_id_eia            plant_name_eia prime_mover_code energy_source_code  ... fuel_consumed_mmbtu  fuel_consumed_units  net_generation_mwh       date
-0            61014  Pattern Santa Isabel LLC               WT                WND  ...            101260.0                  0.0             10991.0 2017-04-01
-1            61034              EcoElectrica               CA                 NG  ...                 0.0                  0.0             86494.0 2017-04-01
-2            61034              EcoElectrica               CT                 NG  ...           1976130.0            1976130.0            189669.0 2017-04-01
-3            61036               AES ILUMINA               PV                SUN  ...             31886.0                  0.0              3461.0 2017-04-01
-4            61082           AES Puerto Rico               ST                BIT  ...           3258736.0             150103.0            310975.0 2017-04-01
-...            ...                       ...              ...                ...  ...                 ...                  ...                 ...        ...
-5362         61149           Palo Seco Plant               GT                DFO  ...            332108.0              57260.0             25652.0 2024-09-01
-5363         61149           Palo Seco Plant               ST                RFO  ...           1041201.0             165270.0             98601.0 2024-09-01
-5364         61150          Cambalache Plant               GT                DFO  ...            633760.0             109269.0             51293.0 2024-09-01
-5365         61151            Mayaguez Plant               GT                DFO  ...            526019.0              90693.0             48201.0 2024-09-01
-5366         61225                 Caonillas               HY                WAT  ...                 0.0                  0.0                 0.0 2024-09-01
-
-[5058 rows x 11 columns]
-```
-
-We can use these two
-- the code and the actual output -
-to figure out what we think the system *should* do.
-This is sort of the mirror image to the input assumptions
-we were making in the assumptions lesson earlier.
-Let's try it!
-
 :::: challenge
 
-Take 10 minutes to skim through `main.py` and explore the output data.
-As you're doing so, keep track of things that should be true about the output data!
+### Challenge: characterize the function
 
-Write them in the Google Doc that your instructor should have given you by this point.
+Look at this function!
 
-Afterwards we'll talk about what we noticed!
+TODO think about connecting this back to the assumptions work earlier.
 
-::::
+What are the inputs to this function? What do you think is true about them?
 
-:::: instructor
+What are the outputs from this function? What do you think is true about them?
 
-* all plants report some non-null values for net generation
-* all fuel consumption units are non-negative
-* the heat rate of combined cycle plants is roughly 7,000 Btu/kWh
+Write these down in the Google Doc.
 
 ::::
-
-Now that we have some idea of what the system is supposed to do,
-we should figure out if that's all actually true.
-We can use the `assert` statement we introduced in the assumptions lesson -
-maybe throw them in at the end of `transform`.
-That can absolutely work to tell you if your system is functioning as expected.
-But there are some common situations that can make it a little painful:
-
-* sometimes there's a bunch of weird setup to even make that assertion, and you'd like to keep that out of your actual pipeline
-* sometimes you want to test that something works in a variety of situations, but the assertions need to change based on the situation
-* sometimes your *full* pipeline takes forever but there's a subsetted version of your pipeline that will expose most of the problems anyways, so you want to run the same checks on both
-* when an assertion fails, your whole pipeline stops running - so if there are multiple problems you only know about the first one.
-* if your assertion fails and it really seems like it shouldn't have, it can be hard to figure out what's going on
-
-"Figuring out what's wrong with your system" is a huge topic,
-so we'll only get to dip our toes in in this episode.
-We'll introduce a few tools that help you deal with these pain points:
-
-* *test functions* and *automated test runners* help you organize and run tests in a variety of different scenarios
-* an *interactive debugger* will help you when you need to investigate something about the code, whether it's the data processing code or the testing code.
-
 
 ## Test functions
 
-Let's try writing a test function for one of our expectations.
-This pulls the testing logic out of the actual data processing code,
-which allows us to run it separately and use automated test runners in the future.
-Think of it as modularizing your test code.
+Now that we know *what* to expect,
+let's figure out if those expectations are fulfilled.
+We can use the `assert` statement we introduced in the assumptions lesson.
+That can absolutely work to tell you if your system is functioning as expected.
+But oftentimes the assertion code is complicated,
+and can be confusing to have next to the "actual" code.
 
-Along the way, we'll also introduce the *debugger*,
-which can be a massive help in all of your coding activities.
+We can fix that by extracting the assertion logic out into its own function!
+Think of it as modularizing your test code.
+Let's do it!
 
 :::: instructor
 
@@ -175,11 +127,11 @@ throw up the NO react in Zoom and we'll give you time to catch up."
 ::::
 
 Start by creating a new file, `test_main.py`.
-Make sure it starts with `test_` - that will let the automated test runner find it later.
 Because of how we've set up the package structure,
 we need to keep it in the same directory as `main.py` and `utils.py`.
 
 Next we need to pick something to test.
+
 One thing we expect from the output is that
 there's a `fuel_consumption_units` column and that its value is 0 for sun, wind, and water.
 
@@ -234,8 +186,6 @@ Let's try it out!
 The first thing we need to do is add a *breakpoint* to the code,
 a place where we are going to pause our code and mess around inside it.
 We do this with the `breakpoint()` function:
-
-TODO add
 
 ```python
 from main import extract_pr_gen_fuel, transform_pr_gen_fuel

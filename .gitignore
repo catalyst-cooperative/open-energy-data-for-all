@@ -62,3 +62,5 @@ data/.~lock*
 data/pr_gen_fuel_monthly.parquet
 data/pr_gen_fuel_annual.parquet
 data/pr_plant_frame.parquet
+
+**/__pycache__/
