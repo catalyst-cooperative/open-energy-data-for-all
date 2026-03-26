@@ -14,9 +14,9 @@ exercises: 15
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Use a "plain language" strategy to help decide how best to design your functions
+- Use a "plain language" strategy to identify good candidates for modularization
 - Structure code to isolate discrete, inspectable steps
-- Design code modules for clarity and reuse
+- Communicate what code is doing using docstrings
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -303,6 +303,9 @@ Ask each team to paste their function into the codi and explain why they chose i
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
-- TODO
+- Plain language descriptions can help us choose which code to reorganize by identifying
+goals and intent.
+- 
+- We can attach our descriptions directly to our functions using docstrings.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

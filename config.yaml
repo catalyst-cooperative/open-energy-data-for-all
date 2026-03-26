@@ -59,7 +59,7 @@ episodes:
 - visual-data-exploration.md
 - assumptions.md
 # chapter 3. robustness/rigor
-#- modularization.md
+- modularization.md
 #- escape-from-jupyter.md
 #- data-validation.md
 #- debugging.md
