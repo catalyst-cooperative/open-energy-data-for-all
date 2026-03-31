@@ -19,18 +19,16 @@ def yearly_heat_rate_by_energy_source(data: pd.DataFrame) -> pd.DataFrame:
             "net_generation_mwh",
         ],
     ]
-    monthly_heat_rates = fuel_gen_monthly.assign(
-        year=fuel_gen_monthly["date"].dt.year,
-        heat_rate_mmbtu_per_mwh=fuel_gen_monthly["fuel_consumed_for_electricity_mmbtu"]
-        / fuel_gen_monthly["net_generation_mwh"],
-    )
+    fuel_gen_yearly = fuel_gen_monthly.assign(
+        year=fuel_gen_monthly["date"].dt.year
+    ).drop(columns="date")
+    fleets_yearly = fuel_gen_yearly.groupby(
+        by=["year", "energy_source_code"], observed=True
+    ).sum()
     yearly_heat_rates = (
-        monthly_heat_rates.groupby(["year", "energy_source_code"], observed=False)[
-            "heat_rate_mmbtu_per_mwh"
-        ]
-        .mean()
-        .dropna()
-    )
+        fleets_yearly["fuel_consumed_for_electricity_mmbtu"]
+        / fleets_yearly["net_generation_mwh"]
+    ).dropna()
     return yearly_heat_rates
 
 
