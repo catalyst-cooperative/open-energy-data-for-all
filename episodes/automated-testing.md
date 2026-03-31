@@ -223,7 +223,7 @@ This will help us figure out what the heck is going on.
 The first thing we need to do is add a *breakpoint* to the code,
 which is where we will first pause the program.
 
-We do this with the `breakpoint()` function. 
+We do this with the `breakpoint()` function.
 
 First, let's look right before the assertion -
 this error just tells us that *something* was greater than 15,
@@ -720,4 +720,3 @@ We introduced some tools to help with this strategy:
 * test functions to identify and reproduce bad output
 * the debugger to dig into the process that produced the bad output
 * an automated testing framework that helps organize your rapidly-growing test suite
-
