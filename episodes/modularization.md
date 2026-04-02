@@ -305,7 +305,7 @@ Ask each team to paste their function into the codi and explain why they chose i
 
 - Plain language descriptions can help us choose which code to reorganize by identifying
 goals and intent.
-- 
+-
 - We can attach our descriptions directly to our functions using docstrings.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
