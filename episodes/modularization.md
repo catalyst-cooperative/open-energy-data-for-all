@@ -82,7 +82,7 @@ code that we can use to guide our decision-making.
 # Get the speed limit of a highway in miles/hr
 def x():
     return 65
-``` 
+```
 
 ```python
 # Get the age at which someone is eligible for Medicare
