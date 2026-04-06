@@ -1,7 +1,7 @@
 ---
 title: "Modularization"
-teaching: 30
-exercises: 15
+teaching: 40
+exercises: 20
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions
@@ -46,8 +46,12 @@ Even in this short notebook, we're already seeing a lot of duplication! How shou
 As we think about how to organize our code into discrete and reusable steps (or to *modularize* it), it doesn't take long to run into these types of tricky questions. One strategy to help us figure out which code we can modularize is a **plain language approach**.
 
 Often, we start by writing our code first and adding comments or documentation at the end. However, language can be an important tool to guide code design and reorganization.
+We can start by describing what our code *should do* and *why* - what we call a  **plain language description**.
 
-A **plain language description** tells us what our code *should do*.
+In our notebook, we saw many examples of near-identical code that we should
+consolidate. In real life, things aren't always so clear cut.
+
+Sometimes our code looks different but does the same or similar things:
 
 ```python
 def double_x(df):
@@ -66,21 +70,24 @@ def two_x(df):
 This code creates a new column with values that are also twice the value of X.
 
 Even though the code is not identical, these two lines are performing an identical task
-and we could replace them with one shared function. Where these descriptions
-are very similar, we should consider combining the code into one shared function.
+and we could replace them with one shared function. Plain language descriptions can be
+an important tool for identifying code with shared goals that we should consider
+combining into one shared function.
 
-However, not all similar code should be automatically reorganized together. A plain
-language description should also give us important context about *why* we've written
-this code:
-
-```python
-def speed_limit():
-    return 35
-```
+Conversely, not all similar code should be automatically reorganized together. A plain
+language description should give us important context about *why* we've written
+code that we can use to guide our decision-making.
 
 ```python
-def age():
-    return 35
+# Get the speed limit of a highway in miles/hr
+def x():
+    return 65
+``` 
+
+```python
+# Get the age at which someone is eligible for Medicare
+def x():
+    return 65
 ```
 
 For instance, if we know that the first function returns the speed limit and the second returns someone's
@@ -93,7 +100,8 @@ Let's practice on some real code!
 
 ### Challenge 2: Writing a plain language description
 
-Look at the following code. Which of these best describes the intent of the code?
+Look at the following code. Which of these is the most useful way of describing this code
+in plain language?
 
 ```python
 # Plant 62410 has two 2020 data entries but one is null
@@ -106,7 +114,7 @@ pr_gen_fuel_clean = pr_gen_fuel_clean.loc[
 
 * A. Drop a duplicated entry with missing data.
 * B. Address some data problems and return a cleaner Pandas DataFrame.
-* C. Drop any rows with a null in the "value" column for plant ID 62410 in 2020.
+* C. Drop any rows with a null in the fuel_consumed_for_electricity_mmbtu column for plant ID 62410 in 2020.
 * D. Create ``pr_gen_fuel_clean``.
 
 :::: solution
@@ -114,7 +122,8 @@ A. Drop a duplicated entry with missing data.
 
 Why A.? Unlike B., A. describes the *intention* behind the code (e.g., we're dropping a
 value because we've subjectively decided that it is *bad*), while providing enough detail
-about the specific steps taked in the code (unlike C. or D.).
+about the specific steps taken in the code (unlike C or D). If the in-line comment was removed, we could still write C but we wouldn't be
+able to recover the context about intention that A provides.
 
 B. does not give us any specific information about what types of cleaning we are performing. We could return a completely different output that would still meet this description.
 
@@ -188,17 +197,6 @@ What makes a good function?:
 
 ::::
 
-Plain language not only helps us to identify meaningful similarities and differences across
-our code, but it can also serve as an important starting place for function design:
-
-- There are many ways to do most tasks. Using plain language descriptions focuses us
-on the desired outcome, and helps us assess whether different ways of doing the same
-thing might help meet our goals better.
-- Plain language helps us break down the discrete steps involved in a task and the expected outcome.
-- When our underlying data changes or we try to reuse our code in a different context,
-plain language descriptions can help us pay attention to what the code we've written
-can and can't be used to do.
-
 When we're taught how to write a function, lessons typically focus on the basics:
 
 - A function should have a name
@@ -206,10 +204,13 @@ When we're taught how to write a function, lessons typically focus on the basics
 - A function can have an output (return something)
 - Function and variable names should be informative, but not unwieldy. `i` is bad, but so is `raw_puerto_rico_generation_fuel_data_from_eia_923`.
 
+
+Plain language not only helps us to identify meaningful similarities and differences across
+our code, but it can also serve as an important starting place for function design:
+
 Let's look at this code from the notebook:
 
 ```python
-# convert codes to strings
 ENERGY_SOURCE_DICT = {'WND':'wind', 'NG':'natural_gas', 'SUN':'solar',
     'BIT':'bituminous_coal', 'MWH':"electricity_for_energy_storage", 'DFO':'distillate_fuel_oil', 'RFO':'residual_fuel_oil', 'WAT':'hydro'}
 
@@ -235,10 +236,6 @@ def map_code_to_strings(df, mapped_col, code_dictionary):
     df = df.drop(columns=mapped_col).rename(columns={'code_name':mapped_col})
     return df
 ```
-
-:::: instructor
-Demonstrate that the code works on cell 5 as well.
-::::
 
 ### Docstrings
 
