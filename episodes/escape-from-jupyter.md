@@ -102,7 +102,7 @@ uv run main.py
 ```
 
 ```
-Using CPython 3.13.2
+Using CPython 3.13.5
 Creating virtual environment at: .venv
 Hello from pr-gen-fuel!
 ```
@@ -160,7 +160,7 @@ we can now see Pandas and Jupyter listed in the dependencies:
 ```
 dependencies = [
     "jupyter>=1.1.1",
-    "pandas>=2.3.2", # Your version might be different!
+    "pandas>=3.0.2", # Your version might be different!
 ]
 ```
 
@@ -199,15 +199,14 @@ don't have to think about it! Every time we use `uv run` to run our Python files
 
 #### Setting up our data pipeline
 
-Now let's migrate our code over. First, let's copy over our `data` folder and the `checkpoints/transform.ipynb` notebook
-containing our modularized code from the last lesson into our project folder. The folder should now look like this:
+Now let's migrate our code over. First, let's copy over the file and the `data` folder in the `checkpoints/escape-from-jupyter` folder into our project folder. They contain our modularized code from the last lesson. The folder should now look like this:
 
 ```shell
 ls
 ```
 
 ```
-data  main.py  pyproject.toml  README.md  transform.ipynb  uv.lock
+data  etl.ipynb  main.py  pyproject.toml  README.md  uv.lock
 ```
 
 :::: instructor
@@ -230,12 +229,12 @@ if __name__ == "__main__":
     main()
 ```
 
-Let's start by replacing `main()`. We can migrate our modularized code from `transform.ipynb` into one main transformation function called `etl_pr_gen_fuel()`.
+Let's start by replacing `main()`. We can migrate our modularized code from `etl.ipynb` into one main transformation function called `etl_pr_gen_fuel()`.
 
 First, we can open up the notebook:
 
 ```shell
-uv run jupyter notebook transform.ipynb
+uv run jupyter notebook etl.ipynb
 ```
 
 :::: instructor
@@ -251,124 +250,79 @@ We should wind up with a block of code in `main.py` that looks like this:
 import pandas as pd
 import numpy as np
 
-# Silence some warnings about deprecated Pandas behavior
-pd.set_option("future.no_silent_downcasting", True)
+def load_generation_data(path):
+    """Load the cleaned Puerto Rico generator operations data from disk.
+    
+    Args:
+        path: Path to raw data file on disk.
+    """
+    return pd.read_parquet(path)
 
-# Utility functions
-def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFrame:
-    """Melt many columns of monthly data for a single variable into a month and a value column.
+def write_generation_data(df, path):
+    df.to_parquet(path)
+    return
 
-    This code takes a table with data stored in one column per month and stacks all
-    the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning
-    a table with one month column and one value column for this variable in order to
-    make it easier to plot our data over time. Note that this drops the other
-    variables of data.
+
+def map_code_to_strings(df, mapped_col, code_dictionary):
+    """Convert a column of codes into strings defined by a dictionary.
+
+    This code takes a dataframe with a column of codes and returns a dataframe with the same column
+    mapped to strings to prevent users from needing to consult a look-up table. The relationship between columns and strings is defined by a dictionary.
 
     Args:
-        pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
-        melted_var: The variable to be melted.
+        df: A Pandas DataFrame.
+        mapped_col: The name of the column to be mapped.
+        code_dictionary: A dictionary containing code-string pairs.
     """
-    # set up shared index
-    index_cols = ["plant_id_eia", "plant_name_eia", "report_year", "prime_mover_code", "energy_source_code", "fuel_unit"]
+    assert all([code in code_dictionary for code in df[mapped_col].unique()]) # Check all codes present
+    df['code_name'] = df[mapped_col].replace(code_dictionary)
+    df = df.drop(columns=mapped_col).rename(columns={'code_name':mapped_col})
+    return df
 
-    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
-    var_df = pr_gen_fuel.loc[:, var_cols]
+def handle_thousands_fuel_units(df, thousands_unit: str):
+    """Where the fuel unit column contains a small number of thousands, multiply by 1000 and update the unit label.
 
-    ## Melt the fuel_consumed columns
-    var_melt = var_df.melt(
-        id_vars=index_cols,
-        var_name="month",
-        value_name=melted_var
-    )
-    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
-    var_melt = var_melt.set_index(index_cols + ["month"])
-    return var_melt
-
-def handle_data_types(pr_df: pd.DataFrame, categorical_cols: list[str]) -> pd.DataFrame:
-    """Convert EIA 923 PR columns into desired data types.
-
-    In addition to using the standard convert_dtypes() function, handle a series of
-    non-standard data types conversions for associated_combined_heat_power
-    and create categorical columns to save memory.
+    This expects the thousands_unit to be in a column called "fuel_unit", and the units column to live in a
+    column called "fuel_consumed_for_electricity_units".
 
     Args:
-        pr_df: Dataframe with EIA 923 Puerto Rico data.
-        categorical_cols: List of columns that should be converted to a categorical dtype.
+        df: A Pandas DataFrame.
+        unit_column: The column containing unit names.
+        thousands_unit: The name of the unit to be normalized.
     """
-    pr_df = pr_df.convert_dtypes()
-    pr_df["associated_combined_heat_power"] = (
-        pr_df["associated_combined_heat_power"]
-        .astype("object") # necessary for the types to work for the .replace() call
-        .replace({"Y": True, "N": False})
-        .astype("boolean")
-    )
-    pr_df = pr_df.astype({col: "category" for col in categorical_cols})
-    return pr_df
+    df.loc[df.fuel_unit == thousands_unit,"fuel_consumed_for_electricity_units"] = df.loc[df.fuel_unit == thousands_unit, "fuel_consumed_for_electricity_units"]*1000
+    df.loc[df.fuel_unit == thousands_unit, "fuel_unit"] = df.loc[df.fuel_unit == thousands_unit].fuel_unit.str.replace("thousand ", "")
+    return df
+
 
 def transform_pr_gen_fuel():
-    # Read in the raw data
-    pr_gen_fuel = pd.read_parquet("data/raw_eia923__puerto_rico_generation_fuel.parquet")
-    pr_plant_frame = pd.read_parquet("data/raw_eia923__puerto_rico_plant_frame.parquet")
-    # Handle EIA null values
-    pr_gen_fuel = pr_gen_fuel.replace(to_replace = ".", value = pd.NA)
+    raw_pr_gen_fuel = load_generation_data(path="data/pr_gen_fuel_monthly.parquet")
+    # Standardize NAs
+    pr_gen_fuel = raw_pr_gen_fuel.replace(to_replace = ".", value = pd.NA)
+    pr_gen_fuel = pr_gen_fuel.replace(to_replace = "null", value = pd.NA)
 
-    # Convert data types (mmbtu/units to numeric, booleans, categories)
-    pr_gen_fuel = handle_data_types(
-            pr_gen_fuel,
-            categorical_cols = ["energy_source_code","fuel_type_code_agg", "prime_mover_code", "reporting_frequency_code", "data_maturity", "plant_state"]
-                                )
+    # convert codes to strings
+    ENERGY_SOURCE_DICT = {'WND':'wind', 'NG':'natural_gas', 'SUN':'solar',
+                        'BIT':'bituminous_coal', 'MWH':"electricity_for_energy_storage",
+                        'DFO':'distillate_fuel_oil', 'RFO':'residual_fuel_oil', 'WAT':'hydro'}
 
-    for colname in pr_gen_fuel.columns: # TODO: Do we need this? Check.
-        if (
-            "fuel_consumption" in colname
-            or "fuel_consumed" in colname
-            or "net_generation" in colname
-            or "fuel_mmbtu_per_unit" in colname
-        ):
-            pr_gen_fuel[colname] = pr_gen_fuel[colname].astype("float64")
+    PRIME_MOVER_CODE_DICT = {
+        'WT':'onshore_wind', 'CA':'cc_steam', 'CT':'cc_combustion_turbine',
+        'PV':'photovoltaic', 'ST':'steam_turbine', 'BA':'battery',
+        'IC': 'internal_combustion', 'GT': 'gas_turbine', 'HY':'hydraulic_turbine' 
+    }
 
-    # Handle EIA null values
-    pr_plant_frame = pr_plant_frame.replace(to_replace = ".", value = pd.NA)
+    pr_gen_fuel = map_code_to_strings(df = pr_gen_fuel, mapped_col = "energy_source_code", code_dictionary = ENERGY_SOURCE_DICT)
+    pr_gen_fuel = map_code_to_strings(df = pr_gen_fuel, mapped_col = "prime_mover_code", code_dictionary = PRIME_MOVER_CODE_DICT)
 
-    # Convert data types (mmbtu/units to numeric, categories, booleans)
-    pr_plant_frame = handle_data_types(pr_plant_frame, categorical_cols = ["reporting_frequency_code", "data_maturity", "plant_state"])
-
-    #### monthly pivoting
-    # Pivot variable columns
-    fuel_elec_mmbtu_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_for_electricity_mmbtu")
-    fuel_elec_units_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_for_electricity_units")
-    fuel_mmbtu_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_mmbtu")
-    fuel_units_melt = melt_monthly_vars(pr_gen_fuel, "fuel_consumed_units")
-    net_gen_melt = melt_monthly_vars(pr_gen_fuel, "net_generation_mwh")
-
-    # Combine all the pivoted DFs
-    pr_gen_fuel_melt = pd.concat(
-        [fuel_elec_mmbtu_melt, fuel_elec_units_melt, fuel_mmbtu_melt, fuel_units_melt, net_gen_melt],
-        axis="columns",
-    ).reset_index()
-
-    ## Create date from month and year
-    pr_gen_fuel_melt["date"] = pd.to_datetime(
-        pr_gen_fuel_melt["month"] + pr_gen_fuel_melt["report_year"].astype(str),
-        format="%B%Y",
-    )
-    ## Drop old date columns
-    pr_gen_fuel_clean = pr_gen_fuel_melt.drop(columns = ["report_year", "month"])
-
-    # Plant 62410 has two 2020 data entries but one is null
-    # Drop the bad row
-    pr_gen_fuel_final = pr_gen_fuel_clean.loc[
-        ~((pr_gen_fuel_clean.plant_id_eia == 62410)
-        & (pr_gen_fuel_clean.date.dt.year == 2020)
-        & (pr_gen_fuel_clean.fuel_consumed_for_electricity_mmbtu.isnull()))
-    ]
+    pr_gen_fuel = handle_thousands_fuel_units(pr_gen_fuel, thousands_unit = "thousand_short_tons")
+    pr_gen_fuel = handle_thousands_fuel_units(pr_gen_fuel, thousands_unit = "thousand barrels")
 
     # drop after 2025-03-01 (for now) as these values should not exist
-    pr_gen_fuel_final = pr_gen_fuel_final.loc[pr_gen_fuel_clean.date < pd.Timestamp("2025-03-01")]
+    pr_gen_fuel = pr_gen_fuel.loc[pr_gen_fuel.date < pd.Timestamp("2025-03-01")]
 
-    ### output the data to Parquet files
-    pr_gen_fuel_final.to_parquet("data/pr_gen_fuel_monthly.parquet")
-    pr_plant_frame.to_parquet("data/pr_plant_frame.parquet")
+    ### save cleaned file
+    write_generation_data(pr_gen_fuel, "data/pr_gen_fuel_monthly_clean.parquet")
 
 if __name__ == "__main__":
     transform_pr_gen_fuel()
@@ -487,7 +441,7 @@ Now that we've created our `utils.py` file, we can use it in a Jupyter notebook
 by importing it.
 
 ```shell
-uv run jupyter notebook transform.ipynb
+uv run jupyter notebook etl.ipynb
 ```
 
 ```python
