@@ -252,7 +252,7 @@ import numpy as np
 
 def load_generation_data(path):
     """Load the cleaned Puerto Rico generator operations data from disk.
-    
+
     Args:
         path: Path to raw data file on disk.
     """
@@ -309,7 +309,7 @@ def transform_pr_gen_fuel():
     PRIME_MOVER_CODE_DICT = {
         'WT':'onshore_wind', 'CA':'cc_steam', 'CT':'cc_combustion_turbine',
         'PV':'photovoltaic', 'ST':'steam_turbine', 'BA':'battery',
-        'IC': 'internal_combustion', 'GT': 'gas_turbine', 'HY':'hydraulic_turbine' 
+        'IC': 'internal_combustion', 'GT': 'gas_turbine', 'HY':'hydraulic_turbine'
     }
 
     pr_gen_fuel = map_code_to_strings(df = pr_gen_fuel, mapped_col = "energy_source_code", code_dictionary = ENERGY_SOURCE_DICT)
