@@ -229,7 +229,7 @@ if __name__ == "__main__":
     main()
 ```
 
-Let's start by replacing `main()`. We can migrate our modularized code from `etl.ipynb` into one main transformation function called `etl_pr_gen_fuel()`.
+Let's start by replacing `main()`. We can migrate our modularized code from `etl.ipynb` into one main transformation function called `transform_pr_gen_fuel()`.
 
 First, we can open up the notebook:
 
@@ -370,65 +370,56 @@ across multiple contexts. In order to keep things organized, we can split out th
 general purpose functions from our EIA 923-specific code in another file.
 
 Let's start by copying the `main.py` file and renaming it `utils.py`. In this file, let's
-only keep the `melt_monthly_vars()` and `handle_data_types()` functions we wrote in the last episode:
+only keep the helper functions we wrote in the last episode:
 
 :::: spoiler
 ```python
 import pandas as pd
 import numpy as np
 
-# Silence some warnings about deprecated Pandas behavior
-pd.set_option("future.no_silent_downcasting", True)
+def load_generation_data(path):
+    """Load the cleaned Puerto Rico generator operations data from disk.
+    
+    Args:
+        path: Path to raw data file on disk.
+    """
+    return pd.read_parquet(path)
 
-# Utility functions
-def melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: str) -> pd.DataFrame:
-    """Melt many columns of monthly data for a single variable into a month column and a value column.
+def write_generation_data(df, path):
+    df.to_parquet(path)
+    return
 
-    This code takes a table with data stored in one column per month and stacks all the fields for a
-    single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column
-    and one value column for this variable in order to make it easier to plot our data over time.
-    Note that this drops the other variables of data.
+
+def map_code_to_strings(df, mapped_col, code_dictionary):
+    """Convert a column of codes into strings defined by a dictionary.
+
+    This code takes a dataframe with a column of codes and returns a dataframe with the same column
+    mapped to strings to prevent users from needing to consult a look-up table. The relationship between columns and strings is defined by a dictionary.
 
     Args:
-        pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.
-        melted_var: The variable to be melted.
+        df: A Pandas DataFrame.
+        mapped_col: The name of the column to be mapped.
+        code_dictionary: A dictionary containing code-string pairs.
     """
-    # set up shared index
-    index_cols = ["plant_id_eia", "plant_name_eia", "report_year", "prime_mover_code", "energy_source_code", "fuel_unit"]
+    assert all([code in code_dictionary for code in df[mapped_col].unique()]) # Check all codes present
+    df['code_name'] = df[mapped_col].replace(code_dictionary)
+    df = df.drop(columns=mapped_col).rename(columns={'code_name':mapped_col})
+    return df
 
-    var_cols = index_cols + [col for col in pr_gen_fuel.columns if col.startswith(melted_var)]
-    var_df = pr_gen_fuel.loc[:, var_cols]
+def handle_thousands_fuel_units(df, thousands_unit: str):
+    """Where the fuel unit column contains a small number of thousands, multiply by 1000 and update the unit label.
 
-    ## Melt the fuel_consumed columns
-    var_melt = var_df.melt(
-        id_vars=index_cols,
-        var_name="month",
-        value_name=melted_var
-    )
-    var_melt["month"] = var_melt["month"].str.replace(f"{melted_var}_", "")
-    var_melt = var_melt.set_index(index_cols + ["month"])
-    return var_melt
-
-def handle_data_types(pr_df: pd.DataFrame, categorical_cols: list[str]) -> pd.DataFrame:
-    """Convert EIA 923 PR columns into desired data types.
-
-    In addition to using the standard convert_dtypes() function, handle a series of
-    non-standard data types conversions for associated_combined_heat_power
-    and create categorical columns to save memory.
+    This expects the thousands_unit to be in a column called "fuel_unit", and the units column to live in a
+    column called "fuel_consumed_for_electricity_units".
 
     Args:
-        pr_df: Dataframe with EIA 923 Puerto Rico data.
-        categorical_cols: List of columns that should be converted to a categorical dtype.
+        df: A Pandas DataFrame.
+        unit_column: The column containing unit names.
+        thousands_unit: The name of the unit to be normalized.
     """
-    pr_df = pr_df.convert_dtypes()
-    pr_df["associated_combined_heat_power"] = (
-        pr_df["associated_combined_heat_power"]
-        .astype("object") # necessary for the types to work for the .replace() call
-        .replace({"Y": True, "N": False})
-        .astype("boolean")
-    )
-    pr_df = pr_df.astype({col: "category" for col in categorical_cols})
-    return pr_df
+    df.loc[df.fuel_unit == thousands_unit,"fuel_consumed_for_electricity_units"] = df.loc[df.fuel_unit == thousands_unit, "fuel_consumed_for_electricity_units"]*1000
+    df.loc[df.fuel_unit == thousands_unit, "fuel_unit"] = df.loc[df.fuel_unit == thousands_unit].fuel_unit.str.replace("thousand ", "")
+    return df
 ```
 ::::
 
@@ -452,7 +443,7 @@ Better yet, we can access the excellent documentation we've written about it.
 
 ```python
 help(utils)
-help(utils.handle_data_types)
+help(utils.map_code_to_strings)
 ```
 
 Now we can use our functions in any notebook we write, without having to copy it over
@@ -467,7 +458,7 @@ Import our helper functions from `utils.py` into `main.py`. Test that this works
 the script using uv.
 :::
 
-Now, when you make a tweak to `handle_data_types()`, that tweak will be applied across
+Now, when you make a tweak to `map_code_to_strings()`, that tweak will be applied across
 all of your code immediately. No more copy-pasting!
 
 :::: callout
