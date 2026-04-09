@@ -69,29 +69,28 @@ def two_x(df):
 
 This code creates a new column with values that are also twice the value of X.
 
-Even though the code is not identical, these two lines are performing an identical task
-and we could replace them with one shared function. Plain language descriptions can be
-an important tool for identifying code with shared goals that we should consider
-combining into one shared function.
+Even though the code is not identical, plain language descriptions have helped us
+determine that these two lines are performing an identical task, so it is appropriate to
+replace them with one shared function.
 
 Conversely, not all similar code should be automatically reorganized together. A plain
 language description should give us important context about *why* we've written
 code that we can use to guide our decision-making.
 
 ```python
-# Get the speed limit of a highway in miles/hr
-def x():
-    return 65
+# Is someone driving over the speed limi? (in miles/hour)
+def check(x):
+    return x> 65
 ```
 
 ```python
-# Get the age at which someone is eligible for Medicare
-def x():
+# Is someone eligible for a senior citizen discount?
+def check(x):
     return 65
 ```
 
-For instance, if we know that the first function returns the speed limit and the second returns someone's
-age, we **should not** combine them into one function, even if the underlying code is identical.
+For instance, if we know that the first function deals with speed limits and the second deals with
+someone's age, we **should not** combine them into one function, even if the underlying code is identical.
 Intent is a key component of a plain language description.
 
 Let's practice on some real code!
@@ -120,10 +119,10 @@ pr_gen_fuel_clean = pr_gen_fuel_clean.loc[
 :::: solution
 A. Drop a duplicated entry with missing data.
 
-Why A.? Unlike B., A. describes the *intention* behind the code (e.g., we're dropping a
+Why A.? Unlike C., A. describes the *intention* behind the code (e.g., we're dropping a
 value because we've subjectively decided that it is *bad*), while providing enough detail
-about the specific steps taken in the code (unlike C or D). If the in-line comment was removed, we could still write C but we wouldn't be
-able to recover the context about intention that A provides.
+about the specific steps taken in the code (unlike B or D). If the in-line comment was removed,
+we could still write C but we wouldn't be able to recover the context about intention that A provides.
 
 B. does not give us any specific information about what types of cleaning we are performing. We could return a completely different output that would still meet this description.
 
@@ -302,7 +301,6 @@ Ask each team to paste their function into the codi and explain why they chose i
 
 - Plain language descriptions can help us choose which code to reorganize by identifying
 goals and intent.
--
 - We can attach our descriptions directly to our functions using docstrings.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
