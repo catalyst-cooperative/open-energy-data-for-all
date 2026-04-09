@@ -379,7 +379,7 @@ import numpy as np
 
 def load_generation_data(path):
     """Load the cleaned Puerto Rico generator operations data from disk.
-    
+
     Args:
         path: Path to raw data file on disk.
     """
