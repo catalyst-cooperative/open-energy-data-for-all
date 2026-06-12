@@ -10,8 +10,8 @@ def load_generation_data(path) -> pd.DataFrame:
 def yearly_heat_rate_by_energy_source(data: pd.DataFrame) -> pd.DataFrame:
     """Calculate heat rates for each year, across every energy source code.
 
-    We want to know how much efficiently Puerto Rico generates electricity from
-    each fuel source.
+    We want to be able to compare generation efficiency across different
+    energy sources (e.g., coal, distillate fuel oil) over time.
     """
 
     fuel_gen_monthly = data.loc[
