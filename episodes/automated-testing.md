@@ -863,5 +863,25 @@ We introduced some tools to help with this strategy:
 * the debugger to dig into the process that produced the bad output
 * an automated testing framework that helps organize your rapidly-growing test suite
 
-Now you're equipped with a starter kit of knowledge and tools to go and produce your own research software,
-that will mostly keep working as you change it!
+Writing code with tests in mind may be slower at first,
+but it's more than worth the investment if it means you can
+reuse or extend existing code for your next research project
+-- and know that it's still working --
+instead of starting from a blank notebook.
+Using a debugger rapidly accelerates your ability to figure out what's going on
+during an unexpected failure,
+without having to dedicate time to reproduce the error conditions
+in an environment where you can examine what's happening,
+or littering the code with print statements you later have to remove or maintain.
+
+Together, testing and debugging can be a powerful starter kit of tools
+to produce long-lived research software you can be confident will continue working correctly
+across many revisions and extensions.
+Go get 'em!
+
+:::: keypoints
+
+- It is good to test your assumptions about your pipeline's output, and `pytest` can help you keep your tests concise and easy to maintain.
+- When something fails, you can use the built-in Python debugger, `pdb`, to pause the program at the point of failure and explore until you find the culprit.
+
+::::
