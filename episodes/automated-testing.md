@@ -43,19 +43,33 @@ and *diagnose* the problem.
 
 We'll start by looking at a small slice of a system-in-progress.
 
-We'll form a hypothesis about what it should be doing,
+We'll form hypotheses about what it should be doing,
 then write some code that checks if the system is doing the right thing.
-Along the way, we'll get to play with the *debugger*,
-a tool that lets you pause your program and investigate what's going wrong.
-
-Finally, we'll introduce a library that helps you organize the testing code you just wrote,
+We'll introduce a library that helps you organize the testing code you just wrote,
 and deal with the painful parts of a growing test suite.
+When we run into failing tests, we'll get to play with the *debugger*,
+a tool that lets you pause your program and investigate what's going wrong.
 
 
 ## Code background
 
+:::: instructor
+
+Use standard VSCode here,
+instead of whatever wacky terminal editor you happen to be experimenting with this week.
+
+::::
+
 Look in the `checkpoints/making-sure-your-system-is-behaving` directory,
 and open that `main.py` file.
+
+:::: callout
+Make sure you open this with a text editor or a code-specific program -
+VSCode, PyCharm, Notebook, TextEdit, etc. will all work.
+Microsoft Word, LibreOffice,
+or anything that lets you bold/italicize/underline text will not.
+::::
+
 There are two functions in here.
 One just reads in some data.
 The other calculates heat rates, split out by year & energy source code.
@@ -67,41 +81,23 @@ we've introduced a subtle bug in here.
 Don't try too hard to spot it with your eyes,
 we'll use *tools* to figure it out together.
 
-:::: instructor
-
-Use standard VSCode here,
-instead of whatever wacky terminal editor you happen to be experimenting with this week.
-
-::::
-
-:::: callout
-Make sure you open this with a text editor or a code-specific program -
-VSCode, PyCharm, Notebook, TextEdit, etc. will all work.
-Microsoft Word, LibreOffice,
-or anything that lets you bold/italicize/underline text will not.
-::::
-
-
 ## Finding a bug
 
-Let's start out by writing some code to check some basic assumptions about the data.
+We want to write some code to check some basic assumptions about the data.
 
 We can use `assert` statements like before,
-But as the assertion code gets complicated,
-and can be confusing to have next to the "actual" code.
-We can deal with that by modularizing the test code,
-separating it out into its own functions.
-
-We won't get into anything too complicated here,
-but let's practice writing the tests separately!
+but as the assertion code gets complicated,
+it can be confusing to have it mixed in with the "actual" code.
+We can deal with that by keeping the test code in separate files.
 
 Start by creating a new file, `test_main.py`.
 Because of how we've set up the package structure,
 we need to keep it in the same directory as `main.py` and `utils.py`.
 
-Let's check that there is data at all.
-But first, it's nice to start with something that fails.
-Then at least you know all the test machinery is working.
+For our first assumption, let's check that there is data at all.
+We'll start with an empty function and build up to the check that we want.
+Starting with something that fails
+makes it easy to tell that all the test machinery is working.
 
 ```python
 def test_data_exists():
@@ -112,11 +108,12 @@ That should fail nicely!
 Now let's run it:
 
 ```
-$ uv run test_main.py
+$ uv run python test_main.py
 ```
 
-Hmm... no `AssertionError` shows up, something's fishy.
-We need to add the test function to the `if __name__ == "__main__":` block in order for it to run.
+Hmm... no `AssertionError` shows up, so something is fishy.
+Aha! We wrote a function, but nothing is calling it.
+We need to call our function in the `if __name__ == "__main__":` block in order for it to run.
 
 ```python
 if __name__ == "__main__":
@@ -125,9 +122,11 @@ if __name__ == "__main__":
 ```
 
 Now if we run it we'll get an `AssertionError`. Hooray!
-Always good to know that the test code will actually yell at you if it fails.
+If you know that the test code will actually yell at you if it fails,
+then you know that if it doesn't yell at you, it has succeeded.
 
-Now let's actually write the test - we need to take the following steps:
+Now let's build up to the check we want.
+We need to take the following steps:
 
 ```python
 def test_data_exists():
@@ -153,7 +152,7 @@ Now we can try to test some other things!
 
 * the heat rates exist at all
 * the heat rates are all non-negative
-* the heat rates are all less than 15
+* the heat rates aren't unreasonably high
 
 Let's have you work on the first one
 to get your hands dirty with the testing.
@@ -161,12 +160,11 @@ to get your hands dirty with the testing.
 :::: challenge
 ### Challenge: writing test functions
 
-First, write a test in `test_main.py`, `test_heat_rates_exist`,
+Write a function in `test_main.py` called `test_heat_rates_exist`,
 that tests that the *heat rates* exist.
 
 You'll need to import `yearly_heat_rate_by_energy_source`,
 and remember to start with a failing assertion to make sure the test is getting run:
-
 
 ```python
 from main import load_generation_data, yearly_heat_rate_by_energy_source
@@ -204,15 +202,28 @@ def test_heat_rates_non_negative():
 # if __name__ == "__main__": ...
 ```
 
-There are a few annoyances that are starting to show up now.
+We have three tests! That's great.
+
+But ... it's only three tests, and there are already some bits of code
+that appear over and over.
+
+A useful programming habit is to be *strategically lazy*:
+if you find yourself doing the same thing repeatedly,
+that's a signal you are working too hard.
+Repetitive code is error-prone, and annoying to maintain.
+If you can find a way to do the same work with less repetition,
+that will usually be more reliable.
+
+There are a few such annoyances that have started to show up for us today.
 First,
 it's easy to forget to add the test to
-the `if __name__ == "__main__":` block at the end.
+the `if __name__ == "__main__"` block at the end.
 Second,
 we are repeating our data loading over and over.
 If we change the name or location of that file, we have to change all the tests.
 
-We can solve both of these issues by introducing a *test framework* -
+We can solve both of these issues by introducing a *test framework*
+that can help us reduce repetition and toil.
 `pytest` is the de facto standard.
 
 ### Example: pytest quickstart
@@ -251,6 +262,12 @@ What `pytest` is doing is:
 
 Now you can take that `if __name__ == "__main__"` block out of your test code,
 and stop worrying about keeping it up to date!
+One source of repetition eliminated.
+
+We also eliminated a *future* source of repetition:
+we didn't have to specify `test_main.py` when we ran `pytest`.
+As our test system grows to include multiple files,
+we won't have to remember to run each of them separately.
 
 :::: instructor
 
@@ -261,10 +278,39 @@ it's important to be able to run tests for the rest of the lesson.
 
 ### Example: shared setup
 
-`pytest` also has a standard way of handling shared test setup:
-["test fixtures"](https://docs.pytest.org/en/stable/how-to/fixtures.html).
+The other source of repetition we encountered in our tests was loading data.
 
-To use them, we add the `@pytest.fixture` decorator to a helper function:
+It is very common to have a bunch of tests that would all require the same
+snippet of code to set up the data they want to check.
+If you use copy and paste to give each test this snippet,
+and you later have to change something about the setup procedure,
+you would then have to remember to go make the same change
+in all of those places.
+That is not being strategically lazy!
+
+In `pytest`, we can reduce this repetition by using
+["test fixtures"](https://docs.pytest.org/en/stable/how-to/fixtures.html).
+Fixtures let you pull shared setup code into a function *and also*
+set a standard variable name for the result,
+so that it's clear that every test that uses the same input variable
+is getting the same data.
+
+To use fixtures, we add a helper function that generates the data
+we want to reuse:
+
+```python
+
+def pr_data():
+    return load_generation_data("data/pr_gen_fuel_monthly.parquet")
+```
+
+...then we apply a special *decorator* to the function to mark it
+as a fixture.
+
+In Python, a decorator is a way to annotate a function with extra
+labels (and sometimes data) that can be accessed by other parts of the code.
+
+When we apply the `@pytest.fixture` decorator to our helper function, we get:
 
 ```python
 import pytest
@@ -276,7 +322,9 @@ def pr_data():
     return load_generation_data("data/pr_gen_fuel_monthly.parquet")
 ```
 
-And then we can use `pr_data` as a parameter to each test that needs it:
+And then we can use `pr_data` as a parameter to each test that needs it,
+and `pytest` will automatically use the matching fixture
+to supply that parameter when it runs the test.
 
 ```python
 def test_data_exists(pr_data):
@@ -293,13 +341,38 @@ def test_heat_rates_non_negative(pr_data):
     assert (heat_rates >= 0).all()
 ```
 
+We can run our tests again, and make sure they still pass:
+
+```bash
+$ uv run pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.13.11, pytest-9.0.2, pluggy-1.6.0
+rootdir: /home/daz/work/open-energy-data-for-all/checkpoints/making-sure-your-system-is-behaving
+configfile: pyproject.toml
+plugins: anyio-4.10.0
+collected 3 items
+
+test_main.py ...                                                         [100%]
+
+============================== 3 passed in 0.52s ===============================
+```
+
+Great!
+That's another source of repetition... partially eliminated.
+We're still computing heat rates multiple times.
+We can do something about that!
+
 :::: challenge
 ### Challenge: nesting fixtures
 
-Another useful thing about fixtures is that they can depend on other fixtures.
+Fixtures can depend on *other fixtures*.
+If you add a parameter to a fixture function,
+and that parameter is the name of a fixture,
+`pytest` will use the fixture to supply that parameter,
+just like it does for test functions.
 
 Add a new fixture, `heat_rates`,
-that takes the `pr_data` as a parameter
+that takes `pr_data` as a parameter
 and returns the yearly heat rates.
 
 Then, use `heat_rates` as a parameter for
@@ -309,10 +382,7 @@ Then, use `heat_rates` as a parameter for
 ```python
 import pytest
 
-from main import (
-    load_generation_data,
-    yearly_heat_rate_by_energy_source,
-)
+from main import load_generation_data, yearly_heat_rate_by_energy_source
 
 
 @pytest.fixture
@@ -330,10 +400,10 @@ def test_data_exists(pr_data):
 
 
 def test_heat_rates_exist(heat_rates):
-    assert not heat_rates.empty, "Heat rates should be non-empty series."
+    assert not heat_rates.empty
 
 
-def test_heat_rates_sensible_values(heat_rates):
+def test_heat_rates_non_negative(heat_rates):
     assert (heat_rates >= 0).all()
 ```
 ::::::::
@@ -352,12 +422,13 @@ Check out the [official documentation](https://docs.pytest.org/en/stable/index.h
 ::::
 
 Now let's add one more test,
-this time that the heat rates are less than 15 for every year across every energy source code,
+this time that the heat rates stay within some reasonable magnitude
+for every year across every energy source code,
 i.e. that no individual fuel type is unrealistically inefficient.
 
 ```python
 def test_heat_rates_sensible_values(heat_rates):
-    assert (heat_rates < 15).all()
+    assert (heat_rates < 15).all() # 15 feels reasonable?
 ```
 
 If we run that with `uv run pytest`, we get an error:
@@ -373,7 +444,7 @@ collected 4 items
 test_main.py ...F                                                             [100%]
 
 ===================================== FAILURES ======================================
-__________________________ test_heat_rates_sensible_values __________________________
+_______________________ test_heat_rates_sensible_values ________________________
 
 heat_rates = year  energy_source_code
 2017  bituminous_coal         10.582860
@@ -383,19 +454,19 @@ heat_rates = year  energy_source_code
 Name: heat_rate_mmbtu_per_mwh, dtype: float64
 
     def test_heat_rates_sensible_values(heat_rates):
->       assert (heat_rates <= 15).all()
+>       assert (heat_rates < 15).all()
 E       assert np.False_
 E        +  where np.False_ = all()
-E        +    where all = year  energy_source_code \n2017  bituminous_coal         10.582860\n      distillate_fuel_oil     12.959005\n      electr...solar                    3.412120\n      wind                     3.411958\nName: heat_rate_mmbtu_per_mwh, dtype: float64 <= 15.all
+E        +    where all = year  energy_source_code \n2017  bituminous_coal         10.582860\n      distillate_fuel_oil     12.959005\n      electr...solar                    3.412120\n      wind                     3.411958\nName: heat_rate_mmbtu_per_mwh, dtype: float64 < 15.all
 
-test_main.py:32: AssertionError
-============================== short test summary info ==============================
+test_main.py:28: AssertionError
+=========================== short test summary info ============================
 FAILED test_main.py::test_heat_rates_sensible_values - assert np.False_
 ============================ 1 failed, 3 passed in 0.42s ============================
 ```
 
 We've found a place where the system's behavior doesn't match our expectations!
-We should check if the expectations are reasonable,
+We should check if the expectations are at fault,
 and if not, we should find where the system's behavior starts to go wrong.
 
 
@@ -417,7 +488,7 @@ Here is where a **debugger** comes in.
 
 We'll use the built-in Python debugger to pause execution of the program,
 look around and observe the state,
-then slowly step through the program.
+then slowly go through the program one line at a time.
 This will help us figure out what the heck is going on.
 
 The first thing we need to do is add a *breakpoint* to the code,
@@ -432,14 +503,23 @@ but the debugger can get us a bit more detail.
 ```python
 def test_heat_rates_sensible_values(heat_rates):
     breakpoint()
-    assert (heat_rates <= 15).all()
+    assert (heat_rates < 15).all()
 ```
 
 Running this drops you into this cryptic situation:
 
 ```bash
-% uv run python test_main.py
-> /home/daz/work/open-energy-data-for-all/checkpoints/making-sure-your-system-is-behaving/test_main.py(17)test_heat_rates_sensible_values()
+% uv run pytest
+============================= test session starts ==============================
+platform darwin -- Python 3.13.11, pytest-9.0.2, pluggy-1.6.0
+rootdir: /home/daz/work/open-energy-data-for-all/checkpoints/making-sure-your-system-is-behaving
+configfile: pyproject.toml
+plugins: anyio-4.10.0
+collected 4 items
+
+test_main.py ...
+>>>>>>>>>>>>>>>>>>> PDB set_trace (IO-capturing turned off) >>>>>>>>>>>>>>>>>>>>
+> /home/daz/work/open-energy-data-for-all/checkpoints/making-sure-your-system-is-behaving/test_main.py(28)test_heat_rates_sensible_values()
 -> breakpoint()
 (Pdb)
 ```
@@ -472,7 +552,7 @@ This shows some context around where the code execution has been paused.
 The arrow shows the line of code that's *about* to run.
 
 Now that we are in here,
-you can type any expression and it will print out the result.
+you can type any Python expression and it will print out the result.
 Let's see what `heat_rates` looks like.
 
 ```pdb
@@ -506,7 +586,8 @@ So it seems like we have some truly **OUTRAGEOUS** numbers for `residual_fuel_oi
 We should see what's going on.
 Unfortunately, at this point the heat rates have already been calculated.
 The cake has already been baked, so to speak.
-We need to catch the program in the act of bugging.
+We can't debug any further from here;
+we need to catch the program in the act of bugging.
 
 Let's quit out of the debugger (`quit`),
 and move the breakpoint to before we calculate the heat rates -
@@ -519,7 +600,7 @@ def heat_rates(pr_data):
     return yearly_heat_rate_by_energy_source(pr_data)
 ```
 
-If we re-run, it pauses us slightly before where we were:
+If we re-run, it pauses us at our new location:
 
 ```pdb
 (Pdb) list
@@ -537,7 +618,7 @@ If we re-run, it pauses us slightly before where we were:
 ```
 
 We want to see what's going on in that yearly heat rate function,
-so let's type `next` to advance the program one line:
+so let's type `next` to advance the program by one line:
 
 ```pdb
 (Pdb) next
@@ -545,9 +626,10 @@ so let's type `next` to advance the program one line:
 -> heat_rates = yearly_heat_rate_by_energy_source(data)
 ```
 
-Next, you can `step` into that assignment,
+Next, you can `step` into that assignment.
 This drops you *into* the function that you're calling,
-while still being paused.
+while still being paused:
+`next` moves us forward, but `step` takes us deeper, and deeper is what we want.
 It's easier to see than explain:
 
 ```pdb
@@ -571,7 +653,7 @@ It's easier to see than explain:
 
 We've just followed the program execution into a totally different file!
 
-Let's step through the code a bit, until we get something interesting to inspect.
+Let's continue to advance through the code, until we get something interesting to inspect.
 
 ```pdb
 (Pdb) next
@@ -626,11 +708,11 @@ we have to `next` through the internal pieces first:
 
 Notice how the `->` arrow jumped *back* to the `fuel_gen_monthly` assignment.
 That's `pdb`'s way of telling you,
-"I've gone through all the lines of this statement and given you a chance to pause.
-Now I'm actually going to execute the statement."
+"I've gone through all the lines of this statement and given you a chance to step into one of the inner components.
+Now I'm actually going to execute the whole statement."
 
 Seeing `fuel_gen_monthly` isn't *that* useful, though.
-We're mostly curious about what the monthly heat rates are which cause such high yearly averages.
+We're mostly curious about which monthly heat rates are causing such high yearly averages.
 We'll take a look at that through two challenges.
 
 :::: challenge
@@ -638,7 +720,7 @@ We'll take a look at that through two challenges.
 
 We know the output of this `yearly_heat_rate_by_energy_source` function looks kind of fishy.
 
-Advance the debugger until you can print out both the return value (`yearly_heat_rates` and the intermediate value that feeds into the return value (`monthly_heat_rates`).
+Advance the debugger until you can print out both the return value (`yearly_heat_rates`) and the intermediate value that feeds into the return value (`monthly_heat_rates`).
 
 :::::::: solution
 
@@ -728,7 +810,8 @@ Which one is in the code?
 
 :::::::: solution
 
-We should sum the fuel consumption and net generation over the whole `residual_fuel_oil` fleet, before dividing them to get heat rate:
+We should sum the fuel consumption and net generation over the whole `residual_fuel_oil` fleet
+for each timestamp, before dividing them to get heat rate:
 
 ```python
 def yearly_heat_rate_by_energy_source(data: pd.DataFrame) -> pd.DataFrame:
@@ -742,15 +825,19 @@ def yearly_heat_rate_by_energy_source(data: pd.DataFrame) -> pd.DataFrame:
             "fuel_consumed_for_electricity_mmbtu",
             "net_generation_mwh",
         ],
-    ]
-    fuel_gen_yearly = fuel_gen_monthly.assign(
-        year=fuel_gen_monthly["date"].dt.year
-    ).drop(columns="date")
-    fleets_yearly = fuel_gen_yearly.groupby(by=["year", "energy_source_code"], observed=True).sum()
+    ].groupby(["date", "energy_source_code"]).sum().reset_index()
+    monthly_heat_rates = fuel_gen_monthly.assign(
+        year=fuel_gen_monthly["date"].dt.year,
+        heat_rate_mmbtu_per_mwh=fuel_gen_monthly["fuel_consumed_for_electricity_mmbtu"]
+        / fuel_gen_monthly["net_generation_mwh"],
+    )
     yearly_heat_rates = (
-        fleets_yearly["fuel_consumed_for_electricity_mmbtu"]
-        / fleets_yearly["net_generation_mwh"]
-    ).dropna()
+        monthly_heat_rates.groupby(["year", "energy_source_code"], observed=False)[
+            "heat_rate_mmbtu_per_mwh"
+        ]
+        .mean()
+        .dropna()
+    )
     return yearly_heat_rates
 ```
 
