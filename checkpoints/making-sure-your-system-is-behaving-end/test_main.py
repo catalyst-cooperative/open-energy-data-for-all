@@ -21,9 +21,12 @@ def test_data_exists(pr_data):
 
 
 def test_heat_rates_exist(heat_rates):
-    assert not heat_rates.empty, "Heat rates should be non-empty series."
+    assert not heat_rates.empty
+
+
+def test_heat_rates_non_negative(heat_rates):
+    assert (heat_rates >= 0).all()
 
 
 def test_heat_rates_sensible_values(heat_rates):
-    assert (heat_rates >= 0).all()
     assert (heat_rates <= 15).all()

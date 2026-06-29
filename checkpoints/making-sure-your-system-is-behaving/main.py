@@ -8,7 +8,11 @@ def load_generation_data(path) -> pd.DataFrame:
 
 
 def yearly_heat_rate_by_energy_source(data: pd.DataFrame) -> pd.DataFrame:
-    """Calculate yearly heat rates for each energy source code."""
+    """Calculate heat rates for each year, across every energy source code.
+
+    We want to be able to compare generation efficiency across different
+    energy sources (e.g., coal, distillate fuel oil) over time.
+    """
 
     fuel_gen_monthly = data.loc[
         data["net_generation_mwh"] > 0,
