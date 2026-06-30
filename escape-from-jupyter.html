@@ -339,7 +339,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Escape from Jupyter!</h1>
-        <p>Last updated on 2026-04-01 |
+        <p>Last updated on 2026-06-30 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/escape-from-jupyter.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -388,8 +388,11 @@ are incredibly versatile, and are incredibly useful starting points for
 data exploration and visualization. Yet as your code grows more complex
 or you start to collaborate with others, you might find it increasingly
 challenging to work entirely in Jupyter notebooks.</p>
-<p>In contrast, moving towards coding in scripts and modules offers us
-numerous advantages:</p>
+<p>When your supervisor asks to see your work, or you’re starting to get
+confused about running cell 17, not cell 18, it’s a good sign that it’s
+time to consider escaping from Jupyter.</p>
+<p>Moving towards coding in scripts and modules offers us numerous
+advantages:</p>
 <ul><li>
 <strong>Keep code organized:</strong> Having to constantly scroll up
 and down to find that helpful function you wrote… somewhere? By
@@ -467,7 +470,7 @@ ls</code></pre>
 and run our <code>.py</code> file. We will use <code>uv run</code> to
 run the script within our virtual environment.</p>
 <pre class="shell"><code>uv run main.py</code></pre>
-<pre><code>Using CPython 3.13.2
+<pre><code>Using CPython 3.13.5
 Creating virtual environment at: .venv
 Hello from pr-gen-fuel!</code></pre>
 <p>What did we just do? Since this is a brand new environment,
@@ -523,7 +526,7 @@ successfully added and installed <code>pandas</code>,
 listed in the dependencies:</p>
 <pre><code>dependencies = [
     "jupyter&gt;=1.1.1",
-    "pandas&gt;=2.3.2", # Your version might be different!
+    "pandas&gt;=3.0.2", # Your version might be different!
 ]</code></pre>
 <div id="callout2" class="callout">
 <div class="callout-square">
@@ -568,13 +571,13 @@ for new package releases and update our environment.</p>
 </div>
 <div class="section level4">
 <h4 id="setting-up-our-data-pipeline">Setting up our data pipeline<a class="anchor" aria-label="anchor" href="#setting-up-our-data-pipeline"></a></h4>
-<p>Now let’s migrate our code over. First, let’s copy over our
-<code>data</code> folder and the
-<code>checkpoints/transform.ipynb</code> notebook containing our
-modularized code from the last lesson into our project folder. The
+<p>Now let’s migrate our code over. First, let’s copy over the file and
+the <code>data</code> folder in the
+<code>checkpoints/escape-from-jupyter</code> folder into our project
+folder. They contain our modularized code from the last lesson. The
 folder should now look like this:</p>
 <pre class="shell"><code><span><span class="va">ls</span></span></code></pre>
-<pre><code>data  main.py  pyproject.toml  README.md  transform.ipynb  uv.lock</code></pre>
+<pre><code>data  etl.ipynb  main.py  pyproject.toml  README.md  uv.lock</code></pre>
 
 <p>The <code>main.py</code> file provides a helpful skeleton for
 migrating our code. In it, we can see two things: 1. a function called
@@ -591,10 +594,10 @@ migrating our code. In it, we can see two things: 1. a function called
 <span id="cb14-6"><a href="#cb14-6" tabindex="-1" aria-label="code-block-14-6"></a>    main()</span></code></pre>
 </div>
 <p>Let’s start by replacing <code>main()</code>. We can migrate our
-modularized code from <code>transform.ipynb</code> into one main
-transformation function called <code>etl_pr_gen_fuel()</code>.</p>
+modularized code from <code>etl.ipynb</code> into one main
+transformation function called <code>transform_pr_gen_fuel()</code>.</p>
 <p>First, we can open up the notebook:</p>
-<pre class="shell"><code>uv run jupyter notebook transform.ipynb</code></pre>
+<pre class="shell"><code>uv run jupyter notebook etl.ipynb</code></pre>
 
 <p>We should wind up with a block of code in <code>main.py</code> that
 looks like this:</p>
@@ -603,7 +606,7 @@ looks like this:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Show details </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -611,127 +614,82 @@ looks like this:</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" tabindex="-1" aria-label="code-block-16-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1" aria-label="code-block-16-2"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1" aria-label="code-block-16-3"></a></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1" aria-label="code-block-16-4"></a><span class="co"># Silence some warnings about deprecated Pandas behavior</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a>pd.set_option(<span class="st">"future.no_silent_downcasting"</span>, <span class="va">True</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1" aria-label="code-block-16-4"></a><span class="kw">def</span> load_generation_data(path):</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a>    <span class="co">"""Load the cleaned Puerto Rico generator operations data from disk.</span></span>
 <span id="cb16-6"><a href="#cb16-6" tabindex="-1" aria-label="code-block-16-6"></a></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1" aria-label="code-block-16-7"></a><span class="co"># Utility functions</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1" aria-label="code-block-16-8"></a><span class="kw">def</span> melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: <span class="bu">str</span>) <span class="op">-&gt;</span> pd.DataFrame:</span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1" aria-label="code-block-16-9"></a>    <span class="co">"""Melt many columns of monthly data for a single variable into a month and a value column.</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1" aria-label="code-block-16-10"></a></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1" aria-label="code-block-16-11"></a><span class="co">    This code takes a table with data stored in one column per month and stacks all</span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1" aria-label="code-block-16-12"></a><span class="co">    the fields for a single variable (fuel_consumed_for_electricity_mmbtu), returning</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1" aria-label="code-block-16-13"></a><span class="co">    a table with one month column and one value column for this variable in order to</span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1" aria-label="code-block-16-14"></a><span class="co">    make it easier to plot our data over time. Note that this drops the other</span></span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1" aria-label="code-block-16-15"></a><span class="co">    variables of data.</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1" aria-label="code-block-16-7"></a><span class="co">    Args:</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1" aria-label="code-block-16-8"></a><span class="co">        path: Path to raw data file on disk.</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1" aria-label="code-block-16-9"></a><span class="co">    """</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1" aria-label="code-block-16-10"></a>    <span class="cf">return</span> pd.read_parquet(path)</span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1" aria-label="code-block-16-11"></a></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1" aria-label="code-block-16-12"></a><span class="kw">def</span> write_generation_data(df, path):</span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1" aria-label="code-block-16-13"></a>    df.to_parquet(path)</span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1" aria-label="code-block-16-14"></a>    <span class="cf">return</span></span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1" aria-label="code-block-16-15"></a></span>
 <span id="cb16-16"><a href="#cb16-16" tabindex="-1" aria-label="code-block-16-16"></a></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1" aria-label="code-block-16-17"></a><span class="co">    Args:</span></span>
-<span id="cb16-18"><a href="#cb16-18" tabindex="-1" aria-label="code-block-16-18"></a><span class="co">        pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.</span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1" aria-label="code-block-16-19"></a><span class="co">        melted_var: The variable to be melted.</span></span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1" aria-label="code-block-16-20"></a><span class="co">    """</span></span>
-<span id="cb16-21"><a href="#cb16-21" tabindex="-1" aria-label="code-block-16-21"></a>    <span class="co"># set up shared index</span></span>
-<span id="cb16-22"><a href="#cb16-22" tabindex="-1" aria-label="code-block-16-22"></a>    index_cols <span class="op">=</span> [<span class="st">"plant_id_eia"</span>, <span class="st">"plant_name_eia"</span>, <span class="st">"report_year"</span>, <span class="st">"prime_mover_code"</span>, <span class="st">"energy_source_code"</span>, <span class="st">"fuel_unit"</span>]</span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1" aria-label="code-block-16-23"></a></span>
-<span id="cb16-24"><a href="#cb16-24" tabindex="-1" aria-label="code-block-16-24"></a>    var_cols <span class="op">=</span> index_cols <span class="op">+</span> [col <span class="cf">for</span> col <span class="kw">in</span> pr_gen_fuel.columns <span class="cf">if</span> col.startswith(melted_var)]</span>
-<span id="cb16-25"><a href="#cb16-25" tabindex="-1" aria-label="code-block-16-25"></a>    var_df <span class="op">=</span> pr_gen_fuel.loc[:, var_cols]</span>
-<span id="cb16-26"><a href="#cb16-26" tabindex="-1" aria-label="code-block-16-26"></a></span>
-<span id="cb16-27"><a href="#cb16-27" tabindex="-1" aria-label="code-block-16-27"></a>    <span class="co">## Melt the fuel_consumed columns</span></span>
-<span id="cb16-28"><a href="#cb16-28" tabindex="-1" aria-label="code-block-16-28"></a>    var_melt <span class="op">=</span> var_df.melt(</span>
-<span id="cb16-29"><a href="#cb16-29" tabindex="-1" aria-label="code-block-16-29"></a>        id_vars<span class="op">=</span>index_cols,</span>
-<span id="cb16-30"><a href="#cb16-30" tabindex="-1" aria-label="code-block-16-30"></a>        var_name<span class="op">=</span><span class="st">"month"</span>,</span>
-<span id="cb16-31"><a href="#cb16-31" tabindex="-1" aria-label="code-block-16-31"></a>        value_name<span class="op">=</span>melted_var</span>
-<span id="cb16-32"><a href="#cb16-32" tabindex="-1" aria-label="code-block-16-32"></a>    )</span>
-<span id="cb16-33"><a href="#cb16-33" tabindex="-1" aria-label="code-block-16-33"></a>    var_melt[<span class="st">"month"</span>] <span class="op">=</span> var_melt[<span class="st">"month"</span>].<span class="bu">str</span>.replace(<span class="ss">f"</span><span class="sc">{</span>melted_var<span class="sc">}</span><span class="ss">_"</span>, <span class="st">""</span>)</span>
-<span id="cb16-34"><a href="#cb16-34" tabindex="-1" aria-label="code-block-16-34"></a>    var_melt <span class="op">=</span> var_melt.set_index(index_cols <span class="op">+</span> [<span class="st">"month"</span>])</span>
-<span id="cb16-35"><a href="#cb16-35" tabindex="-1" aria-label="code-block-16-35"></a>    <span class="cf">return</span> var_melt</span>
-<span id="cb16-36"><a href="#cb16-36" tabindex="-1" aria-label="code-block-16-36"></a></span>
-<span id="cb16-37"><a href="#cb16-37" tabindex="-1" aria-label="code-block-16-37"></a><span class="kw">def</span> handle_data_types(pr_df: pd.DataFrame, categorical_cols: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> pd.DataFrame:</span>
-<span id="cb16-38"><a href="#cb16-38" tabindex="-1" aria-label="code-block-16-38"></a>    <span class="co">"""Convert EIA 923 PR columns into desired data types.</span></span>
-<span id="cb16-39"><a href="#cb16-39" tabindex="-1" aria-label="code-block-16-39"></a></span>
-<span id="cb16-40"><a href="#cb16-40" tabindex="-1" aria-label="code-block-16-40"></a><span class="co">    In addition to using the standard convert_dtypes() function, handle a series of</span></span>
-<span id="cb16-41"><a href="#cb16-41" tabindex="-1" aria-label="code-block-16-41"></a><span class="co">    non-standard data types conversions for associated_combined_heat_power</span></span>
-<span id="cb16-42"><a href="#cb16-42" tabindex="-1" aria-label="code-block-16-42"></a><span class="co">    and create categorical columns to save memory.</span></span>
-<span id="cb16-43"><a href="#cb16-43" tabindex="-1" aria-label="code-block-16-43"></a></span>
-<span id="cb16-44"><a href="#cb16-44" tabindex="-1" aria-label="code-block-16-44"></a><span class="co">    Args:</span></span>
-<span id="cb16-45"><a href="#cb16-45" tabindex="-1" aria-label="code-block-16-45"></a><span class="co">        pr_df: Dataframe with EIA 923 Puerto Rico data.</span></span>
-<span id="cb16-46"><a href="#cb16-46" tabindex="-1" aria-label="code-block-16-46"></a><span class="co">        categorical_cols: List of columns that should be converted to a categorical dtype.</span></span>
-<span id="cb16-47"><a href="#cb16-47" tabindex="-1" aria-label="code-block-16-47"></a><span class="co">    """</span></span>
-<span id="cb16-48"><a href="#cb16-48" tabindex="-1" aria-label="code-block-16-48"></a>    pr_df <span class="op">=</span> pr_df.convert_dtypes()</span>
-<span id="cb16-49"><a href="#cb16-49" tabindex="-1" aria-label="code-block-16-49"></a>    pr_df[<span class="st">"associated_combined_heat_power"</span>] <span class="op">=</span> (</span>
-<span id="cb16-50"><a href="#cb16-50" tabindex="-1" aria-label="code-block-16-50"></a>        pr_df[<span class="st">"associated_combined_heat_power"</span>]</span>
-<span id="cb16-51"><a href="#cb16-51" tabindex="-1" aria-label="code-block-16-51"></a>        .astype(<span class="st">"object"</span>) <span class="co"># necessary for the types to work for the .replace() call</span></span>
-<span id="cb16-52"><a href="#cb16-52" tabindex="-1" aria-label="code-block-16-52"></a>        .replace({<span class="st">"Y"</span>: <span class="va">True</span>, <span class="st">"N"</span>: <span class="va">False</span>})</span>
-<span id="cb16-53"><a href="#cb16-53" tabindex="-1" aria-label="code-block-16-53"></a>        .astype(<span class="st">"boolean"</span>)</span>
-<span id="cb16-54"><a href="#cb16-54" tabindex="-1" aria-label="code-block-16-54"></a>    )</span>
-<span id="cb16-55"><a href="#cb16-55" tabindex="-1" aria-label="code-block-16-55"></a>    pr_df <span class="op">=</span> pr_df.astype({col: <span class="st">"category"</span> <span class="cf">for</span> col <span class="kw">in</span> categorical_cols})</span>
-<span id="cb16-56"><a href="#cb16-56" tabindex="-1" aria-label="code-block-16-56"></a>    <span class="cf">return</span> pr_df</span>
-<span id="cb16-57"><a href="#cb16-57" tabindex="-1" aria-label="code-block-16-57"></a></span>
-<span id="cb16-58"><a href="#cb16-58" tabindex="-1" aria-label="code-block-16-58"></a><span class="kw">def</span> transform_pr_gen_fuel():</span>
-<span id="cb16-59"><a href="#cb16-59" tabindex="-1" aria-label="code-block-16-59"></a>    <span class="co"># Read in the raw data</span></span>
-<span id="cb16-60"><a href="#cb16-60" tabindex="-1" aria-label="code-block-16-60"></a>    pr_gen_fuel <span class="op">=</span> pd.read_parquet(<span class="st">"data/raw_eia923__puerto_rico_generation_fuel.parquet"</span>)</span>
-<span id="cb16-61"><a href="#cb16-61" tabindex="-1" aria-label="code-block-16-61"></a>    pr_plant_frame <span class="op">=</span> pd.read_parquet(<span class="st">"data/raw_eia923__puerto_rico_plant_frame.parquet"</span>)</span>
-<span id="cb16-62"><a href="#cb16-62" tabindex="-1" aria-label="code-block-16-62"></a>    <span class="co"># Handle EIA null values</span></span>
-<span id="cb16-63"><a href="#cb16-63" tabindex="-1" aria-label="code-block-16-63"></a>    pr_gen_fuel <span class="op">=</span> pr_gen_fuel.replace(to_replace <span class="op">=</span> <span class="st">"."</span>, value <span class="op">=</span> pd.NA)</span>
-<span id="cb16-64"><a href="#cb16-64" tabindex="-1" aria-label="code-block-16-64"></a></span>
-<span id="cb16-65"><a href="#cb16-65" tabindex="-1" aria-label="code-block-16-65"></a>    <span class="co"># Convert data types (mmbtu/units to numeric, booleans, categories)</span></span>
-<span id="cb16-66"><a href="#cb16-66" tabindex="-1" aria-label="code-block-16-66"></a>    pr_gen_fuel <span class="op">=</span> handle_data_types(</span>
-<span id="cb16-67"><a href="#cb16-67" tabindex="-1" aria-label="code-block-16-67"></a>            pr_gen_fuel,</span>
-<span id="cb16-68"><a href="#cb16-68" tabindex="-1" aria-label="code-block-16-68"></a>            categorical_cols <span class="op">=</span> [<span class="st">"energy_source_code"</span>,<span class="st">"fuel_type_code_agg"</span>, <span class="st">"prime_mover_code"</span>, <span class="st">"reporting_frequency_code"</span>, <span class="st">"data_maturity"</span>, <span class="st">"plant_state"</span>]</span>
-<span id="cb16-69"><a href="#cb16-69" tabindex="-1" aria-label="code-block-16-69"></a>                                )</span>
-<span id="cb16-70"><a href="#cb16-70" tabindex="-1" aria-label="code-block-16-70"></a></span>
-<span id="cb16-71"><a href="#cb16-71" tabindex="-1" aria-label="code-block-16-71"></a>    <span class="cf">for</span> colname <span class="kw">in</span> pr_gen_fuel.columns: <span class="co"># </span><span class="al">TODO</span><span class="co">: Do we need this? Check.</span></span>
-<span id="cb16-72"><a href="#cb16-72" tabindex="-1" aria-label="code-block-16-72"></a>        <span class="cf">if</span> (</span>
-<span id="cb16-73"><a href="#cb16-73" tabindex="-1" aria-label="code-block-16-73"></a>            <span class="st">"fuel_consumption"</span> <span class="kw">in</span> colname</span>
-<span id="cb16-74"><a href="#cb16-74" tabindex="-1" aria-label="code-block-16-74"></a>            <span class="kw">or</span> <span class="st">"fuel_consumed"</span> <span class="kw">in</span> colname</span>
-<span id="cb16-75"><a href="#cb16-75" tabindex="-1" aria-label="code-block-16-75"></a>            <span class="kw">or</span> <span class="st">"net_generation"</span> <span class="kw">in</span> colname</span>
-<span id="cb16-76"><a href="#cb16-76" tabindex="-1" aria-label="code-block-16-76"></a>            <span class="kw">or</span> <span class="st">"fuel_mmbtu_per_unit"</span> <span class="kw">in</span> colname</span>
-<span id="cb16-77"><a href="#cb16-77" tabindex="-1" aria-label="code-block-16-77"></a>        ):</span>
-<span id="cb16-78"><a href="#cb16-78" tabindex="-1" aria-label="code-block-16-78"></a>            pr_gen_fuel[colname] <span class="op">=</span> pr_gen_fuel[colname].astype(<span class="st">"float64"</span>)</span>
-<span id="cb16-79"><a href="#cb16-79" tabindex="-1" aria-label="code-block-16-79"></a></span>
-<span id="cb16-80"><a href="#cb16-80" tabindex="-1" aria-label="code-block-16-80"></a>    <span class="co"># Handle EIA null values</span></span>
-<span id="cb16-81"><a href="#cb16-81" tabindex="-1" aria-label="code-block-16-81"></a>    pr_plant_frame <span class="op">=</span> pr_plant_frame.replace(to_replace <span class="op">=</span> <span class="st">"."</span>, value <span class="op">=</span> pd.NA)</span>
-<span id="cb16-82"><a href="#cb16-82" tabindex="-1" aria-label="code-block-16-82"></a></span>
-<span id="cb16-83"><a href="#cb16-83" tabindex="-1" aria-label="code-block-16-83"></a>    <span class="co"># Convert data types (mmbtu/units to numeric, categories, booleans)</span></span>
-<span id="cb16-84"><a href="#cb16-84" tabindex="-1" aria-label="code-block-16-84"></a>    pr_plant_frame <span class="op">=</span> handle_data_types(pr_plant_frame, categorical_cols <span class="op">=</span> [<span class="st">"reporting_frequency_code"</span>, <span class="st">"data_maturity"</span>, <span class="st">"plant_state"</span>])</span>
-<span id="cb16-85"><a href="#cb16-85" tabindex="-1" aria-label="code-block-16-85"></a></span>
-<span id="cb16-86"><a href="#cb16-86" tabindex="-1" aria-label="code-block-16-86"></a>    <span class="co">#### monthly pivoting</span></span>
-<span id="cb16-87"><a href="#cb16-87" tabindex="-1" aria-label="code-block-16-87"></a>    <span class="co"># Pivot variable columns</span></span>
-<span id="cb16-88"><a href="#cb16-88" tabindex="-1" aria-label="code-block-16-88"></a>    fuel_elec_mmbtu_melt <span class="op">=</span> melt_monthly_vars(pr_gen_fuel, <span class="st">"fuel_consumed_for_electricity_mmbtu"</span>)</span>
-<span id="cb16-89"><a href="#cb16-89" tabindex="-1" aria-label="code-block-16-89"></a>    fuel_elec_units_melt <span class="op">=</span> melt_monthly_vars(pr_gen_fuel, <span class="st">"fuel_consumed_for_electricity_units"</span>)</span>
-<span id="cb16-90"><a href="#cb16-90" tabindex="-1" aria-label="code-block-16-90"></a>    fuel_mmbtu_melt <span class="op">=</span> melt_monthly_vars(pr_gen_fuel, <span class="st">"fuel_consumed_mmbtu"</span>)</span>
-<span id="cb16-91"><a href="#cb16-91" tabindex="-1" aria-label="code-block-16-91"></a>    fuel_units_melt <span class="op">=</span> melt_monthly_vars(pr_gen_fuel, <span class="st">"fuel_consumed_units"</span>)</span>
-<span id="cb16-92"><a href="#cb16-92" tabindex="-1" aria-label="code-block-16-92"></a>    net_gen_melt <span class="op">=</span> melt_monthly_vars(pr_gen_fuel, <span class="st">"net_generation_mwh"</span>)</span>
-<span id="cb16-93"><a href="#cb16-93" tabindex="-1" aria-label="code-block-16-93"></a></span>
-<span id="cb16-94"><a href="#cb16-94" tabindex="-1" aria-label="code-block-16-94"></a>    <span class="co"># Combine all the pivoted DFs</span></span>
-<span id="cb16-95"><a href="#cb16-95" tabindex="-1" aria-label="code-block-16-95"></a>    pr_gen_fuel_melt <span class="op">=</span> pd.concat(</span>
-<span id="cb16-96"><a href="#cb16-96" tabindex="-1" aria-label="code-block-16-96"></a>        [fuel_elec_mmbtu_melt, fuel_elec_units_melt, fuel_mmbtu_melt, fuel_units_melt, net_gen_melt],</span>
-<span id="cb16-97"><a href="#cb16-97" tabindex="-1" aria-label="code-block-16-97"></a>        axis<span class="op">=</span><span class="st">"columns"</span>,</span>
-<span id="cb16-98"><a href="#cb16-98" tabindex="-1" aria-label="code-block-16-98"></a>    ).reset_index()</span>
-<span id="cb16-99"><a href="#cb16-99" tabindex="-1" aria-label="code-block-16-99"></a></span>
-<span id="cb16-100"><a href="#cb16-100" tabindex="-1" aria-label="code-block-16-100"></a>    <span class="co">## Create date from month and year</span></span>
-<span id="cb16-101"><a href="#cb16-101" tabindex="-1" aria-label="code-block-16-101"></a>    pr_gen_fuel_melt[<span class="st">"date"</span>] <span class="op">=</span> pd.to_datetime(</span>
-<span id="cb16-102"><a href="#cb16-102" tabindex="-1" aria-label="code-block-16-102"></a>        pr_gen_fuel_melt[<span class="st">"month"</span>] <span class="op">+</span> pr_gen_fuel_melt[<span class="st">"report_year"</span>].astype(<span class="bu">str</span>),</span>
-<span id="cb16-103"><a href="#cb16-103" tabindex="-1" aria-label="code-block-16-103"></a>        <span class="bu">format</span><span class="op">=</span><span class="st">"%B%Y"</span>,</span>
-<span id="cb16-104"><a href="#cb16-104" tabindex="-1" aria-label="code-block-16-104"></a>    )</span>
-<span id="cb16-105"><a href="#cb16-105" tabindex="-1" aria-label="code-block-16-105"></a>    <span class="co">## Drop old date columns</span></span>
-<span id="cb16-106"><a href="#cb16-106" tabindex="-1" aria-label="code-block-16-106"></a>    pr_gen_fuel_clean <span class="op">=</span> pr_gen_fuel_melt.drop(columns <span class="op">=</span> [<span class="st">"report_year"</span>, <span class="st">"month"</span>])</span>
-<span id="cb16-107"><a href="#cb16-107" tabindex="-1" aria-label="code-block-16-107"></a></span>
-<span id="cb16-108"><a href="#cb16-108" tabindex="-1" aria-label="code-block-16-108"></a>    <span class="co"># Plant 62410 has two 2020 data entries but one is null</span></span>
-<span id="cb16-109"><a href="#cb16-109" tabindex="-1" aria-label="code-block-16-109"></a>    <span class="co"># Drop the bad row</span></span>
-<span id="cb16-110"><a href="#cb16-110" tabindex="-1" aria-label="code-block-16-110"></a>    pr_gen_fuel_final <span class="op">=</span> pr_gen_fuel_clean.loc[</span>
-<span id="cb16-111"><a href="#cb16-111" tabindex="-1" aria-label="code-block-16-111"></a>        <span class="op">~</span>((pr_gen_fuel_clean.plant_id_eia <span class="op">==</span> <span class="dv">62410</span>)</span>
-<span id="cb16-112"><a href="#cb16-112" tabindex="-1" aria-label="code-block-16-112"></a>        <span class="op">&amp;</span> (pr_gen_fuel_clean.date.dt.year <span class="op">==</span> <span class="dv">2020</span>)</span>
-<span id="cb16-113"><a href="#cb16-113" tabindex="-1" aria-label="code-block-16-113"></a>        <span class="op">&amp;</span> (pr_gen_fuel_clean.fuel_consumed_for_electricity_mmbtu.isnull()))</span>
-<span id="cb16-114"><a href="#cb16-114" tabindex="-1" aria-label="code-block-16-114"></a>    ]</span>
-<span id="cb16-115"><a href="#cb16-115" tabindex="-1" aria-label="code-block-16-115"></a></span>
-<span id="cb16-116"><a href="#cb16-116" tabindex="-1" aria-label="code-block-16-116"></a>    <span class="co"># drop after 2025-03-01 (for now) as these values should not exist</span></span>
-<span id="cb16-117"><a href="#cb16-117" tabindex="-1" aria-label="code-block-16-117"></a>    pr_gen_fuel_final <span class="op">=</span> pr_gen_fuel_final.loc[pr_gen_fuel_clean.date <span class="op">&lt;</span> pd.Timestamp(<span class="st">"2025-03-01"</span>)]</span>
-<span id="cb16-118"><a href="#cb16-118" tabindex="-1" aria-label="code-block-16-118"></a></span>
-<span id="cb16-119"><a href="#cb16-119" tabindex="-1" aria-label="code-block-16-119"></a>    <span class="co">### output the data to Parquet files</span></span>
-<span id="cb16-120"><a href="#cb16-120" tabindex="-1" aria-label="code-block-16-120"></a>    pr_gen_fuel_final.to_parquet(<span class="st">"data/pr_gen_fuel_monthly.parquet"</span>)</span>
-<span id="cb16-121"><a href="#cb16-121" tabindex="-1" aria-label="code-block-16-121"></a>    pr_plant_frame.to_parquet(<span class="st">"data/pr_plant_frame.parquet"</span>)</span>
-<span id="cb16-122"><a href="#cb16-122" tabindex="-1" aria-label="code-block-16-122"></a></span>
-<span id="cb16-123"><a href="#cb16-123" tabindex="-1" aria-label="code-block-16-123"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
-<span id="cb16-124"><a href="#cb16-124" tabindex="-1" aria-label="code-block-16-124"></a>    transform_pr_gen_fuel()</span></code></pre>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1" aria-label="code-block-16-17"></a><span class="kw">def</span> map_code_to_strings(df, mapped_col, code_dictionary):</span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1" aria-label="code-block-16-18"></a>    <span class="co">"""Convert a column of codes into strings defined by a dictionary.</span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1" aria-label="code-block-16-19"></a></span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1" aria-label="code-block-16-20"></a><span class="co">    This code takes a dataframe with a column of codes and returns a dataframe with the same column</span></span>
+<span id="cb16-21"><a href="#cb16-21" tabindex="-1" aria-label="code-block-16-21"></a><span class="co">    mapped to strings to prevent users from needing to consult a look-up table. The relationship between columns and strings is defined by a dictionary.</span></span>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1" aria-label="code-block-16-22"></a></span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1" aria-label="code-block-16-23"></a><span class="co">    Args:</span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1" aria-label="code-block-16-24"></a><span class="co">        df: A Pandas DataFrame.</span></span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1" aria-label="code-block-16-25"></a><span class="co">        mapped_col: The name of the column to be mapped.</span></span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1" aria-label="code-block-16-26"></a><span class="co">        code_dictionary: A dictionary containing code-string pairs.</span></span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1" aria-label="code-block-16-27"></a><span class="co">    """</span></span>
+<span id="cb16-28"><a href="#cb16-28" tabindex="-1" aria-label="code-block-16-28"></a>    <span class="cf">assert</span> <span class="bu">all</span>([code <span class="kw">in</span> code_dictionary <span class="cf">for</span> code <span class="kw">in</span> df[mapped_col].unique()]) <span class="co"># Check all codes present</span></span>
+<span id="cb16-29"><a href="#cb16-29" tabindex="-1" aria-label="code-block-16-29"></a>    df[<span class="st">'code_name'</span>] <span class="op">=</span> df[mapped_col].replace(code_dictionary)</span>
+<span id="cb16-30"><a href="#cb16-30" tabindex="-1" aria-label="code-block-16-30"></a>    df <span class="op">=</span> df.drop(columns<span class="op">=</span>mapped_col).rename(columns<span class="op">=</span>{<span class="st">'code_name'</span>:mapped_col})</span>
+<span id="cb16-31"><a href="#cb16-31" tabindex="-1" aria-label="code-block-16-31"></a>    <span class="cf">return</span> df</span>
+<span id="cb16-32"><a href="#cb16-32" tabindex="-1" aria-label="code-block-16-32"></a></span>
+<span id="cb16-33"><a href="#cb16-33" tabindex="-1" aria-label="code-block-16-33"></a><span class="kw">def</span> handle_thousands_fuel_units(df, thousands_unit: <span class="bu">str</span>):</span>
+<span id="cb16-34"><a href="#cb16-34" tabindex="-1" aria-label="code-block-16-34"></a>    <span class="co">"""Where the fuel unit column contains a small number of thousands, multiply by 1000 and update the unit label.</span></span>
+<span id="cb16-35"><a href="#cb16-35" tabindex="-1" aria-label="code-block-16-35"></a></span>
+<span id="cb16-36"><a href="#cb16-36" tabindex="-1" aria-label="code-block-16-36"></a><span class="co">    This expects the thousands_unit to be in a column called "fuel_unit", and the units column to live in a</span></span>
+<span id="cb16-37"><a href="#cb16-37" tabindex="-1" aria-label="code-block-16-37"></a><span class="co">    column called "fuel_consumed_for_electricity_units".</span></span>
+<span id="cb16-38"><a href="#cb16-38" tabindex="-1" aria-label="code-block-16-38"></a></span>
+<span id="cb16-39"><a href="#cb16-39" tabindex="-1" aria-label="code-block-16-39"></a><span class="co">    Args:</span></span>
+<span id="cb16-40"><a href="#cb16-40" tabindex="-1" aria-label="code-block-16-40"></a><span class="co">        df: A Pandas DataFrame.</span></span>
+<span id="cb16-41"><a href="#cb16-41" tabindex="-1" aria-label="code-block-16-41"></a><span class="co">        unit_column: The column containing unit names.</span></span>
+<span id="cb16-42"><a href="#cb16-42" tabindex="-1" aria-label="code-block-16-42"></a><span class="co">        thousands_unit: The name of the unit to be normalized.</span></span>
+<span id="cb16-43"><a href="#cb16-43" tabindex="-1" aria-label="code-block-16-43"></a><span class="co">    """</span></span>
+<span id="cb16-44"><a href="#cb16-44" tabindex="-1" aria-label="code-block-16-44"></a>    df.loc[df.fuel_unit <span class="op">==</span> thousands_unit,<span class="st">"fuel_consumed_for_electricity_units"</span>] <span class="op">=</span> df.loc[df.fuel_unit <span class="op">==</span> thousands_unit, <span class="st">"fuel_consumed_for_electricity_units"</span>]<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb16-45"><a href="#cb16-45" tabindex="-1" aria-label="code-block-16-45"></a>    df.loc[df.fuel_unit <span class="op">==</span> thousands_unit, <span class="st">"fuel_unit"</span>] <span class="op">=</span> df.loc[df.fuel_unit <span class="op">==</span> thousands_unit].fuel_unit.<span class="bu">str</span>.replace(<span class="st">"thousand "</span>, <span class="st">""</span>)</span>
+<span id="cb16-46"><a href="#cb16-46" tabindex="-1" aria-label="code-block-16-46"></a>    <span class="cf">return</span> df</span>
+<span id="cb16-47"><a href="#cb16-47" tabindex="-1" aria-label="code-block-16-47"></a></span>
+<span id="cb16-48"><a href="#cb16-48" tabindex="-1" aria-label="code-block-16-48"></a></span>
+<span id="cb16-49"><a href="#cb16-49" tabindex="-1" aria-label="code-block-16-49"></a><span class="kw">def</span> transform_pr_gen_fuel():</span>
+<span id="cb16-50"><a href="#cb16-50" tabindex="-1" aria-label="code-block-16-50"></a>    raw_pr_gen_fuel <span class="op">=</span> load_generation_data(path<span class="op">=</span><span class="st">"data/pr_gen_fuel_monthly.parquet"</span>)</span>
+<span id="cb16-51"><a href="#cb16-51" tabindex="-1" aria-label="code-block-16-51"></a>    <span class="co"># Standardize NAs</span></span>
+<span id="cb16-52"><a href="#cb16-52" tabindex="-1" aria-label="code-block-16-52"></a>    pr_gen_fuel <span class="op">=</span> raw_pr_gen_fuel.replace(to_replace <span class="op">=</span> <span class="st">"."</span>, value <span class="op">=</span> pd.NA)</span>
+<span id="cb16-53"><a href="#cb16-53" tabindex="-1" aria-label="code-block-16-53"></a>    pr_gen_fuel <span class="op">=</span> pr_gen_fuel.replace(to_replace <span class="op">=</span> <span class="st">"null"</span>, value <span class="op">=</span> pd.NA)</span>
+<span id="cb16-54"><a href="#cb16-54" tabindex="-1" aria-label="code-block-16-54"></a></span>
+<span id="cb16-55"><a href="#cb16-55" tabindex="-1" aria-label="code-block-16-55"></a>    <span class="co"># convert codes to strings</span></span>
+<span id="cb16-56"><a href="#cb16-56" tabindex="-1" aria-label="code-block-16-56"></a>    ENERGY_SOURCE_DICT <span class="op">=</span> {<span class="st">'WND'</span>:<span class="st">'wind'</span>, <span class="st">'NG'</span>:<span class="st">'natural_gas'</span>, <span class="st">'SUN'</span>:<span class="st">'solar'</span>,</span>
+<span id="cb16-57"><a href="#cb16-57" tabindex="-1" aria-label="code-block-16-57"></a>                        <span class="st">'BIT'</span>:<span class="st">'bituminous_coal'</span>, <span class="st">'MWH'</span>:<span class="st">"electricity_for_energy_storage"</span>,</span>
+<span id="cb16-58"><a href="#cb16-58" tabindex="-1" aria-label="code-block-16-58"></a>                        <span class="st">'DFO'</span>:<span class="st">'distillate_fuel_oil'</span>, <span class="st">'RFO'</span>:<span class="st">'residual_fuel_oil'</span>, <span class="st">'WAT'</span>:<span class="st">'hydro'</span>}</span>
+<span id="cb16-59"><a href="#cb16-59" tabindex="-1" aria-label="code-block-16-59"></a></span>
+<span id="cb16-60"><a href="#cb16-60" tabindex="-1" aria-label="code-block-16-60"></a>    PRIME_MOVER_CODE_DICT <span class="op">=</span> {</span>
+<span id="cb16-61"><a href="#cb16-61" tabindex="-1" aria-label="code-block-16-61"></a>        <span class="st">'WT'</span>:<span class="st">'onshore_wind'</span>, <span class="st">'CA'</span>:<span class="st">'cc_steam'</span>, <span class="st">'CT'</span>:<span class="st">'cc_combustion_turbine'</span>,</span>
+<span id="cb16-62"><a href="#cb16-62" tabindex="-1" aria-label="code-block-16-62"></a>        <span class="st">'PV'</span>:<span class="st">'photovoltaic'</span>, <span class="st">'ST'</span>:<span class="st">'steam_turbine'</span>, <span class="st">'BA'</span>:<span class="st">'battery'</span>,</span>
+<span id="cb16-63"><a href="#cb16-63" tabindex="-1" aria-label="code-block-16-63"></a>        <span class="st">'IC'</span>: <span class="st">'internal_combustion'</span>, <span class="st">'GT'</span>: <span class="st">'gas_turbine'</span>, <span class="st">'HY'</span>:<span class="st">'hydraulic_turbine'</span></span>
+<span id="cb16-64"><a href="#cb16-64" tabindex="-1" aria-label="code-block-16-64"></a>    }</span>
+<span id="cb16-65"><a href="#cb16-65" tabindex="-1" aria-label="code-block-16-65"></a></span>
+<span id="cb16-66"><a href="#cb16-66" tabindex="-1" aria-label="code-block-16-66"></a>    pr_gen_fuel <span class="op">=</span> map_code_to_strings(df <span class="op">=</span> pr_gen_fuel, mapped_col <span class="op">=</span> <span class="st">"energy_source_code"</span>, code_dictionary <span class="op">=</span> ENERGY_SOURCE_DICT)</span>
+<span id="cb16-67"><a href="#cb16-67" tabindex="-1" aria-label="code-block-16-67"></a>    pr_gen_fuel <span class="op">=</span> map_code_to_strings(df <span class="op">=</span> pr_gen_fuel, mapped_col <span class="op">=</span> <span class="st">"prime_mover_code"</span>, code_dictionary <span class="op">=</span> PRIME_MOVER_CODE_DICT)</span>
+<span id="cb16-68"><a href="#cb16-68" tabindex="-1" aria-label="code-block-16-68"></a></span>
+<span id="cb16-69"><a href="#cb16-69" tabindex="-1" aria-label="code-block-16-69"></a>    pr_gen_fuel <span class="op">=</span> handle_thousands_fuel_units(pr_gen_fuel, thousands_unit <span class="op">=</span> <span class="st">"thousand_short_tons"</span>)</span>
+<span id="cb16-70"><a href="#cb16-70" tabindex="-1" aria-label="code-block-16-70"></a>    pr_gen_fuel <span class="op">=</span> handle_thousands_fuel_units(pr_gen_fuel, thousands_unit <span class="op">=</span> <span class="st">"thousand barrels"</span>)</span>
+<span id="cb16-71"><a href="#cb16-71" tabindex="-1" aria-label="code-block-16-71"></a></span>
+<span id="cb16-72"><a href="#cb16-72" tabindex="-1" aria-label="code-block-16-72"></a>    <span class="co"># drop after 2025-03-01 (for now) as these values should not exist</span></span>
+<span id="cb16-73"><a href="#cb16-73" tabindex="-1" aria-label="code-block-16-73"></a>    pr_gen_fuel <span class="op">=</span> pr_gen_fuel.loc[pr_gen_fuel.date <span class="op">&lt;</span> pd.Timestamp(<span class="st">"2025-03-01"</span>)]</span>
+<span id="cb16-74"><a href="#cb16-74" tabindex="-1" aria-label="code-block-16-74"></a></span>
+<span id="cb16-75"><a href="#cb16-75" tabindex="-1" aria-label="code-block-16-75"></a>    <span class="co">### save cleaned file</span></span>
+<span id="cb16-76"><a href="#cb16-76" tabindex="-1" aria-label="code-block-16-76"></a>    write_generation_data(pr_gen_fuel, <span class="st">"data/pr_gen_fuel_monthly_clean.parquet"</span>)</span>
+<span id="cb16-77"><a href="#cb16-77" tabindex="-1" aria-label="code-block-16-77"></a></span>
+<span id="cb16-78"><a href="#cb16-78" tabindex="-1" aria-label="code-block-16-78"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb16-79"><a href="#cb16-79" tabindex="-1" aria-label="code-block-16-79"></a>    transform_pr_gen_fuel()</span></code></pre>
 </div>
 </div>
 </div>
@@ -762,7 +720,7 @@ Trying to import the above resulted in these errors:
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Run <code>uv add pyarrow fastparquet</code>.</p>
 </div>
@@ -771,8 +729,8 @@ Trying to import the above resulted in these errors:
 </div>
 <p>Let’s try that again:</p>
 <pre class="shell"><code>uv run main.py</code></pre>
-<p>If we check our <code>data</code> folder, we can see we created two
-new files!</p>
+<p>If we check our <code>data</code> folder, we can see we created a new
+file!</p>
 </div>
 </div>
 <div class="section level3">
@@ -782,15 +740,14 @@ that could get reused across multiple contexts. In order to keep things
 organized, we can split out these general purpose functions from our EIA
 923-specific code in another file.</p>
 <p>Let’s start by copying the <code>main.py</code> file and renaming it
-<code>utils.py</code>. In this file, let’s only keep the
-<code>melt_monthly_vars()</code> and <code>handle_data_types()</code>
+<code>utils.py</code>. In this file, let’s only keep the helper
 functions we wrote in the last episode:</p>
 <div id="accordionSpoiler2" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Show details </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -798,58 +755,49 @@ functions we wrote in the last episode:</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" tabindex="-1" aria-label="code-block-20-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb20-2"><a href="#cb20-2" tabindex="-1" aria-label="code-block-20-2"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1" aria-label="code-block-20-3"></a></span>
-<span id="cb20-4"><a href="#cb20-4" tabindex="-1" aria-label="code-block-20-4"></a><span class="co"># Silence some warnings about deprecated Pandas behavior</span></span>
-<span id="cb20-5"><a href="#cb20-5" tabindex="-1" aria-label="code-block-20-5"></a>pd.set_option(<span class="st">"future.no_silent_downcasting"</span>, <span class="va">True</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1" aria-label="code-block-20-4"></a><span class="kw">def</span> load_generation_data(path):</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1" aria-label="code-block-20-5"></a>    <span class="co">"""Load the cleaned Puerto Rico generator operations data from disk.</span></span>
 <span id="cb20-6"><a href="#cb20-6" tabindex="-1" aria-label="code-block-20-6"></a></span>
-<span id="cb20-7"><a href="#cb20-7" tabindex="-1" aria-label="code-block-20-7"></a><span class="co"># Utility functions</span></span>
-<span id="cb20-8"><a href="#cb20-8" tabindex="-1" aria-label="code-block-20-8"></a><span class="kw">def</span> melt_monthly_vars(pr_gen_fuel: pd.DataFrame, melted_var: <span class="bu">str</span>) <span class="op">-&gt;</span> pd.DataFrame:</span>
-<span id="cb20-9"><a href="#cb20-9" tabindex="-1" aria-label="code-block-20-9"></a>    <span class="co">"""Melt many columns of monthly data for a single variable into a month column and a value column.</span></span>
-<span id="cb20-10"><a href="#cb20-10" tabindex="-1" aria-label="code-block-20-10"></a></span>
-<span id="cb20-11"><a href="#cb20-11" tabindex="-1" aria-label="code-block-20-11"></a><span class="co">    This code takes a table with data stored in one column per month and stacks all the fields for a</span></span>
-<span id="cb20-12"><a href="#cb20-12" tabindex="-1" aria-label="code-block-20-12"></a><span class="co">    single variable (fuel_consumed_for_electricity_mmbtu), returning a table with one month column</span></span>
-<span id="cb20-13"><a href="#cb20-13" tabindex="-1" aria-label="code-block-20-13"></a><span class="co">    and one value column for this variable in order to make it easier to plot our data over time.</span></span>
-<span id="cb20-14"><a href="#cb20-14" tabindex="-1" aria-label="code-block-20-14"></a><span class="co">    Note that this drops the other variables of data.</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1" aria-label="code-block-20-7"></a><span class="co">    Args:</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1" aria-label="code-block-20-8"></a><span class="co">        path: Path to raw data file on disk.</span></span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1" aria-label="code-block-20-9"></a><span class="co">    """</span></span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1" aria-label="code-block-20-10"></a>    <span class="cf">return</span> pd.read_parquet(path)</span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1" aria-label="code-block-20-11"></a></span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1" aria-label="code-block-20-12"></a><span class="kw">def</span> write_generation_data(df, path):</span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1" aria-label="code-block-20-13"></a>    df.to_parquet(path)</span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1" aria-label="code-block-20-14"></a>    <span class="cf">return</span></span>
 <span id="cb20-15"><a href="#cb20-15" tabindex="-1" aria-label="code-block-20-15"></a></span>
-<span id="cb20-16"><a href="#cb20-16" tabindex="-1" aria-label="code-block-20-16"></a><span class="co">    Args:</span></span>
-<span id="cb20-17"><a href="#cb20-17" tabindex="-1" aria-label="code-block-20-17"></a><span class="co">        pr_gen_fuel: EIA 923 Puerto Rico generation fuel data.</span></span>
-<span id="cb20-18"><a href="#cb20-18" tabindex="-1" aria-label="code-block-20-18"></a><span class="co">        melted_var: The variable to be melted.</span></span>
-<span id="cb20-19"><a href="#cb20-19" tabindex="-1" aria-label="code-block-20-19"></a><span class="co">    """</span></span>
-<span id="cb20-20"><a href="#cb20-20" tabindex="-1" aria-label="code-block-20-20"></a>    <span class="co"># set up shared index</span></span>
-<span id="cb20-21"><a href="#cb20-21" tabindex="-1" aria-label="code-block-20-21"></a>    index_cols <span class="op">=</span> [<span class="st">"plant_id_eia"</span>, <span class="st">"plant_name_eia"</span>, <span class="st">"report_year"</span>, <span class="st">"prime_mover_code"</span>, <span class="st">"energy_source_code"</span>, <span class="st">"fuel_unit"</span>]</span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1" aria-label="code-block-20-16"></a></span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1" aria-label="code-block-20-17"></a><span class="kw">def</span> map_code_to_strings(df, mapped_col, code_dictionary):</span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1" aria-label="code-block-20-18"></a>    <span class="co">"""Convert a column of codes into strings defined by a dictionary.</span></span>
+<span id="cb20-19"><a href="#cb20-19" tabindex="-1" aria-label="code-block-20-19"></a></span>
+<span id="cb20-20"><a href="#cb20-20" tabindex="-1" aria-label="code-block-20-20"></a><span class="co">    This code takes a dataframe with a column of codes and returns a dataframe with the same column</span></span>
+<span id="cb20-21"><a href="#cb20-21" tabindex="-1" aria-label="code-block-20-21"></a><span class="co">    mapped to strings to prevent users from needing to consult a look-up table. The relationship between columns and strings is defined by a dictionary.</span></span>
 <span id="cb20-22"><a href="#cb20-22" tabindex="-1" aria-label="code-block-20-22"></a></span>
-<span id="cb20-23"><a href="#cb20-23" tabindex="-1" aria-label="code-block-20-23"></a>    var_cols <span class="op">=</span> index_cols <span class="op">+</span> [col <span class="cf">for</span> col <span class="kw">in</span> pr_gen_fuel.columns <span class="cf">if</span> col.startswith(melted_var)]</span>
-<span id="cb20-24"><a href="#cb20-24" tabindex="-1" aria-label="code-block-20-24"></a>    var_df <span class="op">=</span> pr_gen_fuel.loc[:, var_cols]</span>
-<span id="cb20-25"><a href="#cb20-25" tabindex="-1" aria-label="code-block-20-25"></a></span>
-<span id="cb20-26"><a href="#cb20-26" tabindex="-1" aria-label="code-block-20-26"></a>    <span class="co">## Melt the fuel_consumed columns</span></span>
-<span id="cb20-27"><a href="#cb20-27" tabindex="-1" aria-label="code-block-20-27"></a>    var_melt <span class="op">=</span> var_df.melt(</span>
-<span id="cb20-28"><a href="#cb20-28" tabindex="-1" aria-label="code-block-20-28"></a>        id_vars<span class="op">=</span>index_cols,</span>
-<span id="cb20-29"><a href="#cb20-29" tabindex="-1" aria-label="code-block-20-29"></a>        var_name<span class="op">=</span><span class="st">"month"</span>,</span>
-<span id="cb20-30"><a href="#cb20-30" tabindex="-1" aria-label="code-block-20-30"></a>        value_name<span class="op">=</span>melted_var</span>
-<span id="cb20-31"><a href="#cb20-31" tabindex="-1" aria-label="code-block-20-31"></a>    )</span>
-<span id="cb20-32"><a href="#cb20-32" tabindex="-1" aria-label="code-block-20-32"></a>    var_melt[<span class="st">"month"</span>] <span class="op">=</span> var_melt[<span class="st">"month"</span>].<span class="bu">str</span>.replace(<span class="ss">f"</span><span class="sc">{</span>melted_var<span class="sc">}</span><span class="ss">_"</span>, <span class="st">""</span>)</span>
-<span id="cb20-33"><a href="#cb20-33" tabindex="-1" aria-label="code-block-20-33"></a>    var_melt <span class="op">=</span> var_melt.set_index(index_cols <span class="op">+</span> [<span class="st">"month"</span>])</span>
-<span id="cb20-34"><a href="#cb20-34" tabindex="-1" aria-label="code-block-20-34"></a>    <span class="cf">return</span> var_melt</span>
+<span id="cb20-23"><a href="#cb20-23" tabindex="-1" aria-label="code-block-20-23"></a><span class="co">    Args:</span></span>
+<span id="cb20-24"><a href="#cb20-24" tabindex="-1" aria-label="code-block-20-24"></a><span class="co">        df: A Pandas DataFrame.</span></span>
+<span id="cb20-25"><a href="#cb20-25" tabindex="-1" aria-label="code-block-20-25"></a><span class="co">        mapped_col: The name of the column to be mapped.</span></span>
+<span id="cb20-26"><a href="#cb20-26" tabindex="-1" aria-label="code-block-20-26"></a><span class="co">        code_dictionary: A dictionary containing code-string pairs.</span></span>
+<span id="cb20-27"><a href="#cb20-27" tabindex="-1" aria-label="code-block-20-27"></a><span class="co">    """</span></span>
+<span id="cb20-28"><a href="#cb20-28" tabindex="-1" aria-label="code-block-20-28"></a>    <span class="cf">assert</span> <span class="bu">all</span>([code <span class="kw">in</span> code_dictionary <span class="cf">for</span> code <span class="kw">in</span> df[mapped_col].unique()]) <span class="co"># Check all codes present</span></span>
+<span id="cb20-29"><a href="#cb20-29" tabindex="-1" aria-label="code-block-20-29"></a>    df[<span class="st">'code_name'</span>] <span class="op">=</span> df[mapped_col].replace(code_dictionary)</span>
+<span id="cb20-30"><a href="#cb20-30" tabindex="-1" aria-label="code-block-20-30"></a>    df <span class="op">=</span> df.drop(columns<span class="op">=</span>mapped_col).rename(columns<span class="op">=</span>{<span class="st">'code_name'</span>:mapped_col})</span>
+<span id="cb20-31"><a href="#cb20-31" tabindex="-1" aria-label="code-block-20-31"></a>    <span class="cf">return</span> df</span>
+<span id="cb20-32"><a href="#cb20-32" tabindex="-1" aria-label="code-block-20-32"></a></span>
+<span id="cb20-33"><a href="#cb20-33" tabindex="-1" aria-label="code-block-20-33"></a><span class="kw">def</span> handle_thousands_fuel_units(df, thousands_unit: <span class="bu">str</span>):</span>
+<span id="cb20-34"><a href="#cb20-34" tabindex="-1" aria-label="code-block-20-34"></a>    <span class="co">"""Where the fuel unit column contains a small number of thousands, multiply by 1000 and update the unit label.</span></span>
 <span id="cb20-35"><a href="#cb20-35" tabindex="-1" aria-label="code-block-20-35"></a></span>
-<span id="cb20-36"><a href="#cb20-36" tabindex="-1" aria-label="code-block-20-36"></a><span class="kw">def</span> handle_data_types(pr_df: pd.DataFrame, categorical_cols: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> pd.DataFrame:</span>
-<span id="cb20-37"><a href="#cb20-37" tabindex="-1" aria-label="code-block-20-37"></a>    <span class="co">"""Convert EIA 923 PR columns into desired data types.</span></span>
+<span id="cb20-36"><a href="#cb20-36" tabindex="-1" aria-label="code-block-20-36"></a><span class="co">    This expects the thousands_unit to be in a column called "fuel_unit", and the units column to live in a</span></span>
+<span id="cb20-37"><a href="#cb20-37" tabindex="-1" aria-label="code-block-20-37"></a><span class="co">    column called "fuel_consumed_for_electricity_units".</span></span>
 <span id="cb20-38"><a href="#cb20-38" tabindex="-1" aria-label="code-block-20-38"></a></span>
-<span id="cb20-39"><a href="#cb20-39" tabindex="-1" aria-label="code-block-20-39"></a><span class="co">    In addition to using the standard convert_dtypes() function, handle a series of</span></span>
-<span id="cb20-40"><a href="#cb20-40" tabindex="-1" aria-label="code-block-20-40"></a><span class="co">    non-standard data types conversions for associated_combined_heat_power</span></span>
-<span id="cb20-41"><a href="#cb20-41" tabindex="-1" aria-label="code-block-20-41"></a><span class="co">    and create categorical columns to save memory.</span></span>
-<span id="cb20-42"><a href="#cb20-42" tabindex="-1" aria-label="code-block-20-42"></a></span>
-<span id="cb20-43"><a href="#cb20-43" tabindex="-1" aria-label="code-block-20-43"></a><span class="co">    Args:</span></span>
-<span id="cb20-44"><a href="#cb20-44" tabindex="-1" aria-label="code-block-20-44"></a><span class="co">        pr_df: Dataframe with EIA 923 Puerto Rico data.</span></span>
-<span id="cb20-45"><a href="#cb20-45" tabindex="-1" aria-label="code-block-20-45"></a><span class="co">        categorical_cols: List of columns that should be converted to a categorical dtype.</span></span>
-<span id="cb20-46"><a href="#cb20-46" tabindex="-1" aria-label="code-block-20-46"></a><span class="co">    """</span></span>
-<span id="cb20-47"><a href="#cb20-47" tabindex="-1" aria-label="code-block-20-47"></a>    pr_df <span class="op">=</span> pr_df.convert_dtypes()</span>
-<span id="cb20-48"><a href="#cb20-48" tabindex="-1" aria-label="code-block-20-48"></a>    pr_df[<span class="st">"associated_combined_heat_power"</span>] <span class="op">=</span> (</span>
-<span id="cb20-49"><a href="#cb20-49" tabindex="-1" aria-label="code-block-20-49"></a>        pr_df[<span class="st">"associated_combined_heat_power"</span>]</span>
-<span id="cb20-50"><a href="#cb20-50" tabindex="-1" aria-label="code-block-20-50"></a>        .astype(<span class="st">"object"</span>) <span class="co"># necessary for the types to work for the .replace() call</span></span>
-<span id="cb20-51"><a href="#cb20-51" tabindex="-1" aria-label="code-block-20-51"></a>        .replace({<span class="st">"Y"</span>: <span class="va">True</span>, <span class="st">"N"</span>: <span class="va">False</span>})</span>
-<span id="cb20-52"><a href="#cb20-52" tabindex="-1" aria-label="code-block-20-52"></a>        .astype(<span class="st">"boolean"</span>)</span>
-<span id="cb20-53"><a href="#cb20-53" tabindex="-1" aria-label="code-block-20-53"></a>    )</span>
-<span id="cb20-54"><a href="#cb20-54" tabindex="-1" aria-label="code-block-20-54"></a>    pr_df <span class="op">=</span> pr_df.astype({col: <span class="st">"category"</span> <span class="cf">for</span> col <span class="kw">in</span> categorical_cols})</span>
-<span id="cb20-55"><a href="#cb20-55" tabindex="-1" aria-label="code-block-20-55"></a>    <span class="cf">return</span> pr_df</span></code></pre>
+<span id="cb20-39"><a href="#cb20-39" tabindex="-1" aria-label="code-block-20-39"></a><span class="co">    Args:</span></span>
+<span id="cb20-40"><a href="#cb20-40" tabindex="-1" aria-label="code-block-20-40"></a><span class="co">        df: A Pandas DataFrame.</span></span>
+<span id="cb20-41"><a href="#cb20-41" tabindex="-1" aria-label="code-block-20-41"></a><span class="co">        unit_column: The column containing unit names.</span></span>
+<span id="cb20-42"><a href="#cb20-42" tabindex="-1" aria-label="code-block-20-42"></a><span class="co">        thousands_unit: The name of the unit to be normalized.</span></span>
+<span id="cb20-43"><a href="#cb20-43" tabindex="-1" aria-label="code-block-20-43"></a><span class="co">    """</span></span>
+<span id="cb20-44"><a href="#cb20-44" tabindex="-1" aria-label="code-block-20-44"></a>    df.loc[df.fuel_unit <span class="op">==</span> thousands_unit,<span class="st">"fuel_consumed_for_electricity_units"</span>] <span class="op">=</span> df.loc[df.fuel_unit <span class="op">==</span> thousands_unit, <span class="st">"fuel_consumed_for_electricity_units"</span>]<span class="op">*</span><span class="dv">1000</span></span>
+<span id="cb20-45"><a href="#cb20-45" tabindex="-1" aria-label="code-block-20-45"></a>    df.loc[df.fuel_unit <span class="op">==</span> thousands_unit, <span class="st">"fuel_unit"</span>] <span class="op">=</span> df.loc[df.fuel_unit <span class="op">==</span> thousands_unit].fuel_unit.<span class="bu">str</span>.replace(<span class="st">"thousand "</span>, <span class="st">""</span>)</span>
+<span id="cb20-46"><a href="#cb20-46" tabindex="-1" aria-label="code-block-20-46"></a>    <span class="cf">return</span> df</span></code></pre>
 </div>
 </div>
 </div>
@@ -860,8 +808,8 @@ need to include an <code>if __name__ == "__main__":</code> block.</p>
 <div class="section level4">
 <h4 id="importing-your-code-into-a-notebook">Importing your code into a notebook<a class="anchor" aria-label="anchor" href="#importing-your-code-into-a-notebook"></a></h4>
 <p>Now that we’ve created our <code>utils.py</code> file, we can use it
-in a Jupyter notebook by importing it.</p>
-<pre class="shell"><code>uv run jupyter notebook transform.ipynb</code></pre>
+in a new Jupyter notebook by importing it.</p>
+<pre class="shell"><code>uv run jupyter notebook</code></pre>
 <div class="codewrapper sourceCode" id="cb22">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -873,7 +821,7 @@ about it.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" tabindex="-1" aria-label="code-block-23-1"></a><span class="bu">help</span>(utils)</span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1" aria-label="code-block-23-2"></a><span class="bu">help</span>(utils.handle_data_types)</span></code></pre>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1" aria-label="code-block-23-2"></a><span class="bu">help</span>(utils.map_code_to_strings)</span></code></pre>
 </div>
 <p>Now we can use our functions in any notebook we write, without having
 to copy it over into a cell at the top - nice!</p>
@@ -896,8 +844,8 @@ using uv.</p>
 </div>
 </div>
 </div>
-<p>Now, when you make a tweak to <code>handle_data_types()</code>, that
-tweak will be applied across all of your code immediately. No more
+<p>Now, when you make a tweak to <code>map_code_to_strings()</code>,
+that tweak will be applied across all of your code immediately. No more
 copy-pasting!</p>
 <div id="callout4" class="callout">
 <div class="callout-square">
@@ -1009,7 +957,7 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/escape-from-jupyter.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/escape-from-jupyter.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2026-04-01",
+  "dateModified": "2026-06-30",
   "datePublished": "2026-06-30"
 }
 
