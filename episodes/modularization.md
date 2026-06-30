@@ -279,7 +279,7 @@ In plain language, identify what you want the function you're writing
 to accomplish. Then, try and write a generalizeable function that accomplishes that step.
 
 ```python
-def my_cool_function(input: Type) -> Type:
+def my_cool_function(input):
     """ This function does something.
 
     Any more notes can go here.
