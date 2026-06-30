@@ -26,7 +26,9 @@ are incredibly useful starting points for data exploration and visualization. Ye
 your code grows more complex or you start to collaborate with others, you might find
 it increasingly challenging to work entirely in Jupyter notebooks.
 
-In contrast, moving towards coding in scripts and modules offers us numerous advantages:
+When your supervisor asks to see your work, or you're starting to get confused about running cell 17, not cell 18, it's a good sign that it's time to consider escaping from Jupyter.
+
+Moving towards coding in scripts and modules offers us numerous advantages:
 
 - **Keep code organized:** Having to constantly scroll up and down to find that helpful function you wrote… somewhere?
 By organizing code into discrete steps and themes (e.g., one file per dataset), you and your collaborators can easily find relevant code.
@@ -361,7 +363,7 @@ Let's try that again:
 uv run main.py
 ```
 
-If we check our `data` folder, we can see we created two new files!
+If we check our `data` folder, we can see we created a new file!
 
 ### Importing your own code
 
@@ -428,11 +430,11 @@ an `if __name__ == "__main__":` block.
 
 #### Importing your code into a notebook
 
-Now that we've created our `utils.py` file, we can use it in a Jupyter notebook
+Now that we've created our `utils.py` file, we can use it in a new Jupyter notebook
 by importing it.
 
 ```shell
-uv run jupyter notebook etl.ipynb
+uv run jupyter notebook
 ```
 
 ```python
