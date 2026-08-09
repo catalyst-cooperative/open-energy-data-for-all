@@ -39,7 +39,13 @@ There's only a couple dozen, so we could probably get away with just downloading
 
 ### Example: EIA 923/906
 
-First, let's import the libraries we'll need to use. Of course we'll use our workhorse `requests`. We'll also need a library called "Beautiful Soup" that helps us work with *website data* in particular. It's imported as `bs4`.
+#### Skill: Using BeautifulSoup to extract tags from a webpage
+
+First, let's import the libraries we'll need to use.
+Of course we'll use our workhorse `requests`.
+We'll also need a library called "Beautiful Soup" that helps us work with the structure of a webpage -
+just like pandas can help you work with the structure of a csv or parquet file.
+Beautiful Soup is imported as `bs4`.
 
 ```python
 import bs4
@@ -60,9 +66,31 @@ eia_923_response.text
 '<!doctype html>\r\n<html>\r\n\r\n<head>\r\n\t<title>\r\n\t\tForm EIA-923 detailed data with previous form data (EIA-906/920) -\r\n\t\tU.S. Energy Information Administration (EIA)\t</title>\r\n\t<meta property="og:title" content="Form EIA-923 detailed data with previous form data (EIA-906/920) - U.S. Energy Information Administration (EIA)">\r\n\t<meta property="og:url" content="https://www.eia.gov/electricity/data/eia923/index.php">\r\n\t<meta name="url" content="https://www.eia.gov/electricity/data/eia923/index.php">\r\n\t<meta name="description" content="Clean Air Act Data Browser" />\r\n\t...
 ```
 
-OK, so that looks like some XML, which we saw a couple episodes ago - notice the many angle brackets containing words that seem to be trying to tell us something. We can use those *tags* to understand the content of the file, and then filter through it to find what we actually need.
+:::: instructor 
 
-This is actually a *special type* of XML called HTML, which is what most webpages are described in (see the `doctype html` tag). HTML is a vast and chaotic world, with exceptions to every rule. Fortunately, `bs4` is here to help tame the chaos a bit. The core of the library is the `BeautifulSoup` class, which takes in a website's HTML and adds some useful functionality to it:
+If delivering this episode in a block that includes Working With Diverse Filetypes, you can shorten the below to:
+
+> OK, so that looks like some XML, which we saw a couple episodes ago - notice the many angle brackets containing words that seem to be trying to tell us something. We can use those *tags* to understand the content of the file, and then filter through it to find what we actually need.
+
+> This is actually a *special type* of XML called HTML, which is what most webpages are described in (see the `doctype html` tag). 
+
+::::
+
+OK, there is some recognizeable text there, but also a bunch of extra stuff.
+Notice the many angle brackets enclosing words that seem to be trying to tell us something.
+This document is in HTML format, which stands for Hyper Text Markup Language.
+The bracketed words are called *tags*, and they wrap around the content you see when the HTML file is rendered in your browser.
+
+* Tags usually come in pairs, and can nest together to create a hierarchy.
+* Each tag has a name, which is the first word inside the angle brackets.
+* A tag may also include *attributes*, providing a way to specify more complex metadata about a given piece of content.
+
+In this way, the tags encode information about the structure of the document,
+the type of information in each content snippet,
+and how the browser should display it.
+We can use the tags to filter through the document to find what we actually need.
+
+HTML is a vast and chaotic world, with exceptions to every rule. Fortunately, `bs4` is here to help tame the chaos a bit. The core of the library is the `BeautifulSoup` class, which takes in a website's HTML and adds some useful functionality to it:
 
 ```python
 eia_923_soup = bs4.BeautifulSoup(eia_923_response.text)
@@ -79,18 +107,22 @@ The first thing you'll notice is that the output looks neater:
 		Form EIA-923 detailed data with previous form data (EIA-906/920) -
 		U.S. Energy Information Administration (EIA)	</title>
 <meta content="Form EIA-923 detailed data with previous form data (EIA-906/920) - U.S. Energy Information Administration (EIA)" property="og:title"/>
+...
 ```
 
 We'll also be able to filter through this complicated set of tags.
+We can use the `find_all` function to grab just the `title` tags.
+(Ideally there is only one title per HTML document, but you never know)
 
 ```python
 eia_923_soup.find_all("title")
 ```
 
-To get all the links, we need to get all the `a` tags - that's where links in HTML usually live:
+In HTML, links are wrapped in `a` tags (the "a" stands for "anchor").
+Let's see if that's enough to get the links we want:
 
 ```python
-eia_923_all_a_tags = eia_923_soup.find_all("a")
+eia_923_soup.find_all("a")
 ```
 
 ```output
@@ -108,7 +140,9 @@ eia_923_all_a_tags = eia_923_soup.find_all("a")
  ...
 ```
 
-OK, so we see a big list of tags, some of which appear to be links to form 923 ZIP files. The URLs for those are included in an `href` attribute. Almost every URL you'll want to use will live in one of these `href` attributes.
+OK, so we see a big list of tags, some of which we don't care about, but others appear to be links to EIA-923 ZIP files.
+When a link points to a ZIP file, the URL for the ZIP file is included in an `href` attribute.
+Almost every URL you'll want to use for scraping will live in one of these `href` attributes.
 
 We can filter based on attributes like this:
 
@@ -152,7 +186,6 @@ eia_923_zip_tags
  <a class="ico zip" href="archive/xls/f906nonutil1989.zip" title="1989-1998"><span>ZIP</span></a>]
 ```
 
-
 We probably want to skip those Form 906 links too.
 
 ```python
@@ -166,10 +199,11 @@ eia_923_zip_tags
 :::: challenge
 
 #### Challenge: get all the relevant `a` tags from EIA 906
-Lots of the data that is collected in EIA 923 was collected in EIA 906 in the past.
+
+In the example we just did, we looked at EIA-923, but
+lots of the data that is collected in EIA 923 now was collected in EIA 906 in the past.
 
 We'll have you work through the scraping steps on the 906 data to get a sense of how this all works.
-
 
 Let's get the relevant `a` tags from the [EIA 906 page](https://www.eia.gov/electricity/data/eia923/eia906u.php):
 
@@ -199,57 +233,42 @@ for a in eia_906_a_hrefs:
 ::::::::
 ::::
 
-
-### Downloading the data
+#### Skill: Downloading data from tag URLs
 OK, now we have our tags, time to use them to download the data! Let's try it with one tag first:
 
 ```python
+import pandas as pd
 eia_906_one_link = eia_906_xls_tags[0]
-eia_906_one_response = requests.get(eia_906_one_link["href"])
+eia_906_one_df = pd.read_excel(eia_906_one_link["href"])
 ```
 
 Oh no! We get an error:
 
 ```output
-MissingSchema: Invalid URL '/electricity/data/eia923/archive/xls/utility/f7592000mu.xls': No scheme supplied. Perhaps you meant https:///electricity/data/eia923/archive/xls/utility/f7592000mu.xls?
+FileNotFoundError: [Errno 2] No such file or directory: '/electricity/data/eia923/archive/xls/utility/f7592000mu.xls'
 ```
 
-Looks like the URL in the `href` is incomplete. It turns out that this is a *relative path* - much like the relative paths you had to deal with when loading data on your computer. The full URL we want is
-`https://www.eia.gov/electricity/data/eia923/archive/xls/utility/f7592000mu.xls` - which combines the URL of the page we got the link from (`https://www.eia.gov/electricity/data/eia923/eia906u.php`) with the fragment we got in the `href` (`/electricity/data/eia923/archive/xls/utility/f7592000mu.xls`).
+Looks like the URL in the `href` is incomplete. It turns out that as far as the internet is concerned, this is a *relative path* - much like the relative paths you have to deal with when loading data on your computer. The full URL we want is
+`https://www.eia.gov/electricity/data/eia923/archive/xls/utility/f7592000mu.xls` - which combines the URL of the page we got the link from (`https://www.eia.gov/electricity/data/eia923/eia906u.php`) with the fragment we got in the `href` attribute (`/electricity/data/eia923/archive/xls/utility/f7592000mu.xls`).
 
 This is a super common thing to have to do, so there's a useful bit of the Python standard library for this: `urllib.parse.urljoin`:
 
-```
+```python
 from urllib.parse import urljoin
 
 eia_906_one_full_url = urljoin(eia_906_url, eia_906_one_link["href"])
-eia_906_one_response = requests.get(eia_906_one_full_url)
+eia_906_one_df = pd.read_excel(eia_906_one_full_url)
 ```
 
 We can also do the string concatenation ourselves with `eia_906_url + "..."`, but there are a surprising amount of details to get wrong here so it's nice to just use the function that works.
 
-Finally, we can take a look at the actual dataframe using `pandas`:
-
-```python
-import pandas as pd
-
-eia_906_one_df = pd.read_excel(eia_906_one_response.content)
-```
-
-Note that we use `.content` here instead of `.text` - this is because an Excel file is not designed to be read directly as text.
-
-You can bypass this manual download-then-read process, actually, with `pd.read_excel` - it can handle reading directly from a URL:
-```python
-eia_906_one_df = pd.read_excel(eia_906_one_full_url)
-```
-
 :::: challenge
 
-#### Challenge: get the Form 906 file contents
+#### Challenge: get the EIA-906 file contents
 
-OK, so now we know how to scrape a bunch of URLs from a webpage. Let's read the Form 906 files into our program! Since they're XLS files, we can read them directly from a URL using `pandas.read_excel`.
+OK, so now we know how to scrape a bunch of URLs from a webpage. Let's read the EIA-906 files into our program! Since they're XLS files, we can read them directly from a URL using `pandas.read_excel`.
 
-Try making a list, `eia_906_dataframes`, that includes all of the data files from the [EIA 906 page](https://www.eia.gov/electricity/data/eia923/eia906u.php) - start with the (minimal) scaffold below!
+Try making a list, `eia_906_dataframes`, that includes all of the data files from the [EIA-906 page](https://www.eia.gov/electricity/data/eia923/eia906u.php) - start with the (minimal) scaffold below!
 
 ```python
 import pandas as pd
@@ -270,7 +289,57 @@ for a in eia_906_xls_tags:
 
 ::::
 
-Once we've completed the challenge above, we have a list of a bunch of dataframes. To bring them all into one dataframe, we can use `pd.concat`, which "concatenates" several dataframes together:
+
+:::: instructor
+
+Optional detour is optional; exclude based on class fatigue and time.
+
+::::
+
+#### Detour: What if it's not tabular data?
+
+OK, but what if you're downloading a URL that pandas doesn't know how to read?
+
+```python
+eia_923_one_link = eia_923_zip_tags[0]
+eia_923_one_full_url = urljoin(eia_923_url, eia_923_one_link["href"])
+eia_923_one_full_url
+```
+
+Pandas doesn't have a `read_zip`; anything could be in it.
+
+But if we manage the request ourselves, we can save the file to disk.
+
+```python
+eia_923_one_link_response = requests.get(eia_923_one_full_url)
+with open("f923_2026.zip", "wb") as savefile:
+  savefile.write(eia_923_one_link_response.content)
+```
+
+Because we have a whole list of links, we'll want to be able to fetch the filename from the link href.
+Python's standard library can help with that, using `pathlib`:
+
+```python
+from pathlib import Path
+
+eia_923_one_path = Path(eia_923_one_link["href"])
+eia_923_one_path.name
+```
+
+So we could loop through all our EIA-923 ZIP files and save them to disk like this:
+
+```python
+for a in eia_923_zip_tags:
+    filename = Path(a["href"]).name
+    full_url = urljoin(eia_923_url, a["href"])
+    a_response = requests.get(full_url)
+    with open(filename, "wb") as savefile:
+        savefile.write(a_response.content)
+```
+
+#### Skill: From many individual data frames to one
+
+From the last challenge, we have a list of a bunch of dataframes. To bring them all into one dataframe, we can use `pd.concat`, which "concatenates" several dataframes together:
 
 ```python
 mega_906 = pd.concat(eia_906_dataframes)
@@ -282,7 +351,15 @@ If you use `DataFrame.info()` you can quickly see that some columns (YEAR, FIPST
 mega_906.info()
 ```
 
-And if you start to dig into the data a bit, such as pulling out the various values of `YEAR`, you see that you have *plenty* of data cleaning to do before this is really usable for analysis. But at least you have all of the data in one dataframe now! We'll go over some more tips for exploratory data analysis in the next episode.
+And if you start to dig into the data a bit, such as pulling out the various values of `YEAR`, you see that you have *plenty* of data cleaning to do before this is really usable for analysis. But at least you have all of the data in one dataframe now! 
+
+:::: instructor
+
+If teaching this episode in a block that includes Visual Data Exploration, foreshadow here:
+
+> We'll go over some more tips for exploratory data analysis in the next episode.
+
+::::
 
 ```python
 mega_906.YEAR.value_counts()
@@ -335,6 +412,7 @@ Why might you choose to do all this instead of just manually collecting links?
 * If the data is frequently updated
 * If I have to download all the files multiple times
 * If I have to combine everything into one big dataset programmatically anyways
+* To spare my collaborators from experiencing similar pains
 
 ::::
 
@@ -381,7 +459,7 @@ first_page["warnings"]
 ```
 
 ```
-The API can only return 5000 rows in JSON format.  Please consider constraining your request with facet, start, or end, or using offset to paginate results.
+The API can only return 5000 rows in JSON format. Please consider constraining your request with facet, start, or end, or using offset to paginate results.
 ```
 
 So if we want a dataset that's bigger than 5000 rows, we'll need to make multiple requests. Instead of scraping many URLs from a page, we'll be generating the URLs ourselves.
@@ -429,7 +507,6 @@ And if we wanted to grab the first 5 pages, we could use a `for` loop combined w
 ```python
 for i in range(5):
     print(i)
-    # actually get the page here...
 ```
 
 If you want to start at a specific number, you can do something like:
@@ -449,7 +526,18 @@ for i in range(0, 15, 5):
 
 :::: challenge: `range`
 
-If you wanted to set a fresh `offset` for every page in a number of rows, how would you do that? Imagine there are 23,456 rows and each page must be 5000 rows long.
+#### Challenge: use `range` to find offsets
+
+For a query with 23,456 rows of results, how many pages of 5,000 rows each do you need in order to be sure you've retrieved everything?
+
+Write code that generates the offset for each page and stores them in a variable called `offsets`.
+
+```python
+total_rows = 23_456
+page_size = 5_000
+
+offsets = # ???
+```
 
 :::::::: solution
 
@@ -457,8 +545,11 @@ If you wanted to set a fresh `offset` for every page in a number of rows, how wo
 total_rows = 23_456
 page_size = 5000
 
+offsets = []
 for offset in range(0, total_rows, page_size):
-  print(offset)
+  offsets.append(offset)
+
+offsets
 ```
 ::::::::
 
