@@ -518,7 +518,7 @@ string in python?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -570,7 +570,7 @@ data</strong>)?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Some non-exhaustive ideas:</p>
 <p>Remote data pros:</p>
@@ -606,12 +606,12 @@ APIs:</p>
 an example.</p>
 <div class="section level3">
 <h3 id="apis-as-fancy-urls">APIs as fancy URLs<a class="anchor" aria-label="anchor" href="#apis-as-fancy-urls"></a></h3>
-<p>Suppose someone asks you, “how much natural gas was consumed for
-electricity generation, totalled across all sectors, in Puerto Rico, for
-each year between 2020 and 2023?”</p>
-<p>You <em>could</em> go find the EIA 923 spreadsheets for 2020-2023,
-download the individual files, do a bunch of filtering and reshaping of
-the data, and get an answer.</p>
+<p>Suppose someone asks you, “how much bituminous coal was consumed for
+electricity generation, totalled across all sectors, in Colorado, for
+each year between 2024 and 2025?”</p>
+<p>You <em>could</em> go find the EIA 923 spreadsheets for 2024 and
+2025, download the individual files, do a bunch of filtering and
+reshaping of the data, and get an answer.</p>
 <p>But, in this case, the EIA has another way - their web API. Web APIs
 are collections of fancy URLs that allow them to be much more flexible
 than merely downloading individual files. They can save you a lot of
@@ -621,63 +621,44 @@ work, if you become good at using them.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a>response <span class="op">=</span> requests.get(<span class="st">"https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&amp;facets[fueltypeid][]=NG&amp;facets[sectorid][]=99&amp;facets[location][]=PR&amp;frequency=annual&amp;start=2020&amp;end=2023&amp;api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a>response <span class="op">=</span> requests.get(example_api_url)</span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a>response.json()</span></code></pre>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a>response <span class="op">=</span> requests.get(<span class="st">"https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&amp;facets[fueltypeid][]=BIT&amp;facets[sectorid][]=99&amp;facets[location][]=CO&amp;frequency=annual&amp;start=2024&amp;end=2025&amp;api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a>response.json()</span></code></pre>
 </div>
 <p>Which gives you:</p>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="output" tabindex="0"><code>{'response': {'total': '4',
+<pre class="output" tabindex="0"><code>{'response': {'total': '2',
   'dateFormat': 'YYYY',
   'frequency': 'annual',
-  'data': [{'period': '2020',
-    'location': 'PR',
-    'stateDescription': 'Puerto Rico',
+  'data': [{'period': '2025',
+    'location': 'CO',
+    'stateDescription': 'Colorado',
     'sectorid': '99',
     'sectorDescription': 'All Sectors',
-    'fueltypeid': 'NG',
-    'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '47834.384',
-    'consumption-for-eg-units': 'thousand Mcf'},
-   {'period': '2021',
-    'location': 'PR',
-    'stateDescription': 'Puerto Rico',
+    'fueltypeid': 'BIT',
+    'fuelTypeDescription': 'bituminous coal',
+    'consumption-for-eg': '1186.659',
+    'consumption-for-eg-units': 'thousand short tons'},
+   {'period': '2024',
+    'location': 'CO',
+    'stateDescription': 'Colorado',
     'sectorid': '99',
     'sectorDescription': 'All Sectors',
-    'fueltypeid': 'NG',
-    'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '70999.964',
-    'consumption-for-eg-units': 'thousand Mcf'},
-   {'period': '2022',
-    'location': 'PR',
-    'stateDescription': 'Puerto Rico',
-    'sectorid': '99',
-    'sectorDescription': 'All Sectors',
-    'fueltypeid': 'NG',
-    'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '50696.82',
-    'consumption-for-eg-units': 'thousand Mcf'},
-   {'period': '2023',
-    'location': 'PR',
-    'stateDescription': 'Puerto Rico',
-    'sectorid': '99',
-    'sectorDescription': 'All Sectors',
-    'fueltypeid': 'NG',
-    'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '66022.717',
-    'consumption-for-eg-units': 'thousand Mcf'}],
+    'fueltypeid': 'BIT',
+    'fuelTypeDescription': 'bituminous coal',
+    'consumption-for-eg': '1026.034',
+    'consumption-for-eg-units': 'thousand short tons'}],
   'description': 'Monthly and annual electric power operations by state, sector, and energy source.\n    Source: Form EIA-923'},
  'request': {'command': '/v2/electricity/electric-power-operational-data/data/',
   'params': {'data': ['consumption-for-eg'],
-   'facets': {'fueltypeid': ['NG'], 'sectorid': ['99'], 'location': ['PR']},
+   'facets': {'fueltypeid': ['BIT'], 'sectorid': ['99'], 'location': ['CO']},
    'frequency': 'annual',
-   'start': '2020',
-   'end': '2023',
+   'start': '2024',
+   'end': '2025',
    'api_key': '3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8'}},
- 'apiVersion': '2.1.8',
+ 'apiVersion': '2.1.13',
  'ExcelAddInVersion': '2.1.0'}</code></pre>
 </div>
 </div>
@@ -694,17 +675,17 @@ it down into a few parts:</p>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1" aria-label="code-block-13-4"></a>    <span class="st">"?"</span> <span class="co"># separator that indicates "everything after this will be a name-value pair"</span></span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1" aria-label="code-block-13-5"></a>    <span class="st">"data[]=consumption-for-eg"</span> <span class="co"># name: data[], value: consumption-for-eg ("consumption for electricity generation")</span></span>
 <span id="cb13-6"><a href="#cb13-6" tabindex="-1" aria-label="code-block-13-6"></a>    <span class="st">"&amp;"</span> <span class="co"># separator between each pair</span></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1" aria-label="code-block-13-7"></a>    <span class="st">"facets[fueltypeid][]=NG"</span> <span class="co"># only natural gas data</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1" aria-label="code-block-13-7"></a>    <span class="st">"facets[fueltypeid][]=BIT"</span> <span class="co"># only bituminous coal data</span></span>
 <span id="cb13-8"><a href="#cb13-8" tabindex="-1" aria-label="code-block-13-8"></a>    <span class="st">"&amp;"</span></span>
 <span id="cb13-9"><a href="#cb13-9" tabindex="-1" aria-label="code-block-13-9"></a>    <span class="st">"facets[sectorid][]=99"</span> <span class="co"># total across all sectors</span></span>
 <span id="cb13-10"><a href="#cb13-10" tabindex="-1" aria-label="code-block-13-10"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1" aria-label="code-block-13-11"></a>    <span class="st">"facets[location][]=PR"</span> <span class="co"># in Puerto Rico</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1" aria-label="code-block-13-11"></a>    <span class="st">"facets[location][]=CO"</span> <span class="co"># in Colorado</span></span>
 <span id="cb13-12"><a href="#cb13-12" tabindex="-1" aria-label="code-block-13-12"></a>    <span class="st">"&amp;"</span></span>
 <span id="cb13-13"><a href="#cb13-13" tabindex="-1" aria-label="code-block-13-13"></a>    <span class="st">"frequency=annual"</span> <span class="co"># per year</span></span>
 <span id="cb13-14"><a href="#cb13-14" tabindex="-1" aria-label="code-block-13-14"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb13-15"><a href="#cb13-15" tabindex="-1" aria-label="code-block-13-15"></a>    <span class="st">"start=2020"</span> <span class="co"># starting in 2020</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1" aria-label="code-block-13-15"></a>    <span class="st">"start=2024"</span> <span class="co"># starting in 2024</span></span>
 <span id="cb13-16"><a href="#cb13-16" tabindex="-1" aria-label="code-block-13-16"></a>    <span class="st">"&amp;"</span></span>
-<span id="cb13-17"><a href="#cb13-17" tabindex="-1" aria-label="code-block-13-17"></a>    <span class="st">"end=2023"</span> <span class="co"># ending in 2023</span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1" aria-label="code-block-13-17"></a>    <span class="st">"end=2025"</span> <span class="co"># ending in 2025</span></span>
 <span id="cb13-18"><a href="#cb13-18" tabindex="-1" aria-label="code-block-13-18"></a>    <span class="st">"&amp;"</span></span>
 <span id="cb13-19"><a href="#cb13-19" tabindex="-1" aria-label="code-block-13-19"></a>    <span class="st">"api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8"</span> <span class="co"># a password to prove you have access to the API</span></span>
 <span id="cb13-20"><a href="#cb13-20" tabindex="-1" aria-label="code-block-13-20"></a>)</span></code></pre>
@@ -865,7 +846,7 @@ level, what route should we request next? Please request it using
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p><code>facility-fuel</code>!</p>
 <div class="codewrapper sourceCode" id="cb17">
@@ -1136,7 +1117,7 @@ together.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
