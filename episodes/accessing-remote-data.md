@@ -40,7 +40,7 @@ The [`requests` library](https://requests.readthedocs.io/en/latest/user/quicksta
 import requests
 
 json_example_url =
-"https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.json"
+"https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_pr.json"
 ```
 
 To read a URL we use the [`requests.get()` method](https://requests.readthedocs.io/en/latest/api/#requests.get), which returns a [`requests.Response` object](https://requests.readthedocs.io/en/latest/api/#requests.Response). Let's try using it!
@@ -90,7 +90,7 @@ This seems to be a list of records, with "period", "plantCode", "plantName", etc
 [{'period': '2020-11',
   'plantCode': '61034',
   'plantName': 'EcoElectrica',
-  'fuel2002': 'ALL',
+  'fuelType': 'ALL',
   'fuelTypeDescription': 'Total',
   'state': 'PR',
   'stateDescription': None,
@@ -102,7 +102,7 @@ This seems to be a list of records, with "period", "plantCode", "plantName", etc
  {'period': '2020-11',
   'plantCode': '61034',
   'plantName': 'EcoElectrica',
-  'fuel2002': 'NG',
+  'fuelType': 'NG',
   'fuelTypeDescription': 'Natural Gas',
   'state': 'PR',
   'stateDescription': None,
@@ -118,7 +118,7 @@ This seems to be a list of records, with "period", "plantCode", "plantName", etc
 Can you take the raw XML data at the following URL and turn it into a string in python?
 
 ```python
-xml_url = "https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_2022.xml"
+xml_url = "https://raw.githubusercontent.com/catalyst-cooperative/open-energy-data-for-all/refs/heads/main/data/eia923_pr.xml"
 ```
 
 :::: solution
@@ -405,7 +405,8 @@ facility_fuel
     'query': 'A',
     'format': 'YYYY'}],
   'facets': [{'id': 'plantCode', 'description': 'Plant ID and Name'},
-   {'id': 'fuel2002', 'description': 'Energy Source'},
+   {'id': 'fuel2002', 'description': '2002 Fuel Source'},
+   {'id': 'fuelType', 'description': 'Fuel Source'},
    {'id': 'state', 'description': 'State'},
    {'id': 'primeMover', 'description': 'Prime Mover'}],
   'data': {'generation': {'alias': 'Net Generation', 'units': 'megawatthours'},
@@ -510,13 +511,13 @@ facility_fuels_metadata.json()["response"]
 ```output
 ...
  'facets': [{'id': 'plantCode', 'description': 'Plant ID and Name'},
-  {'id': 'fuel2002', 'description': 'Energy Source'},
+  {'id': 'fuelType', 'description': 'Energy Source'},
   {'id': 'state', 'description': 'State'},
   {'id': 'primeMover', 'description': 'Prime Mover'}],
 ...
 ```
 
-Looks like `fuel2002` is the facet we want to use... but how do we use it? ? A quick search in the docs for `&facet` will give us this example:
+Looks like `fuelType` is the facet we want to use... but how do we use it? ? A quick search in the docs for `&facet` will give us this example:
 
 > `http://api.eia.gov/v2/electricity/retail-sales/data/?api_key=xxxxxx&facets[stateid][]=CO&facets[sectorid][]=RES&frequency=monthly`
 
@@ -524,7 +525,7 @@ Let's try copying this pattern.
 
 ```python
 gas_only = requests.get(
-    f"{base_url}/facility-fuel/data?data[]=generation&facets[fuel2002][]=gas&api_key={api_key}"
+    f"{base_url}/facility-fuel/data?data[]=generation&facets[fuelType][]=gas&api_key={api_key}"
 )
 ```
 
@@ -536,7 +537,7 @@ gas_only = requests.get(
     f"{base_url}/facility-fuel/data",
     params={
         "data[]": "generation",
-        "facets[fuel2002][]": "gas",
+        "facets[fuelType][]": "gas",
         "api_key": api_key
     },
 )
@@ -554,7 +555,7 @@ It returns this un-helpful empty result, though... maybe "gas" isn't the right v
   'description': 'Annual and monthly electric power operations for individual power plants, by energy source and prime mover\n    Source: Form EIA-923'},
  'request': {'command': '/v2/electricity/facility-fuel/data/',
   'params': {'data': ['generation'],
-   'facets': {'fuel2002': ['gas']},
+   'facets': {'fuelType': ['gas']},
    'api_key': '3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8'}},
  'apiVersion': '2.1.8',
  'ExcelAddInVersion': '2.1.0'}
@@ -567,7 +568,7 @@ If we look in the docs, there's a [section](https://www.eia.gov/opendata/documen
 > `https://api.eia.gov/v2/electricity/retail-sales/facet/sectorid/?api_key=xxxxxx`
 
 ```python
-fueltypes = requests.get(f"{base_url}/facility-fuel/facet/fuel2002?api_key={api_key}").json()
+fueltypes = requests.get(f"{base_url}/facility-fuel/facet/fuelType?api_key={api_key}").json()
 
 fueltypes
 ```
@@ -590,7 +591,7 @@ gas_only = requests.get(
     f"{base_url}/facility-fuel/data",
     params={
         "data[]": "generation",
-        "facets[fuel2002][]": "NG",
+        "facets[fuelType][]": "NG",
         "api_key": api_key
     },
 )
@@ -603,7 +604,7 @@ It does seem to filter the outputs to only natural gas data!
 :::: challenge
 So we've handled the fuel type - let's split into breakout groups to handle the other issues with the data:
 
-* we would like to filter this to Colorado data only
+* we would like to filter this to Puerto Rico data only
 * we would like to filter this to data for 2020, 2021, 2022, and 2023
 * we would like the data to be reported yearly, not monthly
 
@@ -622,7 +623,7 @@ annual_ng_pr_2020_2023 = requests.get(
     params={
         "data[]": "generation",
         "frequency": "annual",
-        "facets[fuel2002][]": "NG",
+        "facets[fuelType][]": "NG",
         "facets[state][]": "PR",
         "start": "2020-01-01",
         "end": "2023-12-31",
