@@ -182,9 +182,9 @@ This is because every web API is just a fancy bundle of URLs. Here's an example.
 
 ### APIs as fancy URLs
 
-Suppose someone asks you, "how much natural gas was consumed for electricity generation, totalled across all sectors, in Puerto Rico, for each year between 2020 and 2023?"
+Suppose someone asks you, "how much bituminous coal was consumed for electricity generation, totalled across all sectors, in Colorado, for each year between 2024 and 2025?"
 
-You *could* go find the EIA 923 spreadsheets for 2020-2023, download the individual files, do a bunch of filtering and reshaping of the data, and get an answer.
+You *could* go find the EIA 923 spreadsheets for 2024 and 2025, download the individual files, do a bunch of filtering and reshaping of the data, and get an answer.
 
 But, in this case, the EIA has another way - their web API. Web APIs are collections of fancy URLs that allow them to be much more flexible than merely downloading individual files. They can save you a lot of work, if you become good at using them.
 
@@ -193,8 +193,7 @@ For example, to answer that question, you can request this URL:
 
 ```python
 
-response = requests.get("https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&facets[fueltypeid][]=NG&facets[sectorid][]=99&facets[location][]=PR&frequency=annual&start=2020&end=2023&api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
-response = requests.get(example_api_url)
+response = requests.get("https://api.eia.gov/v2/electricity/electric-power-operational-data/data?data[]=consumption-for-eg&facets[fueltypeid][]=BIT&facets[sectorid][]=99&facets[location][]=CO&frequency=annual&start=2024&end=2025&api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8")
 
 response.json()
 ```
@@ -202,54 +201,36 @@ response.json()
 Which gives you:
 
 ```output
-{'response': {'total': '4',
+{'response': {'total': '2',
   'dateFormat': 'YYYY',
   'frequency': 'annual',
-  'data': [{'period': '2020',
-    'location': 'PR',
-    'stateDescription': 'Puerto Rico',
+  'data': [{'period': '2025',
+    'location': 'CO',
+    'stateDescription': 'Colorado',
     'sectorid': '99',
     'sectorDescription': 'All Sectors',
-    'fueltypeid': 'NG',
-    'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '47834.384',
-    'consumption-for-eg-units': 'thousand Mcf'},
-   {'period': '2021',
-    'location': 'PR',
-    'stateDescription': 'Puerto Rico',
+    'fueltypeid': 'BIT',
+    'fuelTypeDescription': 'bituminous coal',
+    'consumption-for-eg': '1186.659',
+    'consumption-for-eg-units': 'thousand short tons'},
+   {'period': '2024',
+    'location': 'CO',
+    'stateDescription': 'Colorado',
     'sectorid': '99',
     'sectorDescription': 'All Sectors',
-    'fueltypeid': 'NG',
-    'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '70999.964',
-    'consumption-for-eg-units': 'thousand Mcf'},
-   {'period': '2022',
-    'location': 'PR',
-    'stateDescription': 'Puerto Rico',
-    'sectorid': '99',
-    'sectorDescription': 'All Sectors',
-    'fueltypeid': 'NG',
-    'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '50696.82',
-    'consumption-for-eg-units': 'thousand Mcf'},
-   {'period': '2023',
-    'location': 'PR',
-    'stateDescription': 'Puerto Rico',
-    'sectorid': '99',
-    'sectorDescription': 'All Sectors',
-    'fueltypeid': 'NG',
-    'fuelTypeDescription': 'natural gas',
-    'consumption-for-eg': '66022.717',
-    'consumption-for-eg-units': 'thousand Mcf'}],
+    'fueltypeid': 'BIT',
+    'fuelTypeDescription': 'bituminous coal',
+    'consumption-for-eg': '1026.034',
+    'consumption-for-eg-units': 'thousand short tons'}],
   'description': 'Monthly and annual electric power operations by state, sector, and energy source.\n    Source: Form EIA-923'},
  'request': {'command': '/v2/electricity/electric-power-operational-data/data/',
   'params': {'data': ['consumption-for-eg'],
-   'facets': {'fueltypeid': ['NG'], 'sectorid': ['99'], 'location': ['PR']},
+   'facets': {'fueltypeid': ['BIT'], 'sectorid': ['99'], 'location': ['CO']},
    'frequency': 'annual',
-   'start': '2020',
-   'end': '2023',
+   'start': '2024',
+   'end': '2025',
    'api_key': '3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8'}},
- 'apiVersion': '2.1.8',
+ 'apiVersion': '2.1.13',
  'ExcelAddInVersion': '2.1.0'}
 ```
 
@@ -264,17 +245,17 @@ example_api_url = (
     "?" # separator that indicates "everything after this will be a name-value pair"
     "data[]=consumption-for-eg" # name: data[], value: consumption-for-eg ("consumption for electricity generation")
     "&" # separator between each pair
-    "facets[fueltypeid][]=NG" # only natural gas data
+    "facets[fueltypeid][]=BIT" # only bituminous coal data
     "&"
     "facets[sectorid][]=99" # total across all sectors
     "&"
-    "facets[location][]=PR" # in Puerto Rico
+    "facets[location][]=CO" # in Colorado
     "&"
     "frequency=annual" # per year
     "&"
-    "start=2020" # starting in 2020
+    "start=2024" # starting in 2024
     "&"
-    "end=2023" # ending in 2023
+    "end=2025" # ending in 2025
     "&"
     "api_key=3zjKYxV86AqtJWSRoAECir1wQFscVu6lxXnRVKG8" # a password to prove you have access to the API
 )
