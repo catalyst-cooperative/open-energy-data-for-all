@@ -66,13 +66,13 @@ eia_923_response.text
 '<!doctype html>\r\n<html>\r\n\r\n<head>\r\n\t<title>\r\n\t\tForm EIA-923 detailed data with previous form data (EIA-906/920) -\r\n\t\tU.S. Energy Information Administration (EIA)\t</title>\r\n\t<meta property="og:title" content="Form EIA-923 detailed data with previous form data (EIA-906/920) - U.S. Energy Information Administration (EIA)">\r\n\t<meta property="og:url" content="https://www.eia.gov/electricity/data/eia923/index.php">\r\n\t<meta name="url" content="https://www.eia.gov/electricity/data/eia923/index.php">\r\n\t<meta name="description" content="Clean Air Act Data Browser" />\r\n\t...
 ```
 
-:::: instructor 
+:::: instructor
 
 If delivering this episode in a block that includes Working With Diverse Filetypes, you can shorten the below to:
 
 > OK, so that looks like some XML, which we saw a couple episodes ago - notice the many angle brackets containing words that seem to be trying to tell us something. We can use those *tags* to understand the content of the file, and then filter through it to find what we actually need.
 
-> This is actually a *special type* of XML called HTML, which is what most webpages are described in (see the `doctype html` tag). 
+> This is actually a *special type* of XML called HTML, which is what most webpages are described in (see the `doctype html` tag).
 
 ::::
 
@@ -351,7 +351,7 @@ If you use `DataFrame.info()` you can quickly see that some columns (YEAR, FIPST
 mega_906.info()
 ```
 
-And if you start to dig into the data a bit, such as pulling out the various values of `YEAR`, you see that you have *plenty* of data cleaning to do before this is really usable for analysis. But at least you have all of the data in one dataframe now! 
+And if you start to dig into the data a bit, such as pulling out the various values of `YEAR`, you see that you have *plenty* of data cleaning to do before this is really usable for analysis. But at least you have all of the data in one dataframe now!
 
 :::: instructor
 
@@ -524,11 +524,11 @@ for i in range(0, 15, 5):
 ```
 
 
-:::: challenge: `range`
+:::: challenge
 
-#### Challenge: use `range` to find offsets
+### Challenge: use `range` to find offsets
 
-For a query with 23,456 rows of results, how many pages of 5,000 rows each do you need in order to be sure you've retrieved everything?
+To fetch a dataframe with 23,456 rows, how many pages of 5,000 rows each do you need to fetch in order to be sure you've retrieved everything?
 
 Write code that generates the offset for each page and stores them in a variable called `offsets`.
 
@@ -543,7 +543,7 @@ offsets = # ???
 
 ```python
 total_rows = 23_456
-page_size = 5000
+page_size = 5_000
 
 offsets = []
 for offset in range(0, total_rows, page_size):
@@ -555,39 +555,41 @@ offsets
 
 ::::
 
-### How many rows to get?
+### Skill: knowng when to stop
 
 Now that we know how to get multiple pages, we need to know when to stop getting more pages.
 
 Broadly, there are two strategies:
 
-* figure out the total number of results ahead of time, and do some math to figure out how many pages to request
+* figure out the total number of results ahead of time, and do some math to figure out how many pages to request (that's the math you just did!)
 * keep getting more pages until you run out of results
 
 Both work, and each has its own downsides:
 
 * the first method only works for APIs that tell you how many results there are.
-* the second method can lead to infinite loops if you mess up.
+* the second method can lead to your program running forever in an infinite loop if you mess up.
 
 Since the EIA API tells you how many results there are, let's work with the first option.
+
+The challenge used a made-up number for the total rows but if we want to fetch the real data we need the real number.
 
 Let's look at the API response again.
 
 ```python
 first_page.keys()
 ```
-That "total" field looks pretty suspicious.
+That "total" field looks pretty promising.
 
 ```python
 first_page["total"]
 ```
 
-So there are about 8,000 rows in this dataset. That's the last piece you need to be able to do this challenge!
+So there are about 8,000 rows in this dataset. That's the last piece you need to be able to do fetch the whole dataframe!
 
 
 :::: challenge
 
-#### Challenge: pagination
+### Challenge: use pagination to fetch the full dataframe
 
 OK, now let's put it all together!
 
@@ -614,7 +616,7 @@ df = pd.concat(all_records)
 
 ```python
 all_records = []
-for offset in range(0, 12_345, 5000):
+for offset in range(0, ???, 5000):
     print(f"Getting page starting at {offset}...")
     page = requests.get(
       f"{eia_api_base_url}/facility-fuel/data",
@@ -636,7 +638,7 @@ We've only just scratched the surface of programmatically getting data from the 
 * Links not showing up in your `bs4` `a` tags?
   * look at the links using the *html inspector* in your browser dev tools.
   * look at what's happening when you download files by using the *network tab* of your browser dev tools.
-    * when you click something to download data, or when you load in data for a graph, keep an eye on this. you might find some suspicious looking URLs
+    * when you click something to download data, or when you load in data for a graph, keep an eye on this. it's a bit of a firehose though -- it will show URLs from any trackers or advertisers used by the site as well as the URLs for the data you're looking for.
 * The HTML you see in *browser dev tools* is different from what you get from `requests`?
   * sometimes there's code that your browser runs after the initial load, which changes the HTML after the fact. `requests` won't catch that, but try `playwright` which runs that post-load code. keyword is `headless browser automation`.
   * sometimes servers will be mean to you because of who you say you are (*user agent*).
@@ -657,8 +659,8 @@ We've only just scratched the surface of programmatically getting data from the 
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
-- beautiful soup lets you grab links out of a webpage so that you can then download them
-- if you need to get more than one request worth of results from an API, they usually provide some "pagination" capabilities so you can make all the requests programmatically.
+- beautiful soup lets you grab links out of a webpage so that you can then download them!
+- if you need to get more than one request worth of results from an API, the API will usually provide some "pagination" capabilities so you can make all the requests programmatically.
 - web scraping is a wide world - if you get stuck, try searching for some of the keywords above.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
