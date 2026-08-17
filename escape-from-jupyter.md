@@ -80,7 +80,7 @@ Let's pick a short but descriptive name for our project (avoid using spaces): `p
 
 Now, run:
 ```shell
-uv init pr-gen-fuel
+uv init pr-gen-fuel --no-package
 ```
 
 What happened? If we navigate to the new folder that has been created, we can see a series
@@ -466,7 +466,7 @@ all of your code immediately. No more copy-pasting!
 :::: callout
 As your code grows in complexity, you might find yourself wanting to reorganize your scripts into folders, call custom commands from the command-line, or even distribute your code so anyone else can install it using tools like `uv`. If so, you'll likely want to re-organize your code into a package.
 
-Running `uv init --package your-project-name` will create the skeleton for a Python package, just as `uv init pr-gen-fuel` created our project template above. See the [uv docs](https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications) for more detail.
+Running `uv init pr-gen-fuel --no-package`, as we did in our lesson, created a simpler structure with all the files in the top-level directory. To set up your project in a package format, run `uv init your-project-name` to create the skeleton for a Python package. See the [uv docs](https://docs.astral.sh/uv/concepts/projects/init/) for more detail.
 
 For more on Python packages, see these [Python docs](https://docs.python.org/3/tutorial/modules.html#packages) and this [explainer](https://docs.astral.sh/uv/concepts/projects/config/#project-packaging) from uv.
 ::::
