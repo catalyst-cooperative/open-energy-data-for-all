@@ -357,7 +357,7 @@ It looks like there's no actual data here... what's going on? Let's take a look 
 
 > Discovering datasets should be much easier in APIv2 because the API now self-documents and organizes itself in a data hierarchy. Parent datasets have child datasets, which may have children of their own, and so on. To investigate what datasets are available, we request a parent node. The API will respond with the child datasets (routes) for the path we've requested.
 
-If we're looking for yearly data about fuel consumption at the plant level, what route should we request next? Please request it using `requests.get` below.
+If we're looking for yearly data about net generation at the plant level, what route should we request next? Please request it using `requests.get` below.
 
 :::::::: solution
 
