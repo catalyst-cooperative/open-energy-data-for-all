@@ -339,7 +339,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Escape from Jupyter!</h1>
-        <p>Last updated on 2026-06-30 |
+        <p>Last updated on 2026-08-17 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/escape-from-jupyter.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -460,7 +460,7 @@ instructions</a>). In a terminal, navigate up one folder.</p>
 <p>Let’s pick a short but descriptive name for our project (avoid using
 spaces): <code>pr-gen-fuel</code>.</p>
 <p>Now, run:</p>
-<pre class="shell"><code>uv init pr-gen-fuel</code></pre>
+<pre class="shell"><code>uv init pr-gen-fuel --no-package</code></pre>
 <p>What happened? If we navigate to the new folder that has been
 created, we can see a series of new files.</p>
 <pre class="shell"><code>cd pr-gen-fuel
@@ -606,7 +606,7 @@ looks like this:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Show details </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -720,7 +720,7 @@ Trying to import the above resulted in these errors:
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Run <code>uv add pyarrow fastparquet</code>.</p>
 </div>
@@ -747,7 +747,7 @@ functions we wrote in the last episode:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Show details </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -859,11 +859,12 @@ reorganize your scripts into folders, call custom commands from the
 command-line, or even distribute your code so anyone else can install it
 using tools like <code>uv</code>. If so, you’ll likely want to
 re-organize your code into a package.</p>
-<p>Running <code>uv init --package your-project-name</code> will create
-the skeleton for a Python package, just as
-<code>uv init pr-gen-fuel</code> created our project template above. See
-the <a href="https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications" class="external-link">uv
-docs</a> for more detail.</p>
+<p>Running <code>uv init pr-gen-fuel --no-package</code>, as we did in
+our lesson, created a simpler structure with all the files in the
+top-level directory. To set up your project in a package format, run
+<code>uv init your-project-name</code> to create the skeleton for a
+Python package. See the <a href="https://docs.astral.sh/uv/concepts/projects/init/" class="external-link">uv docs</a> for
+more detail.</p>
 <p>For more on Python packages, see these <a href="https://docs.python.org/3/tutorial/modules.html#packages" class="external-link">Python
 docs</a> and this <a href="https://docs.astral.sh/uv/concepts/projects/config/#project-packaging" class="external-link">explainer</a>
 from uv.</p>
@@ -957,8 +958,8 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/escape-from-jupyter.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/escape-from-jupyter.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2026-06-30",
-  "datePublished": "2026-08-11"
+  "dateModified": "2026-08-17",
+  "datePublished": "2026-08-17"
 }
 
   </script><script>

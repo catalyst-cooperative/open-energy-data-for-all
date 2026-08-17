@@ -1572,7 +1572,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-accessing-remote-data"><p>Content from <a href="accessing-remote-data.html">Accessing remote data</a></p>
 <hr>
-<p>Last updated on 2026-08-09 |
+<p>Last updated on 2026-08-17 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/accessing-remote-data.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 0 minutes</p>
@@ -2098,7 +2098,7 @@ so on. To investigate what datasets are available, we request a parent
 node. The API will respond with the child datasets (routes) for the path
 we’ve requested.</p>
 </blockquote>
-<p>If we’re looking for yearly data about fuel consumption at the plant
+<p>If we’re looking for yearly data about net generation at the plant
 level, what route should we request next? Please request it using
 <code>requests.get</code> below.</p>
 </div>
@@ -3424,7 +3424,7 @@ anomalies</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Prep:</p>
 <ul>
@@ -3646,7 +3646,7 @@ add to our primary key.</p>
 <button class="accordion-button hint-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHint1" aria-expanded="false" aria-controls="collapseHint1">
   <h4 class="accordion-header" id="headingHint1"> Give me a hint </h4>
 </button>
-<div id="collapseHint1" class="accordion-collapse collapse" aria-labelledby="headingHint1" data-bs-parent="#accordionHint1">
+<div id="collapseHint1" class="accordion-collapse collapse" data-bs-parent="#accordionHint1" aria-labelledby="headingHint1">
 <div class="accordion-body">
 <p>Use <code>.loc</code> to grab the data for one of the duplicate keys.
 Are there any columns, other than the measurement columns, that differ
@@ -3670,7 +3670,7 @@ between the two entries?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>If we add <code>energy_source_code</code> to our primary key, there
 are no more duplicates: we uniquely identify all rows.</p>
@@ -3793,7 +3793,7 @@ codes in the data frame, whether each seems normal or odd, and why.</p>
 <button class="accordion-button hint-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHint2" aria-expanded="false" aria-controls="collapseHint2">
   <h4 class="accordion-header" id="headingHint2"> Give me a hint </h4>
 </button>
-<div id="collapseHint2" class="accordion-collapse collapse" aria-labelledby="headingHint2" data-bs-parent="#accordionHint2">
+<div id="collapseHint2" class="accordion-collapse collapse" data-bs-parent="#accordionHint2" aria-labelledby="headingHint2">
 <div class="accordion-body">
 <ul>
 <li>What energy sources appear most frequently? Is that common for
@@ -3811,7 +3811,7 @@ those generalizations seem to hold in PR?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Here are a few:</p>
 <ul>
@@ -4132,7 +4132,7 @@ source, where each row is the sum for one month.</p>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor2" aria-expanded="false" aria-controls="collapseInstructor2">
   <h3 class="accordion-header" id="headingInstructor2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor2" class="accordion-collapse collapse" aria-labelledby="headingInstructor2" data-bs-parent="#accordionInstructor2">
+<div id="collapseInstructor2" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor2" aria-labelledby="headingInstructor2">
 <div class="accordion-body">
 <p><code>unstack</code> is a bit of a brain warp, so take extra time
 here to check that students are with you.</p>
@@ -4165,7 +4165,7 @@ frame?</p>
 <button class="accordion-button hint-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHint3" aria-expanded="false" aria-controls="collapseHint3">
   <h4 class="accordion-header" id="headingHint3"> Give me a hint </h4>
 </button>
-<div id="collapseHint3" class="accordion-collapse collapse" aria-labelledby="headingHint3" data-bs-parent="#accordionHint3">
+<div id="collapseHint3" class="accordion-collapse collapse" data-bs-parent="#accordionHint3" aria-labelledby="headingHint3">
 <div class="accordion-body">
 <p>Recall that we found the distribution of energy source codes in the
 data frame using <code>.value_counts()</code>:</p>
@@ -4190,7 +4190,7 @@ some of them continue for long periods of time?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb35">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -4265,7 +4265,7 @@ instead.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb38">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -4387,7 +4387,7 @@ this plot, clearly separate the lines by color?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
 <div class="accordion-body">
 <p>Disappointingly, <code>date</code> is the only one that really does
 it:</p>
@@ -5389,7 +5389,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-escape-from-jupyter"><p>Content from <a href="escape-from-jupyter.html">Escape from Jupyter!</a></p>
 <hr>
-<p>Last updated on 2026-06-30 |
+<p>Last updated on 2026-08-17 |
 
         <a href="https://github.com/catalyst-cooperative/open-energy-data-for-all/edit/main/episodes/escape-from-jupyter.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 55 minutes</p>
@@ -5513,7 +5513,7 @@ instructions</a>). In a terminal, navigate up one folder.</p>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
 <div class="accordion-body">
 <p>Take a moment to check that your students are all one directory above
 the lesson content. Otherwise, <code>uv</code> will create a workspace
@@ -5526,7 +5526,7 @@ project.</p>
 <p>Let’s pick a short but descriptive name for our project (avoid using
 spaces): <code>pr-gen-fuel</code>.</p>
 <p>Now, run:</p>
-<pre class="shell"><code>uv init pr-gen-fuel</code></pre>
+<pre class="shell"><code>uv init pr-gen-fuel --no-package</code></pre>
 <p>What happened? If we navigate to the new folder that has been
 created, we can see a series of new files.</p>
 <pre class="shell"><code>cd pr-gen-fuel
@@ -5623,7 +5623,7 @@ the <code>dependencies</code> section. For example:</p>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor2" aria-expanded="false" aria-controls="collapseInstructor2">
   <h3 class="accordion-header" id="headingInstructor2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor2" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor2" aria-labelledby="headingInstructor2">
+<div id="collapseInstructor2" class="accordion-collapse collapse" aria-labelledby="headingInstructor2" data-bs-parent="#accordionInstructor2">
 <div class="accordion-body">
 <p>The precise numbers of packages resolved, prepared and installed will
 vary for each user. In case your students are curious:</p>
@@ -5674,7 +5674,7 @@ folder should now look like this:</p>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor3" aria-expanded="false" aria-controls="collapseInstructor3">
   <h3 class="accordion-header" id="headingInstructor3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor3" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor3" aria-labelledby="headingInstructor3">
+<div id="collapseInstructor3" class="accordion-collapse collapse" aria-labelledby="headingInstructor3" data-bs-parent="#accordionInstructor3">
 <div class="accordion-body">
 <p>If at any point students are struggling to get to this point, they
 can catch up by unzipping the <code>pr-gen-fuel-init.zip</code> file
@@ -5708,7 +5708,7 @@ transformation function called <code>transform_pr_gen_fuel()</code>.</p>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor4" aria-expanded="false" aria-controls="collapseInstructor4">
   <h3 class="accordion-header" id="headingInstructor4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Instructor Note </h3>
 </button>
-<div id="collapseInstructor4" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor4" aria-labelledby="headingInstructor4">
+<div id="collapseInstructor4" class="accordion-collapse collapse" aria-labelledby="headingInstructor4" data-bs-parent="#accordionInstructor4">
 <div class="accordion-body">
 <p>Copy over the cells, with the import and utility function outside of
 <code>main()</code> and the remaining cells in <code>main()</code>. Once
@@ -5727,7 +5727,7 @@ looks like this:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Show details </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5841,7 +5841,7 @@ Trying to import the above resulted in these errors:
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Run <code>uv add pyarrow fastparquet</code>.</p>
 </div>
@@ -5869,7 +5869,7 @@ functions we wrote in the last episode:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Show details </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -5983,11 +5983,12 @@ reorganize your scripts into folders, call custom commands from the
 command-line, or even distribute your code so anyone else can install it
 using tools like <code>uv</code>. If so, you’ll likely want to
 re-organize your code into a package.</p>
-<p>Running <code>uv init --package your-project-name</code> will create
-the skeleton for a Python package, just as
-<code>uv init pr-gen-fuel</code> created our project template above. See
-the <a href="https://docs.astral.sh/uv/concepts/projects/init/#packaged-applications" class="external-link">uv
-docs</a> for more detail.</p>
+<p>Running <code>uv init pr-gen-fuel --no-package</code>, as we did in
+our lesson, created a simpler structure with all the files in the
+top-level directory. To set up your project in a package format, run
+<code>uv init your-project-name</code> to create the skeleton for a
+Python package. See the <a href="https://docs.astral.sh/uv/concepts/projects/init/" class="external-link">uv docs</a> for
+more detail.</p>
 <p>For more on Python packages, see these <a href="https://docs.python.org/3/tutorial/modules.html#packages" class="external-link">Python
 docs</a> and this <a href="https://docs.astral.sh/uv/concepts/projects/config/#project-packaging" class="external-link">explainer</a>
 from uv.</p>
@@ -7046,8 +7047,8 @@ any links that you are not going to use.
   "url": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/aio.html",
   "identifier": "https://catalyst-cooperative.github.io/open-energy-data-for-all/instructor/aio.html",
   "dateCreated": "2024-10-23",
-  "dateModified": "2026-08-11",
-  "datePublished": "2026-08-11"
+  "dateModified": "2026-08-17",
+  "datePublished": "2026-08-17"
 }
 
   </script><script>
