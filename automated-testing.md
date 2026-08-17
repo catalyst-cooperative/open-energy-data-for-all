@@ -92,7 +92,7 @@ We can deal with that by keeping the test code in separate files.
 
 Start by creating a new file, `test_main.py`.
 Because of how we've set up the package structure,
-we need to keep it in the same directory as `main.py` and `utils.py`.
+we need to keep it in the same directory as `main.py`.
 
 For our first assumption, let's check that there is data at all.
 We'll start with an empty function and build up to the check that we want.
