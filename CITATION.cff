@@ -5,7 +5,7 @@
 # ensuring that the author list and other fields remain accurate.
 
 cff-version: 1.2.0
-title: FIXME
+title: Open Energy Data for All
 message: >-
   Please cite this lesson using the information in this file
   when you refer to it in publications, and/or if you
@@ -13,10 +13,16 @@ message: >-
   training material.
 type: dataset
 authors:
-  - given-names: FIXME
-    family-names: FIXME
+  - given-names: Belfer
+    family-names: Ella
+    affiliation: Catalyst Cooperative
+  - given-names: Mazaitis
+    family-names: Kathryn
+    affiliation: Catalyst Cooperative
+  - given-names: Xia
+    family-names: Dazhong
+    affiliation: Catalyst Cooperative
 abstract: >-
-  FIXME Replace this with a short abstract describing the
-  lesson, e.g. its target audience and main intended
-  learning objectives.
+  A course on foundational software and data engineering skills aimed at energy
+  graduate students looking to generate more robust and replicable energy analyses.
 license: CC-BY-4.0
