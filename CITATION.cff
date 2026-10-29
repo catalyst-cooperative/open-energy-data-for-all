@@ -13,14 +13,14 @@ message: >-
   training material.
 type: dataset
 authors:
-  - given-names: Belfer
-    family-names: Ella
+  - given-names: Ella
+    family-names: Belfer
     affiliation: Catalyst Cooperative
-  - given-names: Mazaitis
-    family-names: Kathryn
+  - given-names: Kathryn
+    family-names: Mazaitis
     affiliation: Catalyst Cooperative
-  - given-names: Xia
-    family-names: Dazhong
+  - given-names: Dazhong
+    family-names: Xia
     affiliation: Catalyst Cooperative
 abstract: >-
   A course on foundational software and data engineering skills aimed at energy
